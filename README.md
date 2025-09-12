@@ -9,7 +9,8 @@
 ```bash
 git clone -b develop --single-branch https://github.com/Wizard-Of-Oz-b/Wizard-Of-Oz-FE05.git
 cd Wizard-Of-Oz-FE05
-npm install && npm run dev
+npm install
+npm run dev
 ```
 
 - 기본 포트: **5173**  
