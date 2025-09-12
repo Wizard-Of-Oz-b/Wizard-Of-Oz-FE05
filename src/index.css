@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "./themes/admintheme.css";
 
 // 스크롤 숨기기
 .scrollbar-hide::-webkit-scrollbar {
@@ -9,4 +8,61 @@
 .scrollbar-hide {
   -ms-overflow-style: none !important;
   scrollbar-width: none !important;
+}
+
+/* 관리자 페이지 테마 색상 정의 - 복 */
+@theme {
+  --color-admintheme-black: #0f0f0f;
+  --color-admintheme-white: #ffffff;
+  --color-admintheme-violet: #7c3aed;
+  --color-admintheme-violet-dark: #6d28d9;
+  --color-admintheme-violet-light: #ede9fe;
+}
+
+@utility bg-admintheme-black {
+  background-color: var(--color-admintheme-black);
+}
+@utility bg-admintheme-white {
+  background-color: var(--color-admintheme-white);
+}
+@utility bg-admintheme-violet {
+  background-color: var(--color-admintheme-violet);
+}
+@utility bg-admintheme-violet-dark {
+  background-color: var(--color-admintheme-violet-dark);
+}
+@utility bg-admintheme-violet-light {
+  background-color: var(--color-admintheme-violet-light);
+}
+
+@utility text-admintheme-black {
+  color: var(--color-admintheme-black);
+}
+@utility text-admintheme-white {
+  color: var(--color-admintheme-white);
+}
+@utility text-admintheme-violet {
+  color: var(--color-admintheme-violet);
+}
+@utility text-admintheme-violet-dark {
+  color: var(--color-admintheme-violet-dark);
+}
+@utility text-admintheme-violet-light {
+  color: var(--color-admintheme-violet-light);
+}
+
+@utility border-admintheme-black {
+  border-color: var(--color-admintheme-black);
+}
+@utility border-admintheme-white {
+  border-color: var(--color-admintheme-white);
+}
+@utility border-admintheme-violet {
+  border-color: var(--color-admintheme-violet);
+}
+@utility border-admintheme-violet-dark {
+  border-color: var(--color-admintheme-violet-dark);
+}
+@utility border-admintheme-violet-light {
+  border-color: var(--color-admintheme-violet-light);
 }
