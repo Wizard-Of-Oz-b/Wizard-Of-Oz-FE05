@@ -1,3 +1,5 @@
+// 경복 : 관리자페이지 커스텀색상 지정을 위해, 생성
+
 @theme {
   --color-admintheme-black: #0f0f0f;
   --color-admintheme-white: #ffffff;
