@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./themes/admintheme.css";
 
 // 스크롤 숨기기
 .scrollbar-hide::-webkit-scrollbar {
