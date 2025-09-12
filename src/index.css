@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+// 스크롤 숨기기
+.scrollbar-hide::-webkit-scrollbar {
+  display: none !important;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
