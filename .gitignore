@@ -24,3 +24,11 @@ dist-ssr
 *.sw?
 .env
 .env.dev
+
+src/components/common/layouts/admin/orders/
+src/components/common/layouts/admin/products/
+
+src/components/features/admin/orders/
+
+src/pages/Admin/OrderAdminPage.jsx
+src/pages/Admin/ProductAdminPage.jsx
