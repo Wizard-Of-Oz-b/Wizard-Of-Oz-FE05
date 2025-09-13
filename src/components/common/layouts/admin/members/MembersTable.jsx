@@ -25,14 +25,12 @@ export default function MembersTable({ rows, onOpenDetail }) {
             rows.map((m) => (
               <tr key={m.id} className="hover:bg-violet-50/40 transition-colors">
                 <td className="px-4 py-4 font-semibold text-gray-800">
-                  <button onClick={() => onOpenDetail(m.id)} className="underline decoration-violet-300 underline-offset-2 hover:text-violet-700">
+                  <button onClick={() => onOpenDetail(m.id)} className=" decoration-violet-300 underline-offset-2 hover:text-violet-700">
                     {m.name}
                   </button>
                 </td>
                 <td className="px-4 py-4">
-                  <button onClick={() => onOpenDetail(m.id)} className="underline decoration-violet-300 underline-offset-2 hover:text-violet-700">
                     {m.email}
-                  </button>
                 </td>
                 <td className="px-4 py-4">{m.phone}</td>
                 <td className="px-4 py-4 text-center">
