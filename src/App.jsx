@@ -25,6 +25,7 @@ import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AdminLayout from "./components/common/layouts/admin/AdminLayout";
 import ProductAdminPage from "./pages/Admin/ProductAdminPage.jsx";
 import OrderAdminPage from "./pages/Admin/OrderAdminPage.jsx";
+import MemberAdminPage from "./pages/Admin/MemberAdminPage.jsx";
 
 
 export default function App() {
@@ -65,6 +66,7 @@ export default function App() {
         <Route index element={<AdminDashboard />} />
         <Route path="/admin/products" element={<ProductAdminPage />} />
         <Route path="/admin/orders" element={<OrderAdminPage />} />
+        <Route path="/admin/customers" element={<MemberAdminPage />} />
       </Route>
     </Routes>
         </Suspense>
