@@ -45,11 +45,11 @@ export default function AdminLayout() {
        : "text-admintheme-white hover:bg-admintheme-violet-dark hover:text-admintheme-white"}`;
 
   return (
-    <div className="min-h-screen bg-admintheme-black flex flex-col">
+    <div className="admin-layout h-screen bg-admintheme-black flex flex-col overflow-y-auto">
       {/* 모바일 상단바 */}
       <header className="md:hidden sticky top-0 z-40 bg-admintheme-black/90 border-b border-admintheme-violet-dark backdrop-blur">
         <div className="mx-auto max-w-[110rem] px-4 h-14 flex items-center justify-between text-admintheme-white">
-          <div className="text-sm font-bold">관리자 메뉴</div>
+          <div className="text-lg font-bold">오즈의 이상한 상점</div>
 
           {/* 드롭다운 */}
           <div className="relative" ref={menuRef}>
