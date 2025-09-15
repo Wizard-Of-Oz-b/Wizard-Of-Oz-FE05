@@ -16,6 +16,7 @@ import Error504 from "./pages/errors/Error504";
 // 전역 에러감지
 import { ErrorBoundary } from "./components/common/layouts/errors/ErrorBoundary";
 import "swiper/css";
+import ProductListTest from "./pages/ProductListTest";
 
 export default function App() {
   return (
@@ -25,7 +26,7 @@ export default function App() {
           {/* 정상 페이지 */}
           <Route path="/" element={<Home />} />
           <Route path="/products/:id" element={<ProductDetailPage />} />
-
+          <Route path="/products" element={<ProductListTest />} />
           {/* 상태코드별 에러 라우트 */}
           <Route path="/errors/401" element={<Error401 />} />
           <Route path="/errors/403" element={<Error403 />} />
