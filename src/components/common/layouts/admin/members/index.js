@@ -1,4 +1,4 @@
-export { default as IconButton } from "./IconButton";
+export { default as IconButton } from "../common/IconButton";
 export { default as Modal } from "./Modal";
 export { default as RoleBadge } from "./RoleBadge";
 export { default as MemberDetailsModal } from "./MemberDetailsModal";

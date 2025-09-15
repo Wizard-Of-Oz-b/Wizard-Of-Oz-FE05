@@ -1,0 +1,186 @@
+import { useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Lock, Mail, KeyRound, ChevronRight, ShieldCheck, Eye, EyeOff, UserCog,
+} from "lucide-react";
+
+const API_BASE = import.meta.env.VITE_API_BASE || "";
+const BACKEND_READY = import.meta.env.VITE_BACKEND_READY === "true";
+
+export default function AdminLogin() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/admin";
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [mockRole, setMockRole] = useState("super");
+  const [showPw, setShowPw] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  async function onSubmit(e) {
+    e.preventDefault();
+
+    // 서버 OFF : 모의 로그인
+    if (!BACKEND_READY) {
+      localStorage.setItem("mock_admin_role", mockRole);
+      navigate(from, { replace: true });
+      return;
+    }
+
+    // 서버 ON → 실제 로그인
+    try {
+      setLoading(true);
+      const res = await fetch(`${API_BASE}/api/v1/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (res.status === 403) {
+        navigate("/403", { replace: true });
+        return;
+      }
+      if (!res.ok) {
+        alert("로그인 실패");
+        return;
+      }
+      const data = await res.json();
+      if (data.access) localStorage.setItem("accessToken", data.access);
+      navigate(from, { replace: true });
+    } catch (err) {
+      navigate("/403", { replace: true });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <main className="relative min-h-screen overflow-hidden bg-black text-white">
+      {/* 배경 장식 */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-30"
+        style={{ background:
+          "radial-gradient(800px 600px at 20% -10%, rgba(139,92,246,.35), rgba(0,0,0,0) 60%), radial-gradient(700px 500px at 85% 10%, rgba(217,70,239,.28), rgba(0,0,0,0) 60%)" }} />
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10"
+        style={{ background:
+          "radial-gradient(1200px 1000px at 50% -10%, rgba(255,255,255,.05), rgba(0,0,0,0) 60%)" }} />
+
+      <div className="mx-auto flex max-w-7xl items-center justify-center px-6 py-16 md:py-24">
+        <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: "easeOut" }} className="w-full max-w-md">
+          <div className="relative rounded-2xl border border-white/10 bg-white/5 p-1 shadow-[0_0_120px_-40px_rgba(139,92,246,.6)] backdrop-blur">
+            <div className="rounded-2xl bg-neutral-900 p-6 md:p-8">
+              {/* 헤더 */}
+              <div className="mb-6 flex items-start gap-3">
+                <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-violet-600/20 text-violet-300 ring-1 ring-violet-500/30">
+                  <Lock className="size-5" />
+                </div>
+                <div className="min-w-0">
+                  <h1 className="text-2xl font-extrabold tracking-tight md:text-3xl">
+                    <span className="bg-gradient-to-r from-violet-300 via-white to-fuchsia-300 bg-clip-text text-transparent">
+                      관리자 로그인
+                    </span>
+                  </h1>
+                  <p className="mt-1 text-sm text-white/60">관리자 전용 영역입니다.<br /> 권한이 없을 경우 접근이 제한됩니다</p>
+                </div>
+
+                {/* 서버 상태 배지 */}
+                <div className="ml-auto">
+                  <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-semibold ring-1
+                    ${BACKEND_READY
+                        ? "bg-emerald-500/20 text-emerald-200 ring-emerald-400/40"
+                        : "bg-red-500/20 text-red-200 ring-red-400/40"}`}>
+                    <ShieldCheck className="size-3.5" />
+                    {BACKEND_READY ? "SERVER: ON" : "SERVER: OFF"}
+                  </span>
+                </div>
+              </div>
+
+              {/* 모의 로그인 서버off */}
+              {!BACKEND_READY && (
+                <div className="mb-6 rounded-xl border border-white/10 bg-white/5 p-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-sm text-white/80">테스트용 역할 선택</p>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-violet-600/20 px-2 py-0.5 text-[11px] font-semibold text-violet-200 ring-1 ring-violet-400/30">
+                      MOCK
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <UserCog className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-white/40" />
+                    <select
+                      className="h-11 w-full rounded-xl border border-white/10 bg-white/5 pl-9 pr-3 text-sm outline-none ring-violet-500/40 focus:ring-2"
+                      value={mockRole}
+                      onChange={(e) => setMockRole(e.target.value)}
+                    >
+                      <option value="super">super (슈퍼관리자)</option>
+                      <option value="manager">manager (페이지 관리자)</option>
+                      <option value="cs">cs (CS 관리자)</option>
+                      <option value="user">user (일반 회원)</option>
+                    </select>
+                  </div>
+                  <button
+                    className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-500"
+                    onClick={() => {
+                      localStorage.setItem("mock_admin_role", mockRole);
+                      navigate(from, { replace: true });
+                    }}
+                  >
+                    테스트 로그인
+                    <ChevronRight className="size-4" />
+                  </button>
+                </div>
+              )}
+
+              {/* 찐 로그인, 항상 보이지만 작성이 막혀있음. */}
+              <form onSubmit={onSubmit} className="space-y-3">
+                <div className="relative">
+                  <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-white/40" />
+                  <input
+                    className="h-11 w-full rounded-xl border border-white/10 bg-white/5 pl-9 pr-3 text-sm outline-none placeholder:text-white/40 ring-violet-500/40 focus:ring-2 disabled:opacity-40"
+                    placeholder="관리자 이메일"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={!BACKEND_READY}
+                  />
+                </div>
+                <div className="relative">
+                  <KeyRound className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-white/40" />
+                  <input
+                    type={showPw ? "text" : "password"}
+                    className="h-11 w-full rounded-xl border border-white/10 bg-white/5 pl-9 pr-10 text-sm outline-none placeholder:text白/40 ring-violet-500/40 focus:ring-2 disabled:opacity-40"
+                    placeholder="비밀번호"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={!BACKEND_READY}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPw((v) => !v)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-white/50 hover:bg-white/10"
+                    tabIndex={-1}
+                  >
+                    {showPw ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  </button>
+                </div>
+
+                <motion.button
+                  whileTap={{ scale: BACKEND_READY ? 0.98 : 1 }}
+                  className="mt-1 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white/10 px-4 py-2.5 text-sm font-semibold text-white ring-1 ring-white/15 transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
+                  disabled={!BACKEND_READY || loading}
+                >
+                  {loading ? "로그인 중…" : "로그인"}
+                  <ChevronRight className="size-4" />
+                </motion.button>
+              </form>
+
+              <div className="mt-6 text-center text-xs text-white/50">
+                © {new Date().getFullYear()} 오즈의 이상한 상점 · All rights reserved.
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </main>
+  );
+}

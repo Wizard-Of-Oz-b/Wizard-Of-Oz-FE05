@@ -68,8 +68,8 @@ html, body, #root { height: 100%; }
 @utility border-admintheme-violet-light {
   border-color: var(--color-admintheme-violet-light);
 }
-
-/* 관리자페이지 전용 스크롤바 테마 */
+/* 관리자 페이지 커스텀 팔레트 끝 */
+/* 관리자페이지 전용 스크롤바 테마 - 복 */
 .admin-layout::-webkit-scrollbar {
   width: 16px;
 }
@@ -87,4 +87,32 @@ html, body, #root { height: 100%; }
 .admin-layout {
   scrollbar-width: thin;
   scrollbar-color: #4c1d95 #0b0b0f;
+}
+/* 여기까지 스크롤바 영역입니다 */
+
+/* 관리자 페이지용 - 복 */
+@supports selector(:has(*)) {
+  .grid.items-start.backdrop-blur-md:has(input[placeholder="코드/이름 검색…"]) {
+    align-items: end !important;
+  }
+}
+
+.grid.items-start.backdrop-blur-md input[placeholder="코드/이름 검색…"] {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.grid.items-start.backdrop-blur-md .h-10 {
+  height: 44px !important;
+  line-height: 44px !important;
+}
+
+.grid.items-start.backdrop-blur-md .ring-1 .text-gray-400 {
+  display: inline-block;
+  padding-bottom: 2px;
+}
+
+.grid.items-start.backdrop-blur-md .rounded-lg.bg-gray-100.text-xs {
+  height: 36px;
+  line-height: 36px;
 }

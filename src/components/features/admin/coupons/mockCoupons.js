@@ -1,0 +1,43 @@
+const mockCoupons = [
+  {
+    id: 1,
+    code: 'WELCOME10',
+    name: '첫 구매 10% 할인',
+    type: 'percent',
+    value: 10,
+    minOrder: 30000,
+    usageLimit: 100,
+    usedCount: 34,
+    startDate: '2025-08-01',
+    endDate: '2025-12-31',
+    active: true,
+  },
+  {
+    id: 2,
+    code: 'FALL15000',
+    name: '가을 맞이 15,000원 할인',
+    type: 'fixed',
+    value: 15000,
+    minOrder: 50000,
+    usageLimit: 0,
+    usedCount: 12,
+    startDate: '2025-09-01',
+    endDate: '2025-10-31',
+    active: true,
+  },
+  {
+    id: 3,
+    code: 'FREESHIP',
+    name: '무료배송 프로모션',
+    type: 'shipping',
+    value: 0,
+    minOrder: 0,
+    usageLimit: 0,
+    usedCount: 223,
+    startDate: '2025-08-01',
+    endDate: '2025-08-31',
+    active: false,
+  },
+];
+
+export default mockCoupons

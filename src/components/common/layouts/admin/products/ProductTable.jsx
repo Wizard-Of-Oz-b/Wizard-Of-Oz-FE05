@@ -1,8 +1,8 @@
-import Switch from "./Switch";
-import IconButton from "./IconButton";
+import Switch from "../common/Switch";
+import IconButton from "../common/IconButton";
 import { Pencil, Trash2 } from "lucide-react";
 
-export default function ProductTable({ pageData, toggleAvailable, deleteProduct }) {
+export default function ProductTable({ pageData, toggleAvailable, onRequestDelete, onEdit }) {
   return (
     <div className="relative overflow-x-auto rounded-2xl shadow-lg bg-white">
       <table className="min-w-[900px] w-full">
@@ -51,11 +51,11 @@ export default function ProductTable({ pageData, toggleAvailable, deleteProduct 
                 </td>
                 <td className="px-4 py-4 text-center">
                   <div className="flex gap-2 justify-center">
-                    <IconButton title="수정">
+                    <IconButton title="수정" onClick={() => onEdit(p)}>
                       <Pencil className="size-4" /> 수정
                     </IconButton>
                     <button
-                      onClick={() => deleteProduct(p.id)}
+                      onClick={() => onRequestDelete(p)}
                       className="inline-flex items-center gap-1 rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-red-700 transition"
                     >
                       <Trash2 className="size-4" /> 삭제

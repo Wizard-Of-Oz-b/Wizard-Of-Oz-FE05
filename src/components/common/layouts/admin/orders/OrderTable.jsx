@@ -1,0 +1,97 @@
+import { StatusBadge } from ".";
+
+export default function OrderTable({
+  orders = [],
+  onOpenDetails,
+  onOpenRequest,
+  onOpenStatus,
+}) {
+  return (
+    <div className="relative overflow-x-auto rounded-2xl shadow-lg bg-white">
+      <table className="min-w-[980px] w-full">
+        <thead className="bg-gradient-to-r from-violet-600 to-violet-700 text-white text-left text-xs font-semibold uppercase tracking-wide">
+          <tr>
+            <th className="px-4 py-3 rounded-tl-2xl">주문번호</th>
+            <th className="px-4 py-3">고객명</th>
+            <th className="px-4 py-3">대표 상품</th>
+            <th className="px-4 py-3 text-right">금액</th>
+            <th className="px-4 py-3 text-center">상태</th>
+            <th className="px-4 py-3 text-center">요청</th>
+            <th className="px-4 py-3 text-center">주문일</th>
+            <th className="px-4 py-3 text-center rounded-tr-2xl">기능</th>
+          </tr>
+        </thead>
+
+        <tbody className="divide-y divide-gray-100 text-sm">
+          {orders.length === 0 ? (
+            <tr>
+              <td colSpan={8} className="py-10 text-center text-gray-500">
+                주문이 없습니다.
+              </td>
+            </tr>
+          ) : (
+            orders.map((o) => (
+              <tr key={o.id} className="hover:bg-violet-50/40 transition-colors">
+                <td className="px-4 py-4 font-semibold text-gray-800">
+                  <button
+                    onClick={() => onOpenDetails?.(o.id)}
+                    className="underline decoration-violet-300 underline-offset-2 hover:text-violet-700"
+                  >
+                    {o.orderNo}
+                  </button>
+                </td>
+
+                <td className="px-4 py-4">{o.customer}</td>
+
+                <td className="px-4 py-4 truncate">
+                  {o.items?.[0]?.name}
+                  {o.items && o.items.length > 1 && (
+                    <span className="text-xs text-gray-500"> 외 {o.items.length - 1}건</span>
+                  )}
+                </td>
+
+                <td className="px-4 py-4 text-right font-semibold text-violet-700">
+                  {o.amount.toLocaleString()}원
+                </td>
+
+                <td className="px-4 py-4 text-center">
+                  <StatusBadge
+                    status={o.status}
+                    onClick={() => onOpenStatus?.(o.id)}
+                  />
+                </td>
+
+                <td className="px-4 py-4 text-center">
+                  {o.request ? (
+                    <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                      {o.request.type === "cancel" ? "취소요청" : "환불요청"}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-gray-400">-</span>
+                  )}
+                </td>
+
+                <td className="px-4 py-4 text-center text-gray-600">
+                  {o.created_at}
+                </td>
+
+                <td className="px-4 py-4 text-center">
+                  {o.request && !["취소완료", "환불완료"].includes(o.status) ? (
+                    <button
+                      onClick={() => onOpenRequest?.(o.id)}
+                      className="inline-flex items-center gap-1 rounded-lg bg-amber-100 px-3 py-1.5 text-sm font-semibold text-amber-800 hover:bg-amber-200"
+                    >
+                      {o.request.type === "cancel" ? "취소요청 처리" : "환불요청 처리"}
+                    </button>
+                  ) : (
+                    <span className="text-xs text-gray-400">—</span>
+                  )}
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}

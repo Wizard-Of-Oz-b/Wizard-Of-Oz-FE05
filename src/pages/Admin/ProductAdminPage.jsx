@@ -1,108 +1,143 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  Shirt,
-  PlusCircle,
-  ChevronsLeft,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsRight,
-  Pencil,
-  Trash2,
-} from "lucide-react";
-import { ProductHeader, ProductFilter, Switch, IconButton, ProductTable} from "../../components/common/layouts/admin/products";
-
-/* ===== 목업 데이터 ===== */
-const mockProducts = [
-  {
-    id: 1,
-    name: "화이트 셔츠",
-    sku: "TSHIRT001",
-    price: 39000,
-    category: "상의",
-    image_url: "https://placehold.co/600x400?text=shirts",
-    is_available: true,
-    created_at: "2025-09-01",
-  },
-  {
-    id: 2,
-    name: "슬림 진",
-    sku: "JEANS001",
-    price: 59000,
-    category: "하의",
-    image_url: "https://placehold.co/600x400?text=jeans",
-    is_available: false,
-    created_at: "2025-08-28",
-  },
-  {
-    id: 3,
-    name: "블랙 재킷",
-    sku: "JACKET001",
-    price: 99000,
-    category: "아우터",
-    image_url: "https://placehold.co/100x80?text=jacket",
-    is_available: true,
-    created_at: "2025-08-15",
-  },
-];
+  ProductHeader,
+  ProductFilter,
+  ProductTable,
+  Pagination,
+} from "../../components/common/layouts/admin/products";
+import { mockProducts } from "../../components/features/admin/products/mockProducts";
+import ProductFormModal from "../../components/common/layouts/admin/products/ProductFormModal";
+import DeleteConfirmModal from "../../components/common/layouts/admin/products/DeleteConfirmModal";
 
 export default function ProductAdminPage() {
   const PAGE_SIZE = 5;
+
+  // 목록 & UI 상태
   const [products, setProducts] = useState(mockProducts);
   const [page, setPage] = useState(1);
   const [q, setQ] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
 
+  // 모달
+  const [formOpen, setFormOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState(null);
+
+  // 삭제 모달
+  const [delOpen, setDelOpen] = useState(false);
+  const [delTarget, setDelTarget] = useState(null);
+
+  // 필터링
   const filtered = products.filter((p) => {
     const matchCategory = selectedCategory ? p.category === selectedCategory : true;
-    const matchQuery = q
-      ? p.name.toLowerCase().includes(q.toLowerCase()) || p.sku.toLowerCase().includes(q.toLowerCase())
+    const kw = q.trim().toLowerCase();
+    const matchQuery = kw
+      ? (p.name || "").toLowerCase().includes(kw) ||
+        (p.sku || "").toLowerCase().includes(kw)
       : true;
     return matchCategory && matchQuery;
   });
 
+  // 페이지네이션
   const total = filtered.length;
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const pageData = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  const toggleAvailable = (id) => {
-    setProducts((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, is_available: !p.is_available } : p))
-    );
-  };
-
-  const deleteProduct = (id) => {
-    if (!confirm("정말 삭제하시겠습니까?")) return;
-    setProducts((prev) => prev.filter((p) => p.id !== id));
-  };
-
+  // 검색/필터 변경 시 첫 페이지로 이동
   useEffect(() => {
     setPage(1);
   }, [q, selectedCategory]);
 
+  // 현재 페이지가 범위를 벗어나면 보정
+  useEffect(() => {
+    if (page > pageCount) setPage(pageCount);
+  }, [page, pageCount]);
+
+  // 액션들
+  const toggleAvailable = (id) => {
+    setProducts((prev) =>
+      prev.map((p) =>
+        p.id === id ? { ...p, is_available: !p.is_available } : p
+      )
+    );
+  };
+
+  const handleSave = (payload, isEdit) => {
+    setProducts((prev) => {
+      if (isEdit) {
+        return prev.map((p) => (p.id === payload.id ? { ...p, ...payload } : p));
+      }
+      const row = payload.id ? payload : { ...payload, id: Date.now() };
+      return [row, ...prev];
+    });
+  };
+
+  // 삭제
+  const requestDelete = (product) => {
+    setDelTarget(product);
+    setDelOpen(true);
+  };
+
+  const confirmDelete = (id) => {
+    setProducts((prev) => prev.filter((p) => p.id !== id));
+    setDelOpen(false);
+    setDelTarget(null);
+  };
+
   return (
     <div className="w-full p-5 mx-auto max-w-8xl">
-      <ProductHeader />
-      <ProductFilter q={q} setQ={setQ} selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
-      <ProductTable pageData={pageData} toggleAvailable={toggleAvailable} deleteProduct={deleteProduct} />
+      {/* 헤더 */}
+      <ProductHeader
+        onClickNew={() => {
+          setEditTarget(null);
+          setFormOpen(true);
+        }}
+      />
+
+      {/* 필터 */}
+      <ProductFilter
+        q={q}
+        setQ={setQ}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+      />
+
+      {/* 테이블 */}
+      <ProductTable
+        pageData={pageData}
+        toggleAvailable={toggleAvailable}
+        onEdit={(p) => {
+          setEditTarget(p);
+          setFormOpen(true);
+        }}
+        onRequestDelete={requestDelete}
+      />
 
       {/* 페이지네이션 */}
-      <div className="mt-6 flex justify-center gap-2">
-        <IconButton title="첫 페이지" onClick={() => setPage(1)} disabled={page <= 1}>
-          <ChevronsLeft className="size-4" />
-        </IconButton>
-        <IconButton title="이전" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
-          <ChevronLeft className="size-4" />
-        </IconButton>
-        <span className="px-2 text-sm font-medium">
-          <span className="font-semibold text-violet-700">페이지 {page}</span> / {pageCount}
-        </span>
-        <IconButton title="다음" onClick={() => setPage((p) => Math.min(pageCount, p + 1))} disabled={page >= pageCount}>
-          <ChevronRight className="size-4" />
-        </IconButton>
-        <IconButton title="마지막" onClick={() => setPage(pageCount)} disabled={page >= pageCount}>
-          <ChevronsRight className="size-4" />
-        </IconButton>
-      </div>
+      <Pagination
+        page={page}
+        pageCount={pageCount}
+        onChange={(next) => {
+          const clamped = Math.min(Math.max(1, next), pageCount);
+          setPage(clamped);
+        }}
+        className="mt-6"
+      />
+
+      {/* 추가/수정 모달 */}
+      <ProductFormModal
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        onSave={handleSave}
+        initial={editTarget}
+      />
+
+      {/* 삭제 확인 모달 */}
+      <DeleteConfirmModal
+        open={delOpen}
+        onClose={() => setDelOpen(false)}
+        product={delTarget}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function MembersFilters({ q, setQ, roleFilter, setRoleFilter }) {
   return (
     <div className="mb-6 flex flex-col md:flex-row gap-3 items-center justify-between rounded-2xl bg-white/90 shadow-md backdrop-blur-md p-4">
