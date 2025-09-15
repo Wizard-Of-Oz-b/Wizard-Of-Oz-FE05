@@ -31,6 +31,7 @@ import CouponPromoAdminPage from "./pages/Admin/CouponPromoAdminPage.jsx";
 import CustomerSupportAdminPage from "./pages/Admin/CustomerSupportAdminPage.jsx";
 import AdminProtectedRoute from "./routes/AdminProtectedRoute.jsx";
 import AdminLogin from "./pages/Admin/AdminLogin.jsx";
+import AdminManagersPage from "./pages/Admin/AdminManagersPage.jsx";
 
 export default function App() {
   return (
