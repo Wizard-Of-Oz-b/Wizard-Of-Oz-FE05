@@ -9,7 +9,7 @@ export default function ProductDropDown({currentSort, onSortChange}){
 
   return(
   <>
-    <div className="relative inline-block text-left cursor-pointer">
+    <div className="relative inline-block text-left cursor-pointer select-none">
       <div>
         <button
           type="button"
@@ -19,7 +19,7 @@ export default function ProductDropDown({currentSort, onSortChange}){
           aria-expanded={isOpen}
           aria-haspopup="true"
         >
-          <span className='font-bold text-lg'>정렬 기준</span>
+          <span className='font-bold text-lg '>정렬 기준</span>
         </button>
       </div>
       <div className={`transition-all duration-300 ease-in-out transform-origin-top 
@@ -34,19 +34,27 @@ export default function ProductDropDown({currentSort, onSortChange}){
             tabIndex="-1"
           >
             <div className="py-1 px-3" role="none" onClick={()=>onSortChange('name')}>
-              <span>{currentSort === 'name' && 'V'}이름 순</span>
-              <div className="w-[90%] my-1 border-[1px] border-gray-300"></div>
+							<div className='flex justify-between'>
+              	<span>이름 순</span> <span>{currentSort === 'name' && 'V'}</span>
+							</div>
+              <div className="w-[99%] my-1 border-[1px] border-gray-300"></div>
             </div>
             <div className="py-1 px-3" role="none" onClick={()=>onSortChange('-price')}>
-              <span>{currentSort === '-price' && 'V'}가격: 낮은 순</span>
-              <div className="w-[90%] my-1 border-[1px] border-gray-300"></div>
+							<div className='flex justify-between'>
+              	<span>가격: 낮은 순</span> <span>{currentSort === '-price' && 'V'}</span>
+							</div>
+              <div className="w-[99%] my-1 border-[1px] border-gray-300"></div>
             </div>
             <div className="py-1 px-3" role="none" onClick={()=>onSortChange('price')}>
-              <span>{currentSort === 'price' && 'V'}가격: 높은 순</span>
-              <div className="w-[90%] my-1 border-[1px] border-gray-300"></div>
+							<div className='flex justify-between'>
+              	<span>가격: 높은 순</span> <span>{currentSort === 'price' && 'V'}</span>
+							</div>
+              <div className="w-[99%] my-1 border-[1px] border-gray-300"></div>
             </div>
             <div className="py-1 px-3" role="none" onClick={()=>onSortChange('created_at')}>
-              <span>{currentSort === 'created_at' && 'V'}최신 순</span>
+							<div className='flex justify-between'>
+              	<span>최신 순</span> <span>{currentSort === 'created_at' && 'V'}</span>
+							</div>
             </div>
           </div>
         }

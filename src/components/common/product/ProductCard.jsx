@@ -1,3 +1,4 @@
+import ProductOptions from "./ProductOptions";
 import RatingStars from "./RatingStars";
 // import { KRW } from "../models/product";
 
@@ -12,6 +13,7 @@ export default function ProductCard({data}) {
   return(
     <div className="flex flex-col cursor-pointer w-1/4  pb-8" onClick={onClickhandler}>
       <img src={`https://picsum.photos/id/${data.product_id}/400/600`} alt={data.name}/>
+      <ProductOptions options={data.options} />
       <p className={`font-extralight text-sm ${data?.is_active? 'text-black': 'text-gray-400'}`}>카테고리{data.category_id}</p>
       <p className={`font-medium text-lg ${data?.is_active? 'text-black': 'text-gray-400'}`}>{data.name}</p>
       <p className={`font-bold text-lg ${data?.is_active? 'text-black': 'text-gray-400'}`}>{data.price.toLocaleString()}원</p>

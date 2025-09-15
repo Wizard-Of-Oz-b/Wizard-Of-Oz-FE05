@@ -1,4 +1,4 @@
-export default function ProductPagination({currentPage, totalPage}) {
+export default function ProductPagination({currentPage, totalPage, onPageChange}) {
 
 	return(
 		<div className="flex items-center justify-center">

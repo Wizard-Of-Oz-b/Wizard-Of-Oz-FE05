@@ -11,7 +11,7 @@ export default function ProductList({datas, isLoading, query, onSortChange, onPa
     </>)
   }
   console.log(datas , '데이터 테스트')
-  const totalPage = Math.ceil(datas.total/datas.size)
+  const totalPage = Math.ceil(datas.count/query.size)
 
   return(
   <div className="w-dvw flex items-center justify-center">
@@ -27,11 +27,12 @@ export default function ProductList({datas, isLoading, query, onSortChange, onPa
 			</div>
 
 			<div className="flex flex-wrap items-start  pt-5">
-				{datas?.items.map((el)=> <ProductCard key={el.product_id} data={el}/>)}
+				{datas?.results.map((el)=> <ProductCard key={el.product_id} data={el}/>)}
 			</div>
 			<ProductPagination 
 				currentPage={datas.page}
 				totalPage={totalPage}
+				onPageChange={onPageChange}
 			/>
     </div>
 

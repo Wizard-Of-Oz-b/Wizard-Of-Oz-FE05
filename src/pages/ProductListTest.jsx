@@ -16,7 +16,7 @@ export default function ProductListTest () {
 
 
   const { data: products, isLoading, isError, error } = useProducts(query);
-
+  console.log(products, '프로덕트')
   const handleSortChange = (sortValue) =>{
     setQuery(prev => ({...prev, sort: sortValue, page:1}))
   }
@@ -36,8 +36,9 @@ export default function ProductListTest () {
 
   return(
   <>
-    <div className="flex items-center justify-center">
+    <div className="flex flex-col items-center justify-center">
       <h1 className="text-5xl">테스트 제목</h1>
+      <h2> 카테고리 위치</h2>
     </div>
     <ProductList
     datas={products} 
