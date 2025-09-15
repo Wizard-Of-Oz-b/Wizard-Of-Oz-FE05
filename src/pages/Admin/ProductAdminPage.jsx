@@ -5,15 +5,25 @@ import {
   ProductTable,
   Pagination,
 } from "../../components/common/layouts/admin/products";
-import { mockProducts } from "../../components/features/admin/products/mockProducts";
 import ProductFormModal from "../../components/common/layouts/admin/products/ProductFormModal";
 import DeleteConfirmModal from "../../components/common/layouts/admin/products/DeleteConfirmModal";
+
+import {
+  listProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct as deleteProductAPI,
+  toggleAvailableAPI,
+} from "../../components/common/api/admin/products";
 
 export default function ProductAdminPage() {
   const PAGE_SIZE = 5;
 
   // 목록 & UI 상태
-  const [products, setProducts] = useState(mockProducts);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   const [page, setPage] = useState(1);
   const [q, setQ] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -26,7 +36,26 @@ export default function ProductAdminPage() {
   const [delOpen, setDelOpen] = useState(false);
   const [delTarget, setDelTarget] = useState(null);
 
-  // 필터링
+  // ====== 서버 목록 로드 ======
+  const fetchList = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const data = await listProducts({ pageSize: 1000 });
+      const items = Array.isArray(data) ? data : (data?.items ?? []);
+      setProducts(items);
+    } catch (e) {
+      console.error(e);
+      setError(e.message || "목록을 불러오지 못했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchList();
+  }, []);
+
   const filtered = products.filter((p) => {
     const matchCategory = selectedCategory ? p.category === selectedCategory : true;
     const kw = q.trim().toLowerCase();
@@ -42,45 +71,70 @@ export default function ProductAdminPage() {
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const pageData = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  // 검색/필터 변경 시 첫 페이지로 이동
+  // 검색/필터 변경 시 첫 페이지로
   useEffect(() => {
     setPage(1);
   }, [q, selectedCategory]);
 
-  // 현재 페이지가 범위를 벗어나면 보정
   useEffect(() => {
     if (page > pageCount) setPage(pageCount);
   }, [page, pageCount]);
 
-  // 액션들
-  const toggleAvailable = (id) => {
-    setProducts((prev) =>
-      prev.map((p) =>
-        p.id === id ? { ...p, is_available: !p.is_available } : p
-      )
+  const toggleAvailable = async (id) => {
+    const prev = products;
+    const next = prev.map((p) =>
+      p.id === id ? { ...p, is_available: !p.is_available } : p
     );
+    setProducts(next);
+    try {
+      const changed = next.find((p) => p.id === id);
+      await toggleAvailableAPI(id, changed.is_available);
+    } catch (e) {
+      console.error(e);
+      alert("상태 변경 실패. 되돌립니다.");
+      setProducts(prev);
+    }
   };
 
-  const handleSave = (payload, isEdit) => {
-    setProducts((prev) => {
+  const handleSave = async (payload, isEdit) => {
+    try {
+      setError("");
       if (isEdit) {
-        return prev.map((p) => (p.id === payload.id ? { ...p, ...payload } : p));
+        const updated = await updateProduct(payload.id, payload);
+        setProducts((prev) =>
+          prev.map((p) => (p.id === payload.id ? { ...p, ...(updated || payload) } : p))
+        );
+      } else {
+        const created = await createProduct(payload);
+        const row = created?.id ? created : { ...payload, id: Date.now() };
+        setProducts((prev) => [row, ...prev]);
       }
-      const row = payload.id ? payload : { ...payload, id: Date.now() };
-      return [row, ...prev];
-    });
+      setFormOpen(false);
+      setEditTarget(null);
+    } catch (e) {
+      console.error(e);
+      setError(e.message || "저장에 실패했습니다.");
+      alert("저장에 실패했습니다.");
+    }
   };
 
-  // 삭제
   const requestDelete = (product) => {
     setDelTarget(product);
     setDelOpen(true);
   };
 
-  const confirmDelete = (id) => {
-    setProducts((prev) => prev.filter((p) => p.id !== id));
-    setDelOpen(false);
-    setDelTarget(null);
+  const confirmDelete = async (id) => {
+    const prev = products;
+    setProducts(prev.filter((p) => p.id !== id));
+    try {
+      await deleteProductAPI(id);
+      setDelOpen(false);
+      setDelTarget(null);
+    } catch (e) {
+      console.error(e);
+      alert("삭제 실패. 되돌립니다.");
+      setProducts(prev);
+    }
   };
 
   return (
@@ -91,7 +145,20 @@ export default function ProductAdminPage() {
           setEditTarget(null);
           setFormOpen(true);
         }}
+        rightExtra={
+          <button
+            onClick={fetchList}
+            className="ml-2 rounded-lg border px-3 py-1 text-sm"
+            title="새로고침"
+          >
+            새로고침
+          </button>
+        }
       />
+
+      {/* 상태 표시 */}
+      {loading && <div className="mt-2 text-sm text-gray-500">불러오는 중…</div>}
+      {error && <div className="mt-2 text-sm text-red-500">⚠ {error}</div>}
 
       {/* 필터 */}
       <ProductFilter
@@ -136,7 +203,7 @@ export default function ProductAdminPage() {
         open={delOpen}
         onClose={() => setDelOpen(false)}
         product={delTarget}
-        onConfirm={confirmDelete}
+        onConfirm={() => delTarget && confirmDelete(delTarget.id)}
       />
     </div>
   );

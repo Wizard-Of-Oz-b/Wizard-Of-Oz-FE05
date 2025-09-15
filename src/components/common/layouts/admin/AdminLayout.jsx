@@ -1,9 +1,17 @@
-import React, { useEffect, useRef, useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import React, { useEffect, useRef, useState } from 'react';
+import { NavLink, Outlet } from 'react-router-dom';
 import {
-  LayoutDashboard, ShoppingBag, Package,
-  Users, Tag, Percent, Bell, ChevronDown, LogOut, Home
-} from "lucide-react";
+  LayoutDashboard,
+  ShoppingBag,
+  Package,
+  Users,
+  Tag,
+  Percent,
+  Bell,
+  ChevronDown,
+  LogOut,
+  Home,
+} from 'lucide-react';
 
 export default function AdminLayout() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -17,32 +25,63 @@ export default function AdminLayout() {
       }
     };
     const onEsc = (e) => {
-      if (e.key === "Escape") setMenuOpen(false);
+      if (e.key === 'Escape') setMenuOpen(false);
     };
-    document.addEventListener("mousedown", onClickOutside);
-    document.addEventListener("keydown", onEsc);
+    document.addEventListener('mousedown', onClickOutside);
+    document.addEventListener('keydown', onEsc);
     return () => {
-      document.removeEventListener("mousedown", onClickOutside);
-      document.removeEventListener("keydown", onEsc);
+      document.removeEventListener('mousedown', onClickOutside);
+      document.removeEventListener('keydown', onEsc);
     };
   }, [menuOpen]);
 
   const nav = [
-    { to: "/admin", end: true, label: "대시보드", icon: <LayoutDashboard className="h-4 w-4" /> },
-    { to: "/admin/products", label: "상품 관리", icon: <ShoppingBag className="h-4 w-4" /> },
-    { to: "/admin/orders", label: "주문 관리", icon: <Package className="h-4 w-4" /> },
-    { to: "/admin/customers", label: "회원 관리", icon: <Users className="h-4 w-4" /> },
-    { to: "/admin/categories", label: "카테고리 관리", icon: <Tag className="h-4 w-4" /> },
-    { to: "/admin/coupons", label: "쿠폰/프로모션", icon: <Percent className="h-4 w-4" /> },
-    { to: "/admin/cs", label: "고객 문의관리", icon: <Bell className="h-4 w-4" /> },
-    { to: "/", label: "홈페이지로 이동", icon: <Home className="h-4 w-4" /> },
+    {
+      to: '/admin',
+      end: true,
+      label: '대시보드',
+      icon: <LayoutDashboard className="h-4 w-4" />,
+    },
+    {
+      to: '/admin/products',
+      label: '상품 관리',
+      icon: <ShoppingBag className="h-4 w-4" />,
+    },
+    {
+      to: '/admin/orders',
+      label: '주문 관리',
+      icon: <Package className="h-4 w-4" />,
+    },
+    {
+      to: '/admin/customers',
+      label: '회원 관리',
+      icon: <Users className="h-4 w-4" />,
+    },
+    {
+      to: '/admin/categories',
+      label: '카테고리 관리',
+      icon: <Tag className="h-4 w-4" />,
+    },
+    {
+      to: '/admin/coupons',
+      label: '쿠폰/프로모션',
+      icon: <Percent className="h-4 w-4" />,
+    },
+    {
+      to: '/admin/cs',
+      label: '고객 문의관리',
+      icon: <Bell className="h-4 w-4" />,
+    },
+    { to: '/', label: '홈페이지로 이동', icon: <Home className="h-4 w-4" /> },
   ];
 
   const linkClass = ({ isActive }) =>
     `group flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition
-     ${isActive
-       ? "bg-admintheme-violet text-admintheme-white font-semibold shadow-md"
-       : "text-admintheme-white hover:bg-admintheme-violet-dark hover:text-admintheme-white"}`;
+     ${
+       isActive
+         ? 'bg-admintheme-violet text-admintheme-white font-semibold shadow-md'
+         : 'text-admintheme-white hover:bg-admintheme-violet-dark hover:text-admintheme-white'
+     }`;
 
   return (
     <div className="admin-layout h-screen bg-admintheme-black flex flex-col overflow-y-auto">
@@ -58,7 +97,9 @@ export default function AdminLayout() {
               onClick={() => setMenuOpen((v) => !v)}
             >
               메뉴
-              <ChevronDown className={`h-4 w-4 transition ${menuOpen ? "rotate-180" : ""}`} />
+              <ChevronDown
+                className={`h-4 w-4 transition ${menuOpen ? 'rotate-180' : ''}`}
+              />
             </button>
 
             {menuOpen && (
@@ -83,9 +124,7 @@ export default function AdminLayout() {
                 </ul>
                 <div className="mt-6 border-t border-admintheme-violet-light pt-2 text-xs text-admintheme-violet-light">
                   관리자 메뉴
-                  <button
-                    className="ml-2 inline-flex items-center gap-1 rounded-md px-2 py-1 hover:bg-admintheme-violet-dark"
-                  >
+                  <button className="ml-2 inline-flex items-center gap-1 rounded-md px-2 py-1 hover:bg-admintheme-violet-dark">
                     <LogOut className="h-4 w-4" />
                     로그아웃
                   </button>
@@ -115,8 +154,23 @@ export default function AdminLayout() {
                 ))}
               </ul>
             </div>
-            <div className="px-5 pb-5 text-xs text-admintheme-violet-light">
-              © {new Date().getFullYear()} 오즈의 이상한 상점<br />All rights reserved.
+            <div className="px-5 pb-5">
+              <button
+                onClick={() => {
+                  localStorage.removeItem('mock_admin_role');
+                  console.log('로그아웃 완료: mock_admin_role 제거됨');
+                  window.location.href = '/admin/login';
+                }}
+                className="w-full inline-flex items-center gap-2 rounded-lg border border-admintheme-violet px-3 py-2 text-sm text-admintheme-white hover:bg-admintheme-violet-dark transition"
+              >
+                <LogOut className="h-4 w-4" />
+                로그아웃
+              </button>
+              <p className="mt-4 text-xs text-admintheme-violet-light">
+                © {new Date().getFullYear()} 오즈의 이상한 상점
+                <br />
+                All rights reserved.
+              </p>
             </div>
           </div>
         </aside>

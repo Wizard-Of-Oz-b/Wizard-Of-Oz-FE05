@@ -14,7 +14,6 @@ import {
 } from '../../utils/admin/couponUtils';
 import mockCoupons from '../../components/features/admin/coupons/mockCoupons';
 
-
 export default function CouponPromoAdminPage() {
   const PAGE_SIZE = 10;
   const [coupons, setCoupons] = useState(mockCoupons);
