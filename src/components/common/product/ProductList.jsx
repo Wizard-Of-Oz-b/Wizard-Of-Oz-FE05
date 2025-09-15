@@ -1,5 +1,6 @@
 import ProductCard from "./ProductCard";
 import ProductDropDown from "./ProductDropDown";
+import ProductPagination from "./ProductPagination";
 
 export default function ProductList({datas, isLoading, query, onSortChange, onPageChange}){
 
@@ -18,18 +19,20 @@ export default function ProductList({datas, isLoading, query, onSortChange, onPa
     <div className="w-3/4">
 			<div className="flex items-center justify-between">
 				<p className="font-medium text-lg">{`결과: ${datas.total}개`}</p>
-				<ProductDropDown/>
+				<ProductDropDown
+					currentSort={query?.sort}
+					onSortChange={onSortChange}
+				/>
 				{/* <p className="font-medium">정렬 기준</p> */}
 			</div>
 
 			<div className="flex flex-wrap items-start  pt-5">
 				{datas?.items.map((el)=> <ProductCard key={el.product_id} data={el}/>)}
 			</div>
-			<div className="flex items-center justify-center">
-				<button>이전</button>
-				<span>{datas.page}/{totalPage}</span>
-				<button>다음</button>
-			</div>
+			<ProductPagination 
+				currentPage={datas.page}
+				totalPage={totalPage}
+			/>
     </div>
 
   </div>
