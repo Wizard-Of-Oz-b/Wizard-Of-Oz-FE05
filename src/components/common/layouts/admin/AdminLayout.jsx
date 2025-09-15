@@ -161,7 +161,7 @@ export default function AdminLayout() {
                   console.log('로그아웃 완료: mock_admin_role 제거됨');
                   window.location.href = '/admin/login';
                 }}
-                className="w-full inline-flex items-center gap-2 rounded-lg border border-admintheme-violet px-3 py-2 text-sm text-admintheme-white hover:bg-admintheme-violet-dark transition"
+                className="w-full inline-flex items-center gap-2 rounded-lg border border-admintheme-violet px-3 py-2 text-sm text-admintheme-white hover:bg-admintheme-violet-dark transition cursor-pointer"
               >
                 <LogOut className="h-4 w-4" />
                 로그아웃
