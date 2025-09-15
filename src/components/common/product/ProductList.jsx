@@ -18,7 +18,7 @@ export default function ProductList({datas, isLoading, query, onSortChange, onPa
 
     <div className="w-3/4">
 			<div className="flex items-center justify-between">
-				<p className="font-medium text-lg">{`결과: ${datas.total}개`}</p>
+				<p className="font-medium text-lg">{`결과: ${datas.count}개`}</p>
 				<ProductDropDown
 					currentSort={query?.sort}
 					onSortChange={onSortChange}
@@ -30,7 +30,7 @@ export default function ProductList({datas, isLoading, query, onSortChange, onPa
 				{datas?.results.map((el)=> <ProductCard key={el.product_id} data={el}/>)}
 			</div>
 			<ProductPagination 
-				currentPage={datas.page}
+				currentPage={query.page}
 				totalPage={totalPage}
 				onPageChange={onPageChange}
 			/>
