@@ -1,5 +1,5 @@
 import RatingStars from "./RatingStars";
-import { KRW } from "../models/product";
+// import { KRW } from "../models/product";
 
 // export default function ProductCard({ product, onClick }) {
 export default function ProductCard({data}) {

@@ -9,7 +9,7 @@ export default function ProductList({datas, isLoading, query, onSortChange, onPa
       로딩....
     </>)
   }
-  console.log(datas)
+  console.log(datas , '데이터 테스트')
   const totalPage = Math.ceil(datas.total/datas.size)
 
   return(
@@ -21,7 +21,7 @@ export default function ProductList({datas, isLoading, query, onSortChange, onPa
 				<ProductDropDown/>
 				{/* <p className="font-medium">정렬 기준</p> */}
 			</div>
-			
+
 			<div className="flex flex-wrap items-start  pt-5">
 				{datas?.items.map((el)=> <ProductCard key={el.product_id} data={el}/>)}
 			</div>
