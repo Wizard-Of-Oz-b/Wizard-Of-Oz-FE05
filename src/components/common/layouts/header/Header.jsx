@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { PRIMARY, SEARCH, SUGGEST } from "./constants";
 import { spring } from "./animations";
 import TopBar from "./desktop/TopBar";
@@ -13,7 +14,12 @@ export default function Header({ className = "", onSelectSub, onSearch }) {
   const [keyword, setKeyword] = useState("");
   const closeTimer = useRef(null);
   const inputRef = useRef(null);
-  const isLight = !!active || mobileOpen;
+  
+  const location = useLocation();
+  const isHome = location.pathname === "/";
+
+  // 메인 페이지일 때만 배경이 투명, 아니면 흰색
+  const isLight = !isHome || !!active || mobileOpen;
 
   const open = (p) => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
@@ -33,7 +39,7 @@ export default function Header({ className = "", onSelectSub, onSearch }) {
     setActive(null);
   };
 
-  // 검색 일 때 포커스주기
+
   useEffect(() => {
     if (active === SEARCH && inputRef.current) {
       const t = setTimeout(() => inputRef.current?.focus(), 40);
@@ -62,7 +68,7 @@ export default function Header({ className = "", onSelectSub, onSearch }) {
         />
       </div>
 
-      {/* 데스크탑 드롭다운 */}
+  
       <DesktopDropdown
         active={active}
         keyword={keyword}
@@ -74,7 +80,6 @@ export default function Header({ className = "", onSelectSub, onSearch }) {
         delayedClose={delayedClose}
       />
 
-      {/* 모바일 메뉴 */}
       <MobileMenu
         open={mobileOpen}
         keyword={keyword}
@@ -86,4 +91,3 @@ export default function Header({ className = "", onSelectSub, onSearch }) {
     </header>
   );
 }
-
