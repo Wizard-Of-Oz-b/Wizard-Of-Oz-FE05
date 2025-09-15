@@ -1,6 +1,7 @@
 // msw 연습용
 
 import { http, HttpResponse } from "msw";
+import { dummyProduct } from "./dummyProducts";
 
 export const handlers = [
   // GET /api/user
@@ -29,4 +30,9 @@ export const handlers = [
       { id: "p2", name: "Denim Pants", price: 39900 },
     ]);
   }),
+
+  http.get('/api/v1/products', () => {
+
+    return HttpResponse.json(dummyProduct)
+  })
 ];
