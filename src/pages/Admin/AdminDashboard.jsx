@@ -171,15 +171,15 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* 빠른 메뉴 */}
+          {/* QUICK MENU */}
           <div className="rounded-2xl bg-admintheme-violet/30 backdrop-blur-md border border-white/10 shadow-lg p-5">
             <div className="flex items-center gap-2 mb-3">
               <KeyRound className="h-5 w-5 text-admintheme-violet-light" />
-              <h2 className="text-lg font-semibold text-white">빠른 메뉴</h2>
+              <h2 className="text-lg font-semibold text-white">QUICN MENU</h2>
             </div>
             <div className="grid grid-cols-1 gap-2">
               <QuickLink
-                to="/products/new"
+                to="/admin/products"
                 icon={
                   <ShoppingBag className="h-4 w-4 text-admintheme-violet-light" />
                 }
@@ -187,12 +187,20 @@ export default function AdminDashboard() {
                 상품 등록
               </QuickLink>
               <QuickLink
-                to="/orders"
+                to="/admin/orders"
                 icon={
                   <Package className="h-4 w-4 text-admintheme-violet-light" />
                 }
               >
                 주문 관리
+              </QuickLink>
+              <QuickLink
+                to="/admin/cs"
+                icon={
+                  <Bell className="h-4 w-4 text-admintheme-violet-light" />
+                }
+              >
+                고객 문의
               </QuickLink>
             </div>
           </div>

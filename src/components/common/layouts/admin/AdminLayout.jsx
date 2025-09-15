@@ -34,7 +34,7 @@ export default function AdminLayout() {
     { to: "/admin/customers", label: "회원 관리", icon: <Users className="h-4 w-4" /> },
     { to: "/admin/categories", label: "카테고리 관리", icon: <Tag className="h-4 w-4" /> },
     { to: "/admin/coupons", label: "쿠폰/프로모션", icon: <Percent className="h-4 w-4" /> },
-    { to: "/admin/notifications", label: "공지/알림", icon: <Bell className="h-4 w-4" /> },
+    { to: "/admin/cs", label: "고객 문의관리", icon: <Bell className="h-4 w-4" /> },
     { to: "/", label: "홈페이지로 이동", icon: <Home className="h-4 w-4" /> },
   ];
 

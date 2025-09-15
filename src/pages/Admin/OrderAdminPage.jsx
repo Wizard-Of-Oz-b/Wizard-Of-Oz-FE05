@@ -1,29 +1,29 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   ShoppingCart,
   ChevronsLeft,
   ChevronLeft,
   ChevronRight,
   ChevronsRight,
-} from "lucide-react";
+} from 'lucide-react';
 
-import mockOrders from "../../components/features/admin/orders/mockOrders";
-import { ORDER_STATUS } from "../../components/features/admin/orders/constants";
+import mockOrders from '../../components/features/admin/orders/mockOrders';
+import { ORDER_STATUS } from '../../components/features/admin/orders/constants';
 import {
-  IconButton,
-  StatusBadge,
+  OrderTable,
   StatusChangeModal,
   RequestDecisionModal,
   OrderDetailsModal,
-} from "../../components/common/layouts/admin/orders";
-import { getNextStatus } from "../../components/features/admin/orders/orderStatus";
+} from '../../components/common/layouts/admin/orders';
+import { getNextStatus } from '../../components/features/admin/orders/orderStatus';
+import IconButton from '../../components/common/layouts/admin/common/IconButton';
 
 export default function OrderAdminPage() {
   const PAGE_SIZE = 10;
   const [orders, setOrders] = useState(mockOrders);
   const [page, setPage] = useState(1);
-  const [q, setQ] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [q, setQ] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
 
   // 모달 상태
   const [detailOpen, setDetailOpen] = useState(false);
@@ -32,7 +32,7 @@ export default function OrderAdminPage() {
   const [statusOpen, setStatusOpen] = useState(false);
   const [statusTargetId, setStatusTargetId] = useState(null);
 
-  // 파생값: 항상 최신 order를 찾아옴
+  // 파생값
   const selectedOrder = orders.find((o) => o.id === selectedOrderId) || null;
   const statusTarget = orders.find((o) => o.id === statusTargetId) || null;
 
@@ -85,10 +85,10 @@ export default function OrderAdminPage() {
     );
   };
 
-  const approveRequest = (adminNote = "") => {
+  const approveRequest = (adminNote = '') => {
     if (!selectedOrder || !selectedOrder.request) return;
-    const isCancel = selectedOrder.request.type === "cancel";
-    const newStatus = isCancel ? "취소완료" : "환불완료";
+    const isCancel = selectedOrder.request.type === 'cancel';
+    const newStatus = isCancel ? '취소완료' : '환불완료';
     setOrders((prev) =>
       prev.map((o) =>
         o.id === selectedOrder.id
@@ -104,7 +104,7 @@ export default function OrderAdminPage() {
     setRequestOpen(false);
   };
 
-  const rejectRequest = (adminNote = "") => {
+  const rejectRequest = (adminNote = '') => {
     if (!selectedOrder) return;
     setOrders((prev) =>
       prev.map((o) =>
@@ -159,125 +159,61 @@ export default function OrderAdminPage() {
       </div>
 
       {/* 테이블 */}
-      <div className="relative overflow-x-auto rounded-2xl shadow-lg bg-white">
-        <table className="min-w-[980px] w-full">
-          <thead className="bg-gradient-to-r from-violet-600 to-violet-700 text-white text-left text-xs font-semibold uppercase tracking-wide">
-            <tr>
-              <th className="px-4 py-3 rounded-tl-2xl">주문번호</th>
-              <th className="px-4 py-3">고객명</th>
-              <th className="px-4 py-3">대표 상품</th>
-              <th className="px-4 py-3 text-right">금액</th>
-              <th className="px-4 py-3 text-center">상태</th>
-              <th className="px-4 py-3 text-center">요청</th>
-              <th className="px-4 py-3 text-center">주문일</th>
-              <th className="px-4 py-3 text-center rounded-tr-2xl">기능</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100 text-sm">
-            {pageData.length === 0 ? (
-              <tr>
-                <td colSpan={8} className="py-10 text-center text-gray-500">
-                  주문이 없습니다.
-                </td>
-              </tr>
-            ) : (
-              pageData.map((o) => (
-                <tr
-                  key={o.id}
-                  className="hover:bg-violet-50/40 transition-colors"
-                >
-                  <td className="px-4 py-4 font-semibold text-gray-800">
-                    <button
-                      onClick={() => {
-                        setSelectedOrderId(o.id);
-                        setDetailOpen(true);
-                      }}
-                      className="underline decoration-violet-300 underline-offset-2 hover:text-violet-700"
-                    >
-                      {o.orderNo}
-                    </button>
-                  </td>
-                  <td className="px-4 py-4">{o.customer}</td>
-                  <td className="px-4 py-4 truncate">
-                    {o.items?.[0]?.name}
-                    {o.items && o.items.length > 1 && (
-                      <span className="text-xs text-gray-500">
-                        {" "}
-                        외 {o.items.length - 1}건
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-4 text-right font-semibold text-violet-700">
-                    {o.amount.toLocaleString()}원
-                  </td>
-                  <td className="px-4 py-4 text-center">
-                    <StatusBadge
-                      status={o.status}
-                      onClick={() => {
-                        setStatusTargetId(o.id);
-                        setStatusOpen(true);
-                      }}
-                    />
-                  </td>
-                  <td className="px-4 py-4 text-center">
-                    {o.request ? (
-                      <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                        {o.request.type === "cancel" ? "취소요청" : "환불요청"}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-gray-400">-</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-4 text-center text-gray-600">
-                    {o.created_at}
-                  </td>
-                  <td className="px-4 py-4 text-center">
-                    {o.request && !["취소완료", "환불완료"].includes(o.status) ? (
-                      <button
-                        onClick={() => {
-                          setSelectedOrderId(o.id);
-                          setRequestOpen(true);
-                        }}
-                        className="inline-flex items-center gap-1 rounded-lg bg-amber-100 px-3 py-1.5 text-sm font-semibold text-amber-800 hover:bg-amber-200"
-                      >
-                        {o.request.type === "cancel"
-                          ? "취소요청 처리"
-                          : "환불요청 처리"}
-                      </button>
-                    ) : (
-                      <span className="text-xs text-gray-400">—</span>
-                    )}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      <OrderTable
+        orders={pageData}
+        onOpenDetails={(id) => {
+          setSelectedOrderId(id);
+          setDetailOpen(true);
+        }}
+        onOpenRequest={(id) => {
+          setSelectedOrderId(id);
+          setRequestOpen(true);
+        }}
+        onOpenStatus={(id) => {
+          setStatusTargetId(id);
+          setStatusOpen(true);
+        }}
+      />
 
       {/* 페이지네이션 */}
-      <div className="mt-6 flex justify-center gap-2">
-        <IconButton title="첫 페이지" onClick={goFirst} disabled={page <= 1}>
+      <div className="mt-6 flex justify-center gap-2 items-center">
+        <IconButton
+          title="첫 페이지"
+          onClick={goFirst}
+          disabled={page <= 1}
+          className="h-9 w-9 p-0 rounded-full border-gray-200 text-gray-600 hover:text-violet-700 disabled:cursor-not-allowed"
+        >
           <ChevronsLeft className="size-4" />
         </IconButton>
-        <IconButton title="이전" onClick={goPrev} disabled={page <= 1}>
+
+        <IconButton
+          title="이전"
+          onClick={goPrev}
+          disabled={page <= 1}
+          className="h-9 w-9 p-0 rounded-full border-gray-200 text-gray-600 hover:text-violet-700 disabled:cursor-not-allowed"
+        >
           <ChevronLeft className="size-4" />
         </IconButton>
-        <span className="px-2 text-sm font-medium">
-          <span className="font-semibold text-violet-700">페이지 {page}</span> /{" "}
+
+        <span className="px-2 text-sm font-medium tabular-nums select-none">
+          <span className="font-semibold text-violet-700">페이지 {page}</span> /{' '}
           {pageCount}
         </span>
+
         <IconButton
           title="다음"
           onClick={goNext}
           disabled={page >= pageCount}
+          className="h-9 w-9 p-0 rounded-full border-gray-200 text-gray-600 hover:text-violet-700 disabled:cursor-not-allowed"
         >
           <ChevronRight className="size-4" />
         </IconButton>
+
         <IconButton
           title="마지막"
           onClick={goLast}
           disabled={page >= pageCount}
+          className="h-9 w-9 p-0 rounded-full border-gray-200 text-gray-600 hover:text-violet-700 disabled:cursor-not-allowed"
         >
           <ChevronsRight className="size-4" />
         </IconButton>

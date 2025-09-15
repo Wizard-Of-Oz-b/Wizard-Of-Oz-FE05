@@ -26,7 +26,12 @@ import AdminLayout from "./components/common/layouts/admin/AdminLayout";
 import ProductAdminPage from "./pages/Admin/ProductAdminPage.jsx";
 import OrderAdminPage from "./pages/Admin/OrderAdminPage.jsx";
 import MemberAdminPage from "./pages/Admin/MemberAdminPage.jsx";
-
+import CategoryAdminPage from "./pages/Admin/CategoryAdminPage.jsx";
+import CouponPromoAdminPage from "./pages/Admin/CouponPromoAdminPage.jsx";
+import CustomerSupportAdminPage from "./pages/Admin/CustomerSupportAdminPage.jsx";
+import Forbidden from "./pages/Forbidden.jsx";
+import AdminProtectedRoute from "./routes/AdminProtectedRoute.jsx";
+import AdminLogin from "./pages/Admin/AdminLogin.jsx";
 
 export default function App() {
   return (
@@ -59,14 +64,21 @@ export default function App() {
                 />
               }
             />
-      
+            <Route path="/403" element={<Forbidden />} />
+      <Route path="/admin/login" element={<AdminLogin />} />
+
       {/* 어드민 영역 */}
-      <Route path="/admin" element={<AdminLayout />}>
-        {/* /admin 진입 시 보여줄 페이지 */}
-        <Route index element={<AdminDashboard />} />
-        <Route path="/admin/products" element={<ProductAdminPage />} />
-        <Route path="/admin/orders" element={<OrderAdminPage />} />
-        <Route path="/admin/customers" element={<MemberAdminPage />} />
+      <Route element={<AdminProtectedRoute allowRoles={["super","manager","cs"]} />}>
+        <Route path="/admin" element={<AdminLayout />}>
+          {/* /admin 진입 시 보여줄 페이지 */}
+          <Route index element={<AdminDashboard />} />
+          <Route path="/admin/products" element={<ProductAdminPage />} />
+          <Route path="/admin/orders" element={<OrderAdminPage />} />
+          <Route path="/admin/customers" element={<MemberAdminPage />} />
+          <Route path="/admin/categories" element={<CategoryAdminPage />} />
+          <Route path="/admin/coupons" element={<CouponPromoAdminPage />} />
+          <Route path="/admin/cs" element={<CustomerSupportAdminPage />} />
+        </Route>
       </Route>
     </Routes>
         </Suspense>
