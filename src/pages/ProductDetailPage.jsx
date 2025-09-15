@@ -1,4 +1,3 @@
-// src/pages/ProductDetailPage.jsx
 import React, { useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import ProductDetail from "../components/common/product/ProductDetail";
@@ -8,7 +7,6 @@ import {
 } from "../components/common/product/ProductDetailSections";
 import { mockProducts } from "../components/features/admin/products/mockProducts";
 
-// 통화 포맷터 (프로젝트에 KRW 유틸이 따로 있으면 이 함수는 지워도 됩니다)
 function KRW(n) {
   try {
     return n.toLocaleString("ko-KR", { style: "currency", currency: "KRW" });
@@ -17,7 +15,6 @@ function KRW(n) {
   }
 }
 
-// 배열 → 빠른 조회용 인덱스 맵
 function buildIndex(products) {
   return products.reduce((acc, p) => {
     acc[p.id] = p;

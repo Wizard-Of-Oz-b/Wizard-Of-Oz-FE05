@@ -29,7 +29,6 @@ import MemberAdminPage from "./pages/Admin/MemberAdminPage.jsx";
 import CategoryAdminPage from "./pages/Admin/CategoryAdminPage.jsx";
 import CouponPromoAdminPage from "./pages/Admin/CouponPromoAdminPage.jsx";
 import CustomerSupportAdminPage from "./pages/Admin/CustomerSupportAdminPage.jsx";
-import Forbidden from "./pages/Forbidden.jsx";
 import AdminProtectedRoute from "./routes/AdminProtectedRoute.jsx";
 import AdminLogin from "./pages/Admin/AdminLogin.jsx";
 

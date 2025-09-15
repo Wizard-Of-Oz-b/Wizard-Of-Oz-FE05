@@ -1,32 +1,44 @@
-// src/routes/AdminProtectedRoute.jsx
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
+import api from "../lib/axios";
+import { getToken, clearToken } from "../lib/auth";
 
-export default function AdminProtectedRoute({ allowRoles = [] }) {
-  const [loading, setLoading] = useState(true);
-  const [me, setMe] = useState(null); // { role: "super" | "manager" | "cs" | "user" }
+export default function AdminProtectedRoute() {
+  const [status, setStatus] = useState("loading");
   const location = useLocation();
 
   useEffect(() => {
-    // 데모로그인
-    const mockRole = localStorage.getItem("mock_admin_role");
-    if (mockRole) setMe({ role: mockRole });
-    setLoading(false);
-  }, []);
+    let mounted = true;
+    const ctrl = new AbortController();
 
-  if (loading) return <div className="p-6">권한 확인 중...</div>;
+    async function verify() {
+      const token = getToken();
+      if (!token) {
+        if (mounted) setStatus("unauthed");
+        return;
+      }
 
-  // 로그인/권한 정보 없음 → 로그인 페이지로
-  if (!me) {
-    return <Navigate to="/admin/login" replace state={{ from: location }} />;
-  }
+      try {
+        await api.get("/v1/admins/", { signal: ctrl.signal });
+        if (!mounted) return;
+        setStatus("ok");
+      } catch (e) {
+        const code = e?.response?.status;
+        clearToken();
+        if (mounted) setStatus(code === 401 ? "unauthed" : "forbidden");
+      }
+    }
 
-  const role = String(me.role || "").toLowerCase();
-  const ok =
-    allowRoles.length === 0 ||
-    allowRoles.map((r) => r.toLowerCase()).includes(role);
+    verify();
+    return () => {
+      mounted = false;
+      ctrl.abort();
+    };
+  }, [location.pathname]);
 
-  if (!ok) return <Navigate to="/403" replace />;
+  if (status === "loading") return <div className="p-6">권한 확인 …</div>;
+  if (status === "unauthed") return <Navigate to="/admin/login" replace state={{ from: location }} />;
+  if (status === "forbidden") return <Navigate to="/errors/403" replace />;
 
   return <Outlet />;
 }
