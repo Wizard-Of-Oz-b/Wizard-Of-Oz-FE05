@@ -112,7 +112,6 @@ export default function Home() {
     }, 30);
   };
 
-  // ===== 입력 이벤트 (휠/키/터치) =====
   useEffect(() => {
     const onWheel = (e) => {
       if (!scrollLocked || lockRef.current) return;
