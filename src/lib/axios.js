@@ -29,9 +29,13 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err.response?.status === 401) {
+    const status = err.response?.status;
+    const url = err.config?.url || "";
+
+    if (status === 401 && (/\/v1\/auth\//.test(url) || /\/v1\/admins\//.test(url))) {
       clearToken();
     }
+    
     return Promise.reject(err);
   }
 );
