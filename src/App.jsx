@@ -21,6 +21,7 @@ import "swiper/css";
 import Layout from "./components/common/layouts/Layout";
 import ProductListTest from "./pages/ProductListTest";
 
+
 // 어드민
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AdminLayout from "./components/common/layouts/admin/AdminLayout";
@@ -33,6 +34,7 @@ import CustomerSupportAdminPage from "./pages/Admin/CustomerSupportAdminPage.jsx
 import AdminProtectedRoute from "./routes/AdminProtectedRoute.jsx";
 import AdminLogin from "./pages/Admin/AdminLogin.jsx";
 import AdminManagersPage from "./pages/Admin/AdminManagersPage.jsx";
+import ResultTestPage from "./pages/ResultTestPage.jsx";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +49,7 @@ export default function App() {
               <Route path="/" element={<Home />} />
               <Route path="/products/:id" element={<ProductDetailPage />} />
               <Route path="/products/test" element={<ProductListTest />} />
+              <Route path="/results/test" element={<ResultTestPage />} />
             </Route>
 
             {/* 인증/접근제어 예외 페이지 */}
