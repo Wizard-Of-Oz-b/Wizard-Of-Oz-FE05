@@ -10,6 +10,7 @@ export default function ProductList({datas, isLoading, query, onSortChange, onPa
       로딩....
     </>)
   }
+	
   console.log(datas , '데이터 테스트')
   const totalPage = Math.ceil(datas.count/query.size)
 

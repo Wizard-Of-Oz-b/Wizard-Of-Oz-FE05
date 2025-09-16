@@ -18,6 +18,7 @@ import Error504 from "./pages/errors/Error504";
 import { ErrorBoundary } from "./components/common/layouts/errors/ErrorBoundary";
 import "swiper/css";
 import Layout from "./components/common/layouts/Layout";
+import ProductListTest from "./pages/ProductListTest";
 
 const queryClient = new QueryClient()
 
@@ -31,7 +32,7 @@ export default function App() {
          <Route element={<Layout />}>
             <Route path="/" element={<Home />} />
             <Route path="/products/:id" element={<ProductDetailPage />} />
-            <Route path="/products" element={<ProductDetailPage />} />
+            <Route path="/products/test" element={<ProductListTest />} />
            </Route>
 
             {/* 상태코드별 에러 라우트 */}

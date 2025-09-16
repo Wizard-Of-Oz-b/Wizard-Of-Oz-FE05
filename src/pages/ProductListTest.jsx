@@ -2,20 +2,22 @@ import { useState } from "react";
 import { useProducts } from "../hooks/useProducts";
 import ProductList from "../components/common/product/ProductList";
 
+
+// 해당 컴포넌트는 상품 리스트를 불러 오는 방법의 예시 이니 참고 바랍니다.
 export default function ProductListTest () {
 
-  // 필수 값은 없다.
+  // 쿼리 필수 값은 없다. 필요 없는건 선언을 안해도 되고 null, '' 값으로 지정해두면 된다.
   const [query, setQuery] = useState({
-    q:'',
-    category_id: null,
-    is_active: true,
-    sort: 'created_at',
-    page: 1,
-    size: 20
+    q:'',   //검색값
+    category_id: null,  //카테고리 id
+    is_active: true,    //판매중
+    sort: 'created_at', //정렬 기준
+    page: 1,            //페이지
+    size: 20            //한 페이지에 몇개 결과 가져올지
   })
-  console.log(query)
+  // console.log(query)
 
-
+  //tanStack 쿼리
   const { data: products, isLoading, isError, error } = useProducts(query);
   console.log(products, '프로덕트')
   const handleSortChange = (sortValue) =>{
