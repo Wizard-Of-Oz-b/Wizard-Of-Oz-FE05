@@ -31,6 +31,7 @@ export default function App() {
          <Route element={<Layout />}>
             <Route path="/" element={<Home />} />
             <Route path="/products/:id" element={<ProductDetailPage />} />
+            <Route path="/products" element={<ProductDetailPage />} />
            </Route>
 
             {/* 상태코드별 에러 라우트 */}

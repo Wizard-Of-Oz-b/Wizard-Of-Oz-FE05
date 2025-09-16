@@ -15,20 +15,25 @@ async function getMockProducts() {
   }
 }
 
-async function getProducts(params) {
-  try {
-    const response = await axios.get(BASE_URL+'?'+params);
-    console.log(response.data)
-    return response.data
-  } catch (error) {
-    console.error(`상품 가져오기 에러${error}`);
-    if(error instanceof Error){
-      throw error
-    }else{
-      throw new Error(String(error));
-    }
-  }
-}
+/**
+ * 쿼리 요청으로 상품 가져오는 api 함수
+ * @param {*} params 
+ * @returns 
+ */
+// async function getProducts(params) {
+//   try {
+//     const response = await axios.get(BASE_URL+'?'+params);
+//     console.log(response.data)
+//     return response.data
+//   } catch (error) {
+//     console.error(`상품 가져오기 에러${error}`);
+//     if(error instanceof Error){
+//       throw error
+//     }else{
+//       throw new Error(String(error));
+//     }
+//   }
+// }
 
 
 export function useProducts(params) {
