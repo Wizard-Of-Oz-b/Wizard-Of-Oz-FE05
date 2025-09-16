@@ -1,23 +1,66 @@
-import Switch from "../common/Switch";
-import IconButton from "../common/IconButton";
-import { Pencil, Trash2 } from "lucide-react";
+import Switch from '../common/Switch';
+import { Pencil, Trash2 } from 'lucide-react';
+import dayjs from 'dayjs';
 
-export default function ProductTable({ pageData, toggleAvailable, onRequestDelete, onEdit }) {
+export default function ProductTable({
+  pageData,
+  toggleAvailable,
+  onRequestDelete,
+  onEdit,
+}) {
+  const getId = (row) =>
+    row?.id ?? row?.product_id ?? row?.pk ?? row?.['Product id'] ?? row?.['product id'];
+
+  const getCode = (row) => {
+    const sku =
+      row?.sku ?? row?.SKU ?? row?.['sku id'] ?? row?.['SKU ID'] ?? row?.['Sku'] ?? undefined;
+    const id = getId(row);
+    return (sku ?? id ?? '-').toString();
+  };
+
+  const getCategory = (row) => row?.category ?? row?.Category ?? '-';
+  const getImage = (row) => row?.image_url ?? row?.thumbnail ?? row?.image ?? null;
+
+  const getCreatedAt = (row) => {
+    const raw = row?.created_at ?? row?.['Created at'] ?? null;
+    if (!raw) return '-';
+    const d = dayjs(raw);
+    return d.isValid() ? d.format('YYYY년 MM월 DD일 HH:mm') : String(raw);
+  };
+
+  const COLS = [
+    'w-[140px]', 
+    'w-[100px]',
+    'w-[140px]',
+    '', 
+    'w-[120px]',
+    'w-[90px]',
+    'w-[180px]',
+    'w-[160px]',
+  ];
+
   return (
     <div className="relative overflow-x-auto rounded-2xl shadow-lg bg-white">
-      <table className="min-w-[900px] w-full">
+      <table className="w-full min-w-[1000px] table-fixed">
+        <colgroup>
+          {COLS.map((cls, i) => (
+            <col key={i} className={cls || undefined} />
+          ))}
+        </colgroup>
+
         <thead className="bg-gradient-to-r from-violet-600 to-violet-700 text-white text-left text-xs font-semibold uppercase tracking-wide">
           <tr>
-            <th className="px-4 py-3 rounded-tl-2xl">썸네일</th>
+            <th className="px-4 py-3 rounded-tl-2xl">상품코드</th>
+            <th className="px-4 py-3">썸네일</th>
             <th className="px-4 py-3">카테고리</th>
             <th className="px-4 py-3">상품명</th>
-            <th className="px-4 py-3">SKU</th>
             <th className="px-4 py-3 text-right">가격</th>
             <th className="px-4 py-3 text-center">판매</th>
             <th className="px-4 py-3 text-center">등록일</th>
             <th className="px-4 py-3 text-center rounded-tr-2xl">기능</th>
           </tr>
         </thead>
+
         <tbody className="divide-y divide-gray-100 text-sm">
           {pageData.length === 0 ? (
             <tr>
@@ -26,44 +69,93 @@ export default function ProductTable({ pageData, toggleAvailable, onRequestDelet
               </td>
             </tr>
           ) : (
-            pageData.map((p) => (
-              <tr key={p.id} className="hover:bg-violet-50/40 transition-colors">
-                <td className="px-4 py-4">
-                  <img
-                    src={p.image_url}
-                    alt={p.name}
-                    className="h-14 w-20 object-cover rounded-md shadow-sm"
-                  />
-                </td>
-                <td className="px-4 py-4 font-medium">{p.category}</td>
-                <td className="px-4 py-4 font-semibold text-gray-800">
-                  {p.name}
-                </td>
-                <td className="px-4 py-4">{p.sku}</td>
-                <td className="px-4 py-4 text-right font-semibold text-violet-700">
-                  {p.price.toLocaleString()}원
-                </td>
-                <td className="px-4 py-4 text-center">
-                  <Switch checked={p.is_available} onChange={() => toggleAvailable(p.id)} />
-                </td>
-                <td className="px-4 py-4 text-center text-gray-600">
-                  {p.created_at}
-                </td>
-                <td className="px-4 py-4 text-center">
-                  <div className="flex gap-2 justify-center">
-                    <IconButton title="수정" onClick={() => onEdit(p)}>
-                      <Pencil className="size-4" /> 수정
-                    </IconButton>
-                    <button
-                      onClick={() => onRequestDelete(p)}
-                      className="inline-flex items-center gap-1 rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-red-700 transition"
-                    >
-                      <Trash2 className="size-4" /> 삭제
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))
+            pageData.map((p, idx) => {
+              const id = getId(p);
+              const code = getCode(p);
+              const key = id ?? code ?? `row-${idx}`;
+              const imgSrc = getImage(p);
+
+              return (
+                <tr
+                  key={key}
+                  className="odd:bg-white even:bg-gray-50/40 hover:bg-violet-50/50 transition-colors"
+                >
+                  {/* 상품코드 */}
+                  <td className="px-4 py-3 align-middle whitespace-nowrap">
+                    <span className="font-mono text-[13px] text-gray-800">{code}</span>
+                  </td>
+
+                  {/* 썸네일 */}
+                  <td className="px-4 py-3 align-middle">
+                    {imgSrc ? (
+                      <img
+                        src={imgSrc}
+                        alt={(p.name ?? 'thumbnail') + ''}
+                        className="h-14 w-20 object-cover rounded-md shadow-sm"
+                      />
+                    ) : (
+                      <div className="h-14 w-20 rounded-md bg-gray-100 grid place-items-center text-xs text-gray-400">
+                        없음
+                      </div>
+                    )}
+                  </td>
+
+                  {/* 카테고리 */}
+                  <td className="px-4 py-3 align-middle whitespace-nowrap text-gray-700">
+                    {getCategory(p)}
+                  </td>
+
+                  {/* 상품명 */}
+                  <td className="px-4 py-3 align-middle">
+                    <span className="block max-w-[520px] truncate font-semibold text-gray-800">
+                      {p.name ?? p.Name ?? ''}
+                    </span>
+                  </td>
+
+                  {/* 가격 */}
+                  <td className="px-4 py-3 align-middle text-right font-semibold text-violet-700 whitespace-nowrap">
+                    {(p.price ?? p.Price ?? 0).toLocaleString()}원
+                  </td>
+
+                  {/* 판매 토글 */}
+                  <td className="px-4 py-3 align-middle text-center">
+                    <Switch
+                      checked={!!p.is_active || !!p['Is active']}
+                      onChange={() => toggleAvailable(p)}
+                      disabled={!id}
+                    />
+                  </td>
+
+                  {/* 등록일 */}
+                  <td className="px-4 py-3 align-middle text-center text-gray-600 whitespace-nowrap">
+                    {getCreatedAt(p)}
+                  </td>
+
+                  {/* 기능 */}
+                  <td className="px-4 py-3 align-middle">
+                    <div className="flex items-center justify-center gap-2">
+                      <button
+                        onClick={() => onEdit(p)}
+                        disabled={!id}
+                        className="h-8 px-2 inline-flex items-center gap-1 rounded-md bg-violet-600 text-xs font-medium text-white hover:bg-violet-700 transition disabled:opacity-50"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                        수정
+                      </button>
+
+                      <button
+                        onClick={() => onRequestDelete(p)}
+                        disabled={!id}
+                        className="h-8 px-2 inline-flex items-center gap-1 rounded-md bg-red-600 text-xs font-medium text-white hover:bg-red-700 transition disabled:opacity-50"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        삭제
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })
           )}
         </tbody>
       </table>
