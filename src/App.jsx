@@ -2,6 +2,7 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import ProductDetailPage from "./pages/ProductDetailPage";
+import "swiper/css";
 import Mypage from './pages/Mypage';
 import Layout from "./components/common/layouts/Layout";
 
