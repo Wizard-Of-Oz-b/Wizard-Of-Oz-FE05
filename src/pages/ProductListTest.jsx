@@ -13,6 +13,7 @@ export default function ProductListTest () {
     page: 1,
     size: 20
   })
+  console.log(query)
 
 
   const { data: products, isLoading, isError, error } = useProducts(query);

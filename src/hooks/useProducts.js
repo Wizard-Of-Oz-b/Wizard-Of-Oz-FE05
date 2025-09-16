@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import { createQueryString } from "../utils/createQueryString";
 
 async function getProducts() {
   try {
@@ -12,7 +13,11 @@ async function getProducts() {
   }
 }
 
-export function useProducts({params}) {
+export function useProducts(params) {
+  
+  const query = createQueryString(params)
+  
+  console.log(query, '예시');
   return useQuery({
     queryKey: ['products', params],
     queryFn: getProducts,

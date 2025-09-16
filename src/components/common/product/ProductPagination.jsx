@@ -1,9 +1,9 @@
+import { useMemo } from "react";
+
 export default function ProductPagination({currentPage, totalPage , onPageChange}) {
 
-	const pageNumbers = Array.from({length: totalPage}, (_,i) => i+1);
-	console.log(pageNumbers.length, '길이')
+	const pageNumbers = useMemo(()=> Array.from({length: totalPage}, (_,i) => i+1), [totalPage]) ;
 
-	pageNumbers.map((el,index) =>(console.log(index,'인덱스')))
 	return(
 		    <div className="flex justify-center space-x-2"> 
       {/* '이전' 버튼 */}
