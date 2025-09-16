@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   ProductHeader,
   ProductFilter,
   ProductTable,
   Pagination,
-} from "../../components/common/layouts/admin/products";
-import ProductFormModal from "../../components/common/layouts/admin/products/ProductFormModal";
-import DeleteConfirmModal from "../../components/common/layouts/admin/products/DeleteConfirmModal";
+} from '../../components/common/layouts/admin/products';
+import ProductFormModal from '../../components/common/layouts/admin/products/ProductFormModal';
+import ConfirmModal from '../../components/common/layouts/admin/products/ConfirmModal';
 
 import {
   listProducts,
@@ -14,7 +14,7 @@ import {
   updateProduct,
   deleteProduct as deleteProductAPI,
   toggleAvailableAPI,
-} from "../../components/common/api/admin/products";
+} from '../../components/common/api/admin/products';
 
 export default function ProductAdminPage() {
   const PAGE_SIZE = 5;
@@ -22,11 +22,11 @@ export default function ProductAdminPage() {
   // 목록 & UI 상태
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   const [page, setPage] = useState(1);
-  const [q, setQ] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [q, setQ] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   // 모달
   const [formOpen, setFormOpen] = useState(false);
@@ -36,17 +36,24 @@ export default function ProductAdminPage() {
   const [delOpen, setDelOpen] = useState(false);
   const [delTarget, setDelTarget] = useState(null);
 
+  const getId = (row) =>
+    row?.id ??
+    row?.product_id ??
+    row?.pk ??
+    row?.['Product id'] ??
+    row?.['product id'];
+
   // ====== 서버 목록 로드 ======
   const fetchList = async () => {
     try {
       setLoading(true);
-      setError("");
+      setError('');
       const data = await listProducts({ pageSize: 1000 });
-      const items = Array.isArray(data) ? data : (data?.items ?? []);
+      const items = Array.isArray(data) ? data : data?.items ?? [];
       setProducts(items);
     } catch (e) {
       console.error(e);
-      setError(e.message || "목록을 불러오지 못했습니다.");
+      setError(e.message || '목록을 불러오지 못했습니다.');
     } finally {
       setLoading(false);
     }
@@ -57,11 +64,13 @@ export default function ProductAdminPage() {
   }, []);
 
   const filtered = products.filter((p) => {
-    const matchCategory = selectedCategory ? p.category === selectedCategory : true;
+    const matchCategory = selectedCategory
+      ? p.category === selectedCategory
+      : true;
     const kw = q.trim().toLowerCase();
     const matchQuery = kw
-      ? (p.name || "").toLowerCase().includes(kw) ||
-        (p.sku || "").toLowerCase().includes(kw)
+      ? (p.name || '').toLowerCase().includes(kw) ||
+        (p.sku || '').toLowerCase().includes(kw)
       : true;
     return matchCategory && matchQuery;
   });
@@ -80,41 +89,44 @@ export default function ProductAdminPage() {
     if (page > pageCount) setPage(pageCount);
   }, [page, pageCount]);
 
-  const toggleAvailable = async (id) => {
+  const toggleAvailable = async (row) => {
+    const id = row?.id ?? row?.product_id ?? row?.pk;
+    if (!id) {
+      console.warn('상품 ID 없음:', row);
+      return;
+    }
+
     const prev = products;
     const next = prev.map((p) =>
-      p.id === id ? { ...p, is_available: !p.is_available } : p
+      (p.id ?? p.product_id ?? p.pk) === id
+        ? { ...p, is_active: !p.is_active }
+        : p
     );
     setProducts(next);
+
     try {
-      const changed = next.find((p) => p.id === id);
-      await toggleAvailableAPI(id, changed.is_available);
+      const changed = next.find((p) => (p.id ?? p.product_id ?? p.pk) === id);
+      await toggleAvailableAPI(id, changed.is_active);
     } catch (e) {
       console.error(e);
-      alert("상태 변경 실패. 되돌립니다.");
       setProducts(prev);
+      setError(e.message || '상태 변경에 실패하였습니다.');
     }
   };
-
   const handleSave = async (payload, isEdit) => {
     try {
-      setError("");
+      setError('');
       if (isEdit) {
-        const updated = await updateProduct(payload.id, payload);
-        setProducts((prev) =>
-          prev.map((p) => (p.id === payload.id ? { ...p, ...(updated || payload) } : p))
-        );
+        await updateProduct(payload.id, payload);
       } else {
-        const created = await createProduct(payload);
-        const row = created?.id ? created : { ...payload, id: Date.now() };
-        setProducts((prev) => [row, ...prev]);
+        await createProduct(payload);
       }
+      await fetchList();
       setFormOpen(false);
       setEditTarget(null);
     } catch (e) {
       console.error(e);
-      setError(e.message || "저장에 실패했습니다.");
-      alert("저장에 실패했습니다.");
+      setError(e.message || '변경사항 저장에 실패했습니다.');
     }
   };
 
@@ -125,15 +137,15 @@ export default function ProductAdminPage() {
 
   const confirmDelete = async (id) => {
     const prev = products;
-    setProducts(prev.filter((p) => p.id !== id));
+    setProducts(prev.filter((p) => getId(p) !== id));
     try {
       await deleteProductAPI(id);
       setDelOpen(false);
       setDelTarget(null);
     } catch (e) {
       console.error(e);
-      alert("삭제 실패. 되돌립니다.");
       setProducts(prev);
+      setError(e.message || '해당 상품 삭제에 실패하였습니다.');
     }
   };
 
@@ -157,7 +169,9 @@ export default function ProductAdminPage() {
       />
 
       {/* 상태 표시 */}
-      {loading && <div className="mt-2 text-sm text-gray-500">불러오는 중…</div>}
+      {loading && (
+        <div className="mt-2 text-sm text-gray-500">불러오는 중…</div>
+      )}
       {error && <div className="mt-2 text-sm text-red-500">⚠ {error}</div>}
 
       {/* 필터 */}
@@ -199,11 +213,17 @@ export default function ProductAdminPage() {
       />
 
       {/* 삭제 확인 모달 */}
-      <DeleteConfirmModal
+      <ConfirmModal
         open={delOpen}
         onClose={() => setDelOpen(false)}
-        product={delTarget}
-        onConfirm={() => delTarget && confirmDelete(delTarget.id)}
+        title="상품 삭제"
+        description={`${
+          delTarget?.name ?? ''
+        } 상품을 삭제하시겠어요? 이 작업은 되돌릴 수 없습니다.`}
+        variant="error"
+        confirmText="삭제"
+        cancelText="취소"
+        onConfirm={() => delTarget && confirmDelete(getId(delTarget))}
       />
     </div>
   );
