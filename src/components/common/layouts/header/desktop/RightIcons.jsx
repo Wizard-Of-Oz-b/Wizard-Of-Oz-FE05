@@ -38,7 +38,6 @@ export default function RightIcons({ isLight, onOpenSearch }) {
       <button aria-label="Cart" className={base}>
         <ShoppingCart className="w-7 h-7 cursor-pointer hover:scale-110 hover:opacity-80 transition" />
       </button>
-      {/* 👇 임시 로그아웃 */}
       <button aria-label="Logout" className={base} onClick={handleLogout}>
         <LogOut className="w-7 h-7" />
       </button>
