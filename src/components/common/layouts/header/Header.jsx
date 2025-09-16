@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { PRIMARY, SEARCH, SUGGEST } from "./constants";
 import { spring } from "./animations";
 import TopBar from "./desktop/TopBar";
@@ -13,7 +14,10 @@ export default function Header({ className = "", onSelectSub, onSearch }) {
   const [keyword, setKeyword] = useState("");
   const closeTimer = useRef(null);
   const inputRef = useRef(null);
-  const isLight = !!active || mobileOpen;
+
+  const location = useLocation();
+  const isHomepage = location.pathname === "/";
+  const isLight = !!active || mobileOpen || !isHomepage;
 
   const open = (p) => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
@@ -33,7 +37,6 @@ export default function Header({ className = "", onSelectSub, onSearch }) {
     setActive(null);
   };
 
-  // 검색 일 때 포커스주기
   useEffect(() => {
     if (active === SEARCH && inputRef.current) {
       const t = setTimeout(() => inputRef.current?.focus(), 40);
@@ -86,4 +89,3 @@ export default function Header({ className = "", onSelectSub, onSearch }) {
     </header>
   );
 }
-

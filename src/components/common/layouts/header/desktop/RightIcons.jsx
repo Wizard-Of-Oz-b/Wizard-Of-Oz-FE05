@@ -1,8 +1,10 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Search, User, ShoppingCart, Heart } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function RightIcons({ isLight, onOpenSearch }) {
+  const navigate = useNavigate();
   const base = isLight ? "hover:opacity-80 text-black" : "hover:opacity-80 text-white";
   return (
     <motion.div
@@ -16,9 +18,14 @@ export default function RightIcons({ isLight, onOpenSearch }) {
       <button aria-label="Wishlist" className={base}>
         <Heart className="w-7 h-7" />
       </button>
-      <button aria-label="Account" className={base}>
-        <User className="w-7 h-7" />
-      </button>
+      <button
+  aria-label="Account"
+  className={base}
+  onClick={() => navigate("/mypage")}
+>
+  <User className="w-7 h-7" />
+</button>
+
       <button aria-label="Cart" className={base}>
         <ShoppingCart className="w-7 h-7 cursor-pointer hover:scale-110 hover:opacity-80 transition" />
       </button>

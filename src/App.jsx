@@ -16,15 +16,18 @@ import Error504 from "./pages/errors/Error504";
 // 전역 에러감지
 import { ErrorBoundary } from "./components/common/layouts/errors/ErrorBoundary";
 import "swiper/css";
+import Layout from "./components/common/layouts/Layout";
 
 export default function App() {
   return (
     <ErrorBoundary>
       <Suspense fallback={<div className="p-6 text-sm text-gray-500">로딩 중…</div>}>
         <Routes>
-          {/* 정상 페이지 */}
+          {/* 레이아웃이 필요한 페이지 */}
+         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/products/:id" element={<ProductDetailPage />} />
+         </Route>
 
           {/* 상태코드별 에러 라우트 */}
           <Route path="/errors/401" element={<Error401 />} />
