@@ -2,25 +2,24 @@
 // 주문 예상 금액
 export default function OrderSummary(){
 
+const price = 69800;
 
   return(
-    <div className="flex flex-col border border-gray-200 w-[250px]">
-      <div>
-        <span>주문 예상 금액</span> 
+    <div className="flex justify-center items-center border border-gray-200 bg-gray-200 w-full mt-2 py-6">
+      <div className="flex flex-col mx-5 items-center">
+        <span className="text-sm">총 상품금액</span>
+        <span className="text-2xl">{price.toLocaleString()}</span>
       </div>
-      <div className="flex flex-wrap">
-        <div className="flex justify-between w-100">
-          <span>총 상품 가격</span> <span>46,400원</span> 
-        </div>
-        <div className="flex justify-between w-100">
-          <span>총 배송비</span> <span>+0원</span>
-        </div>
-      </div >
-      <div className="w-[99%] my-1 border-[1px] border-gray-300"></div>
-      <div className="flex justify-end">
-        <span>46,400원</span>
+      <span>+</span>
+      <div className="flex flex-col items-center mx-5 ">
+        <span className="text-sm">총 배송비</span>
+        <span className="text-2xl">0</span>
       </div>
-      <button className="border w-4/5">주문하기</button>
+      <span>=</span>
+      <div className="flex flex-col items-center mx-5">
+        <span className="text-sm">결제예정금액</span>
+        <span className="text-2xl">{price.toLocaleString()}</span>
+      </div>
     </div>
   )
 }
