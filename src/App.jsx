@@ -19,6 +19,7 @@ import { ErrorBoundary } from "./components/common/layouts/errors/ErrorBoundary"
 import "swiper/css";
 import Layout from "./components/common/layouts/Layout";
 import ProductListTest from "./pages/ProductListTest";
+import Wishlist from "./pages/Wishlist";
 
 const queryClient = new QueryClient()
 
@@ -33,6 +34,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/products/:id" element={<ProductDetailPage />} />
             <Route path="/products/test" element={<ProductListTest />} />
+            <Route path="/wishlist" element={<Wishlist />} />
            </Route>
 
             {/* 상태코드별 에러 라우트 */}

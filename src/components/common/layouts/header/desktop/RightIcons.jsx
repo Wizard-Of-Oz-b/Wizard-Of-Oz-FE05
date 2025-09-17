@@ -15,7 +15,10 @@ export default function RightIcons({ isLight, onOpenSearch }) {
       <button aria-label="Search" className={base} onClick={onOpenSearch}>
         <Search className="w-7 h-7" />
       </button>
-      <button aria-label="Wishlist" className={base}>
+      <button aria-label="Wishlist"
+              className={base}
+              onClick={() => navigate("/wishlist")}
+              >
         <Heart className="w-7 h-7" />
       </button>
       <button
