@@ -9,7 +9,7 @@ export default function MembersFilters({ q, setQ, roleFilter, setRoleFilter }) {
         <option value="">등급: 전체</option>
         <option value="superadmin">슈퍼관리자</option>
         <option value="page_admin">페이지관리자</option>
-        <option value="cs_admin">CS관리자</option>
+        <option value="cs_admin">CS</option>
         <option value="customer">일반고객</option>
       </select>
 
