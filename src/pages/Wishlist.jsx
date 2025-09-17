@@ -9,7 +9,6 @@ import EmptyState from "../components/common/layouts/wishlist/components/EmptySt
 import { useToasts } from "../components/common/layouts/wishlist/hooks/useToasts";
 import { useFlyToCart } from "../components/common/layouts/wishlist/hooks/useFlyToCart";
 
-
 //목업데이터
 const initialItems = [
   { id: "1", title: "[오버핏 셔츠] 바이오워싱, SKY BLUE", image: "https://placehold.co/120x150?text=IMG", options: "옵션: FREE", price: 35900 },
