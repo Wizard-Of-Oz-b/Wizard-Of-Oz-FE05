@@ -26,7 +26,7 @@ export function useAlertModal() {
         message: "회원가입이 완료되었습니다!",
         color: "text-green-600",
         btnColor: "bg-green-600 hover:bg-green-700",
-        icon: "✅",
+        icon: "(없어도 됨, 구분을 위해 넣었음)",
       });
       
       1. showModal: 모달을 표시하는 함수입니다. 제목, 메시지, 색상, 버튼 색상, 아이콘을 인자로 받아 모달의 상태를 설정합니다.
