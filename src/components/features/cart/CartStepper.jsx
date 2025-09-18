@@ -1,7 +1,7 @@
 import { useState } from "react"
 
 export default function CartStepper({value, onChageValue, min=1, max=999 }) {
-  const [test, setTest] = useState(1)
+  const [test, setTest] = useState(value)
   const handleDecrement = () => {
     if(test > min){
       setTest(prev => prev - 1)

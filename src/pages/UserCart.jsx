@@ -3,6 +3,7 @@ import CartCard from "../components/features/cart/CartCard";
 import CartDays from "../components/features/cart/CartDays";
 import CartToolbar from "../components/features/cart/CartToolbar";
 import OrderSummary from "../components/features/cart/OrderSummary";
+import { productGroupCount } from "../utils/cart/productGroupCount";
 
 export default function UserCart(){
   
@@ -10,26 +11,25 @@ export default function UserCart(){
 
   //items 배열의 예시이다. 동일한건을 여러번 카트에 추가하면 동일한 요소를가진 객체가 그 갯수만큼 증가함
   const data = [
-    {id: 0, product: 1, product_name: '[내추럴코튼] 멀티 스트라이프 긴팔티_SPLSF49C01' 
+    {id: 1, product: 1, product_name: '[내추럴코튼] 멀티 스트라이프 긴팔티_SPLSF49C01' 
       ,options: 'NAVY/XL', unit_price: 333},
-    {id: 1, product: 2 , product_name: '[내추럴코튼] 멀티 스트라이프 긴팔티_SPLSF49C01' 
-      ,options: 'NAVY/XL', unit_price: 444},
-    {id: 2, product: 3 , product_name: '[내추럴코튼] 멀티 스트라이프 긴팔티_SPLSF49C01' 
-      ,options: 'NAVY/XL', unit_price: 555},
-    {id: 3, product: 4 , product_name: '[내추럴코튼] 멀티 스트라이프 긴팔티_SPLSF49C01' 
-      ,options: 'NAVY/XL', unit_price: 666}
+    {id: 1, product: 1 , product_name: '[내추럴코튼] 멀티 스트라이프 긴팔티_SPLSF49C01' 
+      ,options: 'NAVY/XL', unit_price: 333},
+    {id: 1, product: 3 , product_name: '[내추럴코튼] 멀티 스트라이프 긴팔티_SPLSF49C01' 
+      ,options: 'NAVY/XL', unit_price: 777},
+    {id: 1, product: 4 , product_name: '[내추럴코튼] 멀티 스트라이프 긴팔티_SPLSF49C01' 
+      ,options: 'NAVY/XL', unit_price: 777}
   ];
 
-  const filteredData = data.map(el =>{
-    const newData = {id: 0, product: 0, product_name: '' 
-      ,options: '', unit_price: 0}
-    return 0;
-  })
+  const cartGroup = productGroupCount(data);
+  console.log(cartGroup)
 
-  
+  // const [cartGroup, setCartGroup] = useState([])
   // 카드 체크 예시
   const [cardChecked, setCardChecked] = useState([]);
   // console.log(cardChecked.length)
+
+  // setCartGroup(productGroupCount(data))
 
   const handleSingleCheck = (checked, id) =>{
     if(checked){
@@ -42,11 +42,15 @@ export default function UserCart(){
   const handleAllCheck = (checked) => {
     if(checked){
       const productArray = [];
-      data.forEach((el) => productArray.push(el.product));
+      cartGroup.forEach((el) => productArray.push(el.product));
       setCardChecked(productArray)
     }else{
       setCardChecked([])
     }
+  }
+
+  const handleStepper = () =>{
+
   }
 
   return(
@@ -58,7 +62,7 @@ export default function UserCart(){
 
           <CartToolbar 
           checkItemLength={cardChecked.length}
-          dataLength ={data.length}
+          dataLength ={cartGroup.length}
           onChangeCheckbox ={handleAllCheck}
           />
 
@@ -66,8 +70,8 @@ export default function UserCart(){
         <div className="flex flex-col mt-3">
           <div className="flex flex-col mr-4">
             {/* 나중에 상품 없음 컴포넌트 추가 할것 */}
-            {data.length === 0 ? '상품없음': null}
-            {data.map(el =>
+            {cartGroup.length === 0 ? '상품없음': null}
+            {cartGroup.map(el =>
               <CartCard
               key={el.product} 
               data={el}

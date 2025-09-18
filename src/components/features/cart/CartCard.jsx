@@ -4,6 +4,7 @@ import CartStepper from "./CartStepper"
 export default function CartCard({data, setItemCount, onChangeSelect, checkItems}) {
   // 최대 수량인지 확인
   const price = 333333
+  console.log(data.count)
   return(
     //사진 크기 키우기
     <div className="w-full py-4 border-b border-gray-200
@@ -25,9 +26,12 @@ export default function CartCard({data, setItemCount, onChangeSelect, checkItems
         </div>
       </div>
 
-        <CartStepper />
+        <CartStepper 
+        value={data.count}
+        onChageValue={setItemCount}
+        />
         <p className="text-center">택배 배송</p>
-        <p className="text-center">{price.toLocaleString()}원</p>
+        <p className="text-center">{(data.unit_price * data.count).toLocaleString()}원</p>
       <div className="flex flex-col">
         <button className="border border-gray-300 mb-2 py-0.5">주문하기</button>
         <button className="border border-gray-300 py-0.5">삭제</button>
