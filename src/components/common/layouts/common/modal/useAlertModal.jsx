@@ -26,6 +26,7 @@ export function useAlertModal() {
       showModal({ type: "", message: "" });
       type: 모달의 유형을 지정합니다. "success", "warning", "error", "info" 중 하나를 선택할 수 있습니다.
       (기본값은 "info"입니다. 각 유형에 따라 색상, 버튼 색상, 아이콘, 기본 제목이 다릅니다.)
+      {ModalComponent}를 컴포넌트 트리에 포함시켜 모달이 필요할 때 렌더링되도록 합니다.
       message: 모달에 표시할 메시지를 지정합니다.
       title: 모달에 표시할 제목을 지정합니다. 지정하지 않으면 각 유형에 따른 기본 제목이 사용됩니다.(필요 시 사용)
       */
