@@ -32,7 +32,7 @@ export default function CategoryAdminPage() {
     setLoading(true);
     setErr("");
     try {
-      const list = await fetchCategories({ tree: true });
+      const list = await fetchCategories({});
       setTree(normalizeToTree(list));
     } catch (e) {
       const code = e?.response?.status;
@@ -65,10 +65,10 @@ export default function CategoryAdminPage() {
   const pageData = flat.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   useEffect(() => setPage(1), [q]);
 
-  async function handleSave({ id, name, parentId }) {
+  async function handleSave({ id, name, parent }) {
     if (!name?.trim()) return;
-    if (id) await updateCategory(id, { name, parentId });
-    else await createCategory({ name, parentId });
+    if (id) await updateCategory(id, { name: name.trim(), parent: parent ?? null });
+    else await createCategory({ name: name.trim(), parent: parent ?? null });
     setFormOpen(false);
     await load();
   }
@@ -90,6 +90,8 @@ export default function CategoryAdminPage() {
       alert(code ? `[${code}] ${msg}` : msg);
     }
   }
+
+  const selectedHasChildren = !!(delTarget?.children_count && delTarget.children_count > 0);
 
   return (
     <div className="w-full p-5 mx-auto max-w-8xl">
@@ -121,7 +123,7 @@ export default function CategoryAdminPage() {
         </div>
       </div>
 
-      {/* 필터 */}
+      {/* 검색 */}
       <div className="mb-6 flex flex-col md:flex-row gap-3 items-center justify-between rounded-2xl bg-white/90 shadow-md backdrop-blur-md p-4">
         <div className="relative w-full md:max-w-sm">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
@@ -176,7 +178,7 @@ export default function CategoryAdminPage() {
         open={delOpen}
         onClose={() => setDelOpen(false)}
         category={delTarget}
-        hasChildren={false} 
+        hasChildren={selectedHasChildren}
         onConfirm={confirmDelete}
       />
     </div>

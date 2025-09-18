@@ -73,11 +73,6 @@ export default function AdminLayout() {
       label: '고객 문의관리',
       icon: <Bell className="h-4 w-4" />,
     },
-        {
-      to: '/admin/admin',
-      label: '관리자 계정 관리',
-      icon: <Shield className="h-4 w-4" />,
-    },
     { to: '/', label: '홈페이지로 이동', icon: <Home className="h-4 w-4" /> },
   ];
 

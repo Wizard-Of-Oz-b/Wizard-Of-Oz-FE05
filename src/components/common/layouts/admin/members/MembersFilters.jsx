@@ -7,10 +7,10 @@ export default function MembersFilters({ q, setQ, roleFilter, setRoleFilter }) {
         className="h-10 min-w-40 rounded-xl bg-gray-50 px-3 text-sm outline-none focus:ring-2 focus:ring-violet-400 border-0 shadow-sm"
       >
         <option value="">등급: 전체</option>
-        <option value="superadmin">슈퍼관리자</option>
-        <option value="page_admin">페이지관리자</option>
-        <option value="cs_admin">CS</option>
-        <option value="customer">일반고객</option>
+        <option value="Admin">슈퍼관리자</option>
+        <option value="Manager">페이지관리자</option>
+        <option value="CS">CS</option>
+        <option value="User">일반고객</option>
       </select>
 
       <input

@@ -1,46 +1,61 @@
 import api from "../../../../lib/axios";
 
-const SERVER_SUPPORTS_CATEGORY_CODE = false;
+const ADMIN_API_BASE_RAW = import.meta?.env?.VITE_ADMIN_API_BASE ?? "/v1/admin";
 
-export function apiToUi(node) {
-  if (!node) return null;
-  const ui = {
-    id: node.category_id,
-    name: node.name,
-    parentId: node.parent_id ?? null,
-    categoryCode: node.category_code ?? undefined,
+const join = (base, tail = "") => {
+  const b = (api.defaults.baseURL || "").replace(/\/+$/, "");
+  let p = `${(base || "").replace(/\/+$/, "")}${tail}`;
+  if (b.endsWith("/api") && p.startsWith("/api/")) p = p.replace(/^\/api\//, "/");
+  return p;
+};
+
+export function normalizeCategory(c) {
+  return {
+    id: c.id,
+    name: c.name,
+    parent: c.parent ?? null,
+    level: c.level, 
+    path: c.path ?? "",
+    children_count: c.children_count ?? 0,
+    created_at: c.created_at ?? "",
+    updated_at: c.updated_at ?? "",
   };
-  if (Array.isArray(node.children)) ui.children = node.children.map(apiToUi);
-  return ui;
 }
 
-export function uiToApiDraft(model) {
-  const draft = {
-    name: model.name?.trim() ?? "",
-    parent_id: model.parentId ?? null,
-  };
-  if (SERVER_SUPPORTS_CATEGORY_CODE && model.categoryCode != null) {
-    draft.category_code = Number(model.categoryCode);
-  }
-  return draft;
+/** 목록 조회 */
+export async function fetchCategories(params = {}) {
+  const { level, parent, search, ordering } = params;
+  const res = await api.get(join(ADMIN_API_BASE_RAW, "/categories/"), {
+    params: {
+      level: level || undefined,
+      parent: parent || undefined,
+      search: search || undefined,
+      ordering: ordering || undefined,
+    },
+  });
+  const raw = Array.isArray(res?.data) ? res.data : [];
+  return raw.map(normalizeCategory);
 }
 
-export async function fetchCategories(params = { tree: true }) {
-  const res = await api.get("/v1/categories/", { params });
-  const data = Array.isArray(res?.data) ? res.data : [];
-  return data.map(apiToUi);
+/** 단건 조회 */
+export async function fetchCategory(id) {
+  const { data } = await api.get(join(ADMIN_API_BASE_RAW, `/categories/${id}/`));
+  return normalizeCategory(data);
 }
 
-export async function createCategory(model) {
-  const res = await api.post("/v1/categories/", uiToApiDraft(model));
-  return apiToUi(res?.data);
+/** 생성 */
+export async function createCategory({ name, parent = null }) {
+  const body = { name, parent };
+  const { data } = await api.post(join(ADMIN_API_BASE_RAW, "/categories/"), body);
+  return normalizeCategory(data);
 }
 
-export async function updateCategory(id, model) {
-  const res = await api.patch(`/v1/categories/${id}/`, uiToApiDraft(model));
-  return apiToUi(res?.data);
+export async function updateCategory(id, { name, parent = null }) {
+  const body = { name, parent };
+  const { data } = await api.patch(join(ADMIN_API_BASE_RAW, `/categories/${id}/`), body);
+  return normalizeCategory(data);
 }
 
 export async function removeCategory(id) {
-  return api.delete(`/v1/categories/${id}/`);
+  return api.delete(join(ADMIN_API_BASE_RAW, `/categories/${id}/`));
 }
