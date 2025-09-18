@@ -4,6 +4,7 @@ import CartDays from "../components/features/cart/CartDays";
 import CartToolbar from "../components/features/cart/CartToolbar";
 import OrderSummary from "../components/features/cart/OrderSummary";
 import { productGroupCount } from "../utils/cart/productGroupCount";
+import { useCart, usePatchCart } from "../hooks/cart/useCart";
 
 export default function UserCart(){
   
@@ -52,6 +53,16 @@ export default function UserCart(){
   const handleStepper = () =>{
 
   }
+  const { data: cart, isLoading, isError, error } = useCart();
+  const updateCartQuantity = usePatchCart()
+
+  console.log(cart)
+
+  const onClickPatch = (itemId,newQuantity) =>{
+    console.log(updateCartQuantity)
+    updateCartQuantity.mutate({id: itemId,
+      updatedData:{ quantity: newQuantity } })
+  }
 
   return(
 
@@ -59,7 +70,8 @@ export default function UserCart(){
       <div className="flex flex-col w-full items-center justify-center border-x-gray-600 mt-30 pb-20">
           <p className="text-4xl mb-3">장바구니</p>
         <div>
-
+          {/* 테스트 버튼 */}
+          <button onClick={() => onClickPatch(1,3)}>테스트 버튼</button>
           <CartToolbar 
           checkItemLength={cardChecked.length}
           dataLength ={cartGroup.length}
