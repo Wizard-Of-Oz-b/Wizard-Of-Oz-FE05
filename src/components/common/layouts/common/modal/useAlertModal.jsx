@@ -4,8 +4,8 @@ import AlertModal from "./AlertModal";
 export function useAlertModal() {
   const [modalProps, setModalProps] = useState(null);
 
-  const showModal = ({ title, message, color, btnColor, icon }) => {
-    setModalProps({ title, message, color, btnColor, icon });
+  const showModal = ({ type = "info", title, message }) => {
+    setModalProps({ type, title, message });
   };
 
   const hideModal = () => setModalProps(null);
@@ -16,6 +16,7 @@ export function useAlertModal() {
 
   return { showModal, hideModal, ModalComponent };
 }
+
 
 /* 
 이 훅은 경고 모달(AlertModal)을 쉽게 사용할 수 있도록 도와줍니다. 다음과 같은 기능을 제공합니다:
