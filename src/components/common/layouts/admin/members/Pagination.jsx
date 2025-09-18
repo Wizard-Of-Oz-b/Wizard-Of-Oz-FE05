@@ -16,7 +16,6 @@ export default function Pagination({ page, pageCount, goFirst, goPrev, goNext, g
       >
         <ChevronsLeft className="size-4" />
       </IconButton>
-
       <IconButton
         title="이전"
         aria-label="이전 페이지"

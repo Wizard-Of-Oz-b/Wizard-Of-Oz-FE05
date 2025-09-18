@@ -15,7 +15,6 @@ import { worker } from "./mocks/browser";
 //   </React.StrictMode>
 // );
 
-
 if(import.meta.env.MODE === 'development') {
   worker.start().then(() => {
     createRoot(document.getElementById('root')).render(

@@ -1,4 +1,4 @@
-import Modal from "./Modal";
+import Modal from "../common/Modal";
 
 export default function DeleteConfirmModal({ open, onClose, category, hasChildren, onConfirm }) {
   if (!category) return null;
@@ -16,7 +16,7 @@ export default function DeleteConfirmModal({ open, onClose, category, hasChildre
               하위 항목을 먼저 이동/삭제한 뒤 다시 시도하세요.
             </>
           ) : (
-            <> 이 작업은 다시 되돌릴 수 없습니다.</>
+            <> 이 작업은 되돌릴 수 없습니다.</>
           )}
         </p>
         <div className="mt-6 flex justify-end gap-2">

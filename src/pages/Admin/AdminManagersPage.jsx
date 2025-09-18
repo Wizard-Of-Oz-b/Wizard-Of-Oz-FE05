@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Shield, Plus, Trash2, RefreshCcw, Edit3, Crown, UsersRound, UserRound } from "lucide-react";
 import api from "../../lib/axios";
-import Toast from "../../components/common/layouts/admin/manager/ui/Toast";
+import Toast from "../../components/common/layouts/admin/members/Toast";
 import Modal from "../../components/common/layouts/admin/manager/ui/Modal";
 import AdminManagersTable from "../../components/common/layouts/admin/manager/AdminManagersTable";
 
@@ -30,6 +30,30 @@ export default function AdminManagersPage() {
     setToastMsg(message);
     setToastKind(kind);
   }
+
+  const openRole = (id) => {
+  const u = members.find((m) => m.id === id);
+  if (!u) return;
+  setEditTarget(u);
+  setEditOpen(true);
+};
+
+async function saveEditRole(newRole) {
+  if (!editTarget) return;
+  try {
+    setEditSaving(true);
+    const confirmed = await updateUserRole(editTarget.id, newRole);
+    setMembers((list) => list.map((m) => (m.id === editTarget.id ? { ...m, role: confirmed } : m)));
+    setToastKind("success");
+    setToastMsg("역할이 변경되었습니다.");
+    setEditOpen(false);
+  } catch {
+    setToastKind("error");
+    setToastMsg("역할 변경에 실패했습니다.");
+  } finally {
+    setEditSaving(false);
+  }
+}
 
   async function fetchAdmins() {
     setLoading(true);
@@ -143,7 +167,6 @@ export default function AdminManagersPage() {
   return (
     <div className="w-full mx-auto max-w-8xl p-5">
       <Toast message={toastMsg} kind={toastKind} onClose={() => setToastMsg("")} />
-
       <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-3">
           <div
@@ -167,7 +190,6 @@ export default function AdminManagersPage() {
           새로고침
         </button>
       </div>
-
       {/* 요약 카드 */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="rounded-2xl bg-white/80 backdrop-blur border border-black/5 shadow-sm p-4">
@@ -192,7 +214,6 @@ export default function AdminManagersPage() {
           </div>
         </div>
       </div>
-
       {/* 권한부여 폼 */}
       <div className="mb-6 rounded-2xl bg-white/80 backdrop-blur border border-black/5 shadow-sm p-5">
         <form onSubmit={handleGrant} className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -233,11 +254,7 @@ export default function AdminManagersPage() {
             </button>
           </div>
         </form>
-        <p className="mt-2 text-[12px] text-slate-500">
-          사용자 목록 API가 없으므로 <b>User ID</b>를 직접 입력하세요. (Django Admin에서 확인)
-        </p>
       </div>
-
       {/* 목록 */}
         <AdminManagersTable
             rows={rows}
@@ -245,7 +262,6 @@ export default function AdminManagersPage() {
             onEdit={openEdit}
             onRevoke={openRevoke}
         />
-
       {/* 권한변경 모달 */}
       <Modal
         open={editOpen}
@@ -289,7 +305,7 @@ export default function AdminManagersPage() {
         </div>
       </Modal>
 
-      {/* 해제 확인 모달 */}
+      {/* 해제 확인 안내 모달 */}
       <Modal
         open={confirmOpen}
         title="관리자 해제"

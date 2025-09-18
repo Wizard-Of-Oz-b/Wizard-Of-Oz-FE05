@@ -1,5 +1,6 @@
 import React, { Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
+import "swiper/css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import Home from "./pages/Home";
@@ -14,13 +15,9 @@ import Error500 from "./pages/errors/Error500";
 import Error502 from "./pages/errors/Error502";
 import Error503 from "./pages/errors/Error503";
 import Error504 from "./pages/errors/Error504";
-
 import { ErrorBoundary } from "./components/common/layouts/errors/ErrorBoundary";
-import "swiper/css";
-
 import Layout from "./components/common/layouts/Layout";
 import ProductListTest from "./pages/ProductListTest";
-
 
 // 어드민
 import AdminDashboard from "./pages/Admin/AdminDashboard";
@@ -33,7 +30,6 @@ import CouponPromoAdminPage from "./pages/Admin/CouponPromoAdminPage.jsx";
 import CustomerSupportAdminPage from "./pages/Admin/CustomerSupportAdminPage.jsx";
 import AdminProtectedRoute from "./routes/AdminProtectedRoute.jsx";
 import AdminLogin from "./pages/Admin/AdminLogin.jsx";
-import AdminManagersPage from "./pages/Admin/AdminManagersPage.jsx";
 import ResultTestPage from "./pages/ResultTestPage.jsx";
 
 const queryClient = new QueryClient();
@@ -56,8 +52,8 @@ export default function App() {
             <Route path="/admin/login" element={<AdminLogin />} />
 
             {/* 어드민 보호 라우트 */}
-            <Route element={<AdminProtectedRoute allowRoles={["super", "manager", "cs"]} />}>
-              <Route path="/admin" element={<AdminLayout />}>
+            <Route element={<AdminProtectedRoute allowRoles={["super", "manager", "cs"]} />}> 
+              <Route path="/admin" element={<AdminLayout />}> 
                 <Route index element={<AdminDashboard />} />
                 <Route path="products" element={<ProductAdminPage />} />
                 <Route path="orders" element={<OrderAdminPage />} />
@@ -65,7 +61,6 @@ export default function App() {
                 <Route path="categories" element={<CategoryAdminPage />} />
                 <Route path="coupons" element={<CouponPromoAdminPage />} />
                 <Route path="cs" element={<CustomerSupportAdminPage />} />
-                <Route path="admin" element={<AdminManagersPage />} />
               </Route>
             </Route>
 
