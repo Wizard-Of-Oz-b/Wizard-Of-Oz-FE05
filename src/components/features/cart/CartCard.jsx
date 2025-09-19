@@ -27,7 +27,10 @@ export default function CartCard({data, setItemCount, onChangeSelect, checkItems
 
         <CartStepper 
         value={data.count}
+        itemId={data.product}
+        option={data.option_key}
         onChageValue={setItemCount}
+        max={data.quantity}
         />
         <p className="text-center">택배 배송</p>
         <p className="text-center">{(data.unit_price * data.count).toLocaleString()}원</p>

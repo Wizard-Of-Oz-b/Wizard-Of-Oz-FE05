@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import CartCard from "../components/features/cart/CartCard";
 import CartDays from "../components/features/cart/CartDays";
 import CartToolbar from "../components/features/cart/CartToolbar";
@@ -10,28 +10,21 @@ export default function UserCart(){
   
   //accessToken 추가필요(API 설정 할때 설정해주셔야 합니다.
 
-  //items 배열의 예시이다. 동일한건을 여러번 카트에 추가하면 동일한 요소를가진 객체가 그 갯수만큼 증가함
-  const data = [
-    {id: 1, product: 1, product_name: '[내추럴코튼] 멀티 스트라이프 긴팔티_SPLSF49C01' 
-      ,option_key: 'NAVY/XL', unit_price: 333},
-    {id: 1, product: 1 , product_name: '[내추럴코튼] 멀티 스트라이프 긴팔티_SPLSF49C01' 
-      ,option_key: 'NAVY/XL', unit_price: 333},
-    {id: 1, product: 3 , product_name: '[내추럴코튼] 멀티 스트라이프 긴팔티_SPLSF49C01' 
-      ,option_key: 'NAVY/XL', unit_price: 777},
-    {id: 1, product: 4 , product_name: '[내추럴코튼] 멀티 스트라이프 긴팔티_SPLSF49C01' 
-      ,option_key: 'NAVY/XL', unit_price: 777}
-  ];
-
-  const cartGroup = productGroupCount(data);
-  console.log(cartGroup)
-
-  // const [cartGroup, setCartGroup] = useState([])
   // 카드 체크 예시
   const [cardChecked, setCardChecked] = useState([]);
 
-  // console.log(cardChecked.length)
+ 
+ 
+  const { data: cart, isLoading, isError, error } = useCart();
+  const updateCartQuantity = usePatchCart()
+  // const cartList = cart ? productGroupCount(cart.items).sort((a,b)=> a.product.localeCompare(b.product)) : [];
+  const cartList = useMemo(()=> {
+    if(!cart?.items){
+      return []
+    }
 
-  // setCartGroup(productGroupCount(data))
+    return productGroupCount(cart.items).sort((a,b)=> a.product.localeCompare(b.product))
+  }, [cart])
 
   const handleSingleCheck = (checked, id) =>{
     if(checked){
@@ -44,7 +37,7 @@ export default function UserCart(){
   const handleAllCheck = (checked) => {
     if(checked){
       const productArray = [];
-      cartGroup.forEach((el) => productArray.push(el.product));
+      cartList.forEach((el) => productArray.push(el.product));
       setCardChecked(productArray)
     }else{
       setCardChecked([])
@@ -54,11 +47,6 @@ export default function UserCart(){
   const handleStepper = () =>{
 
   }
-  const { data: cart, isLoading, isError, error } = useCart();
-  const updateCartQuantity = usePatchCart()
-  const cartList = cart ? productGroupCount(cart.items).sort((a,b)=> a.product.localeCompare(b.product)) : [];
-
-
   const onClickPatch = (itemId,option, newQuantity) =>{
     console.log(updateCartQuantity)
     updateCartQuantity.mutate({id: itemId,
@@ -78,31 +66,24 @@ export default function UserCart(){
           <button onClick={() => onClickPatch('p-101','color=white&size=L',12)}>테스트 버튼</button>
           <CartToolbar 
           checkItemLength={cardChecked.length}
-          dataLength ={cartGroup.length}
+          dataLength ={cartList.length}
           onChangeCheckbox ={handleAllCheck}
           />
 
         </div>
         <div className="flex flex-col mt-3">
           <div className="flex flex-col mr-4">
-            {/* 나중에 상품 없음 컴포넌트 추가 할것 */}
-            {cartGroup.length === 0 ? '상품없음': null}
+            {/* 나중에 상품 없음 컴포넌트 추가 할것 중요! */}
+            {cartList.length === 0 ? '상품없음': null}
             {cartList.map(el =>
              <CartCard
               key={el.product}
               data={el}
               checkItems={cardChecked}
+              setItemCount={onClickPatch}
               onChangeSelect={handleSingleCheck}
               />
             )}
-            {/* {cartGroup.map(el =>
-              <CartCard
-              key={el.product} 
-              data={el}
-              checkItems={cardChecked}
-              onChangeSelect={handleSingleCheck}
-              />
-            )} */}
           </div>
           
 

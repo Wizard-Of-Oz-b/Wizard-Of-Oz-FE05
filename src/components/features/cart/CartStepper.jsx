@@ -1,22 +1,25 @@
 import { useState } from "react"
 
-export default function CartStepper({value, onChageValue, min=1, max=999 }) {
-  const [test, setTest] = useState(value)
+export default function CartStepper({value, itemId, option, onChageValue, min=1, max=999 }) {
+  // const [test, setTest] = useState(value)
   const handleDecrement = () => {
-    if(test > min){
-      setTest(prev => prev - 1)
+    if(value > min){
+      // setTest(prev => prev - 1)
+      onChageValue(itemId, option, value-1)
     }
 
   }
   const handleIncrement = () => {
-    if(test < max){
-      setTest(prev => prev + 1)
+    if(value < max){
+      // setTest(prev => prev + 1)
+      onChageValue(itemId, option, value+1)
+
     }
   }
 
 
   return(
-    <div className="flex-2 text-center">
+    <div className="flex-2 text-center select-none">
       <button 
       className="border border-gray-400 px-2"
       onClick={handleDecrement}>-</button>
