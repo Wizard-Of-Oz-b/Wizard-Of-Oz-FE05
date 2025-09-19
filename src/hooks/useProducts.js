@@ -49,76 +49,99 @@
 //   })
 // }
 
+// import { useQuery } from "@tanstack/react-query";
+// import { dummyProduct } from "../mocks/dummyProducts";
+
+// // 한글/영문 검색 안전하게(정규화 + 소문자)
+// const norm = (s) => (s ?? "").toString().normalize("NFC").toLowerCase();
+
+// // 정렬 도우미
+// function sortItems(items, sort) {
+//   switch (sort) {
+//     case "created_at":
+//       return [...items].sort(
+//         (a, b) => new Date(b.created_at) - new Date(a.created_at)
+//       );
+//     case "price_asc":
+//       return [...items].sort((a, b) => a.price - b.price);
+//     case "price_desc":
+//       return [...items].sort((a, b) => b.price - a.price);
+//     case "name_asc":
+//       return [...items].sort((a, b) => a.name.localeCompare(b.name));
+//     case "name_desc":
+//       return [...items].sort((a, b) => b.name.localeCompare(a.name));
+//     default:
+//       return items;
+//   }
+// }
+
+// export function useProducts(params = {}) {
+//   const {
+//     q = "",
+//     category_id = null,
+//     is_active = true,
+//     sort = "created_at",
+//     page = 1,
+//     size = 20,
+//   } = params;
+
+//   return useQuery({
+//     queryKey: ["products", { q, category_id, is_active, sort, page, size }],
+//     queryFn: async () => {
+//       let items = dummyProduct.results.slice();
+
+//       // 판매중 필터
+//       if (typeof is_active === "boolean") {
+//         items = items.filter((p) => p.is_active === is_active);
+//       }
+
+//       // 카테고리 필터
+//       if (category_id != null) {
+//         items = items.filter((p) => p.category_id === Number(category_id));
+//       }
+
+//       // 이름 포함 검색
+//       if (q && q.trim()) {
+//         const term = norm(q.trim());
+//         items = items.filter((p) => norm(p.name).includes(term));
+//       }
+
+//       // 정렬
+//       items = sortItems(items, sort);
+
+//       // 페이지네이션
+//       const count = items.length;
+//       const start = (page - 1) * size;
+//       const results = items.slice(start, start + size);
+
+//       // (선택) 네트워크 흉내
+//       // await new Promise((r) => setTimeout(r, 120));
+
+//       return { count, results };
+//     },
+//     keepPreviousData: true,
+//     staleTime: 5 * 60 * 1000,
+//   });
+// }
+
 import { useQuery } from "@tanstack/react-query";
-import { dummyProduct } from "../mocks/dummyProducts";
-
-// 한글/영문 검색 안전하게(정규화 + 소문자)
-const norm = (s) => (s ?? "").toString().normalize("NFC").toLowerCase();
-
-// 정렬 도우미
-function sortItems(items, sort) {
-  switch (sort) {
-    case "created_at":
-      return [...items].sort(
-        (a, b) => new Date(b.created_at) - new Date(a.created_at)
-      );
-    case "price_asc":
-      return [...items].sort((a, b) => a.price - b.price);
-    case "price_desc":
-      return [...items].sort((a, b) => b.price - a.price);
-    case "name_asc":
-      return [...items].sort((a, b) => a.name.localeCompare(b.name));
-    case "name_desc":
-      return [...items].sort((a, b) => b.name.localeCompare(a.name));
-    default:
-      return items;
-  }
-}
+import { fetchProductsPublic } from "../components/common/api/admin/productsPublic";
 
 export function useProducts(params = {}) {
   const {
     q = "",
     category_id = null,
     is_active = true,
-    sort = "created_at",
+    sort = "-created_at",
     page = 1,
     size = 20,
+    min_price,
+    max_price,
   } = params;
 
   return useQuery({
-    queryKey: ["products", { q, category_id, is_active, sort, page, size }],
-    queryFn: async () => {
-      let items = dummyProduct.results.slice();
-
-      // 판매중 필터
-      if (typeof is_active === "boolean") {
-        items = items.filter((p) => p.is_active === is_active);
-      }
-
-      // 카테고리 필터
-      if (category_id != null) {
-        items = items.filter((p) => p.category_id === Number(category_id));
-      }
-
-      // 이름 포함 검색
-      if (q && q.trim()) {
-        const term = norm(q.trim());
-        items = items.filter((p) => norm(p.name).includes(term));
-      }
-
-      // 정렬
-      items = sortItems(items, sort);
-
-      // 페이지네이션
-      const count = items.length;
-      const start = (page - 1) * size;
-      const results = items.slice(start, start + size);
-
-      // (선택) 네트워크 흉내
-      // await new Promise((r) => setTimeout(r, 120));
-
-      return { count, results };
-    },
+    queryKey: ["products-public", { q, category_id, is_active, sort, page, size, min_price, max_price }],
+    queryFn: () => fetchProductsPublic({ q, category_id, is_active, sort, page, size, min_price, max_price }),
     keepPreviousData: true,
     staleTime: 5 * 60 * 1000,
   });

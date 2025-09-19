@@ -15,11 +15,14 @@ import {
   deleteProduct as deleteProductAPI,
   toggleAvailableAPI,
 } from '../../components/common/api/admin/products';
+import { fetchCategories } from '../../components/common/api/admin/categoryService';
+import { buildCategoryPathMap } from '../../lib/categoryPath';
+import api from '../../lib/axios';
 
 export default function ProductAdminPage() {
-  const PAGE_SIZE = 5;
+  const [categoryMap, setCategoryMap] = useState({});
+  const PAGE_SIZE = 10;
 
-  // 목록 & UI 상태
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -28,27 +31,32 @@ export default function ProductAdminPage() {
   const [q, setQ] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
 
-  // 모달
   const [formOpen, setFormOpen] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
 
-  // 삭제 모달
   const [delOpen, setDelOpen] = useState(false);
   const [delTarget, setDelTarget] = useState(null);
 
-  const getId = (row) =>
-    row?.id ??
-    row?.product_id ??
-    row?.pk ??
-    row?.['Product id'] ??
-    row?.['product id'];
+  const getId = (row) => row?.id || null;
 
-  // ====== 서버 목록 로드 ======
+  const onEdit = async (row) => {
+    const id = row?.id ?? row?.product_id ?? row?.pk;
+    if (!id) return;
+
+    try {
+      const { data } = await api.get(`/v1/admin/products/${id}/`);
+      setEditTarget(data);
+      setFormOpen(true);
+    } catch (e) {
+      console.error('상세 조회 실패:', e);
+    }
+  };
+
   const fetchList = async () => {
     try {
       setLoading(true);
       setError('');
-      const data = await listProducts({ pageSize: 1000 });
+      const data = await listProducts({ page: 1, pageSize: 50 });
       const items = Array.isArray(data) ? data : data?.items ?? [];
       setProducts(items);
     } catch (e) {
@@ -60,7 +68,17 @@ export default function ProductAdminPage() {
   };
 
   useEffect(() => {
-    fetchList();
+    (async () => {
+      await fetchList();
+      try {
+        const cats = await fetchCategories();
+        const { map } = buildCategoryPathMap(cats || []);
+        setCategoryMap(map);
+      } catch (e) {
+        console.warn('category map fail:', e?.message || e);
+        setCategoryMap({});
+      }
+    })();
   }, []);
 
   const filtered = products.filter((p) => {
@@ -68,44 +86,33 @@ export default function ProductAdminPage() {
       ? p.category === selectedCategory
       : true;
     const kw = q.trim().toLowerCase();
-    const matchQuery = kw
-      ? (p.name || '').toLowerCase().includes(kw) ||
-        (p.sku || '').toLowerCase().includes(kw)
-      : true;
+    const matchQuery = kw ? (p.name || '').toLowerCase().includes(kw) : true;
     return matchCategory && matchQuery;
   });
 
-  // 페이지네이션
   const total = filtered.length;
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const pageData = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  // 검색/필터 변경 시 첫 페이지로
   useEffect(() => {
     setPage(1);
   }, [q, selectedCategory]);
-
   useEffect(() => {
     if (page > pageCount) setPage(pageCount);
   }, [page, pageCount]);
 
   const toggleAvailable = async (row) => {
-    const id = row?.id ?? row?.product_id ?? row?.pk;
-    if (!id) {
-      console.warn('상품 ID 없음:', row);
-      return;
-    }
+    const id = getId(row);
+    if (!id) return;
 
     const prev = products;
     const next = prev.map((p) =>
-      (p.id ?? p.product_id ?? p.pk) === id
-        ? { ...p, is_active: !p.is_active }
-        : p
+      getId(p) === id ? { ...p, is_active: !p.is_active } : p
     );
     setProducts(next);
 
     try {
-      const changed = next.find((p) => (p.id ?? p.product_id ?? p.pk) === id);
+      const changed = next.find((p) => getId(p) === id);
       await toggleAvailableAPI(id, changed.is_active);
     } catch (e) {
       console.error(e);
@@ -113,20 +120,31 @@ export default function ProductAdminPage() {
       setError(e.message || '상태 변경에 실패하였습니다.');
     }
   };
-  const handleSave = async (payload, isEdit) => {
+
+  // 저장(생성/수정) 후 목록 새로고침 + 저장결과 반환
+  const handleSave = async (payload, isEditFlag) => {
     try {
       setError('');
-      if (isEdit) {
-        await updateProduct(payload.id, payload);
+
+      const mustUpdate = !!(isEditFlag || payload?.id);
+      let saved;
+
+      if (mustUpdate) {
+        if (!payload?.id) payload.id = editTarget?.id;
+        saved = await updateProduct(payload.id, payload);
       } else {
-        await createProduct(payload);
+        saved = await createProduct(payload);
       }
+
       await fetchList();
       setFormOpen(false);
       setEditTarget(null);
+
+      return saved; // 모달에서 이어서 사용
     } catch (e) {
       console.error(e);
       setError(e.message || '변경사항 저장에 실패했습니다.');
+      throw e;
     }
   };
 
@@ -151,7 +169,6 @@ export default function ProductAdminPage() {
 
   return (
     <div className="w-full p-5 mx-auto max-w-8xl">
-      {/* 헤더 */}
       <ProductHeader
         onClickNew={() => {
           setEditTarget(null);
@@ -168,13 +185,11 @@ export default function ProductAdminPage() {
         }
       />
 
-      {/* 상태 표시 */}
       {loading && (
         <div className="mt-2 text-sm text-gray-500">불러오는 중…</div>
       )}
       {error && <div className="mt-2 text-sm text-red-500">⚠ {error}</div>}
 
-      {/* 필터 */}
       <ProductFilter
         q={q}
         setQ={setQ}
@@ -182,37 +197,30 @@ export default function ProductAdminPage() {
         setSelectedCategory={setSelectedCategory}
       />
 
-      {/* 테이블 */}
       <ProductTable
         pageData={pageData}
         toggleAvailable={toggleAvailable}
-        onEdit={(p) => {
-          setEditTarget(p);
-          setFormOpen(true);
-        }}
+        onEdit={onEdit}
         onRequestDelete={requestDelete}
+        categoryMap={categoryMap}
       />
 
-      {/* 페이지네이션 */}
       <Pagination
         page={page}
         pageCount={pageCount}
-        onChange={(next) => {
-          const clamped = Math.min(Math.max(1, next), pageCount);
-          setPage(clamped);
-        }}
+        onChange={(next) => setPage(Math.min(Math.max(1, next), pageCount))}
         className="mt-6"
       />
 
-      {/* 추가/수정 모달 */}
+      {/* 모드 바뀔 때마다 리마운트 */}
       <ProductFormModal
+        key={editTarget ? `edit-${editTarget.id}` : 'create'}
         open={formOpen}
         onClose={() => setFormOpen(false)}
         onSave={handleSave}
         initial={editTarget}
       />
 
-      {/* 삭제 확인 모달 */}
       <ConfirmModal
         open={delOpen}
         onClose={() => setDelOpen(false)}

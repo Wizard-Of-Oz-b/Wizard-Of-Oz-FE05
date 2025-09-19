@@ -162,7 +162,7 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* 맨 위로 보내는 스티키버튼 */}
+      {/* 페이로 위로 보내는 스티키버튼 */}
       {/* <button
         onClick={scrollTop}
         aria-label="맨 위로"
