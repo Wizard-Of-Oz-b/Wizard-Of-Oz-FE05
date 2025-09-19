@@ -1,6 +1,7 @@
 import { http, HttpResponse } from "msw";
 import { dummyProduct } from "./dummyProducts";
 import { dummyCart } from "./dummy/dummyCart";
+import { adjustItems } from "./utils/adjustItems";
 
 const CART_BASE_URL = '/api/v1/carts'
 export const handlers = [
@@ -45,7 +46,7 @@ export const handlers = [
       const{ item_id } = params;
       console.log(item_id, '아이디 테스트');
       const requestBody = await request.json();
-
+      dummyCart.items = adjustItems(dummyCart.items, item_id, requestBody.option_key, requestBody.quantity)
       console.log('수량 조절')
       console.log(requestBody);
       return HttpResponse.json({},{status:200})

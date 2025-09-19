@@ -20,7 +20,7 @@ export default function CartStepper({value, onChageValue, min=1, max=999 }) {
       <button 
       className="border border-gray-400 px-2"
       onClick={handleDecrement}>-</button>
-      <span className="px-2">{test}</span>
+      <span className="px-2">{value}</span>
       <button 
       className="border border-gray-400 px-2"
       onClick={handleIncrement}

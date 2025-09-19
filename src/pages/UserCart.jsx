@@ -13,13 +13,13 @@ export default function UserCart(){
   //items 배열의 예시이다. 동일한건을 여러번 카트에 추가하면 동일한 요소를가진 객체가 그 갯수만큼 증가함
   const data = [
     {id: 1, product: 1, product_name: '[내추럴코튼] 멀티 스트라이프 긴팔티_SPLSF49C01' 
-      ,options: 'NAVY/XL', unit_price: 333},
+      ,option_key: 'NAVY/XL', unit_price: 333},
     {id: 1, product: 1 , product_name: '[내추럴코튼] 멀티 스트라이프 긴팔티_SPLSF49C01' 
-      ,options: 'NAVY/XL', unit_price: 333},
+      ,option_key: 'NAVY/XL', unit_price: 333},
     {id: 1, product: 3 , product_name: '[내추럴코튼] 멀티 스트라이프 긴팔티_SPLSF49C01' 
-      ,options: 'NAVY/XL', unit_price: 777},
+      ,option_key: 'NAVY/XL', unit_price: 777},
     {id: 1, product: 4 , product_name: '[내추럴코튼] 멀티 스트라이프 긴팔티_SPLSF49C01' 
-      ,options: 'NAVY/XL', unit_price: 777}
+      ,option_key: 'NAVY/XL', unit_price: 777}
   ];
 
   const cartGroup = productGroupCount(data);
@@ -28,6 +28,7 @@ export default function UserCart(){
   // const [cartGroup, setCartGroup] = useState([])
   // 카드 체크 예시
   const [cardChecked, setCardChecked] = useState([]);
+
   // console.log(cardChecked.length)
 
   // setCartGroup(productGroupCount(data))
@@ -55,13 +56,16 @@ export default function UserCart(){
   }
   const { data: cart, isLoading, isError, error } = useCart();
   const updateCartQuantity = usePatchCart()
+  const cartList = cart ? productGroupCount(cart.items).sort((a,b)=> a.product.localeCompare(b.product)) : [];
 
-  console.log(cart)
 
-  const onClickPatch = (itemId,newQuantity) =>{
+  const onClickPatch = (itemId,option, newQuantity) =>{
     console.log(updateCartQuantity)
     updateCartQuantity.mutate({id: itemId,
-      updatedData:{ quantity: newQuantity } })
+      updatedData:{ 
+        quantity: newQuantity,
+        option_key: option
+       } })
   }
 
   return(
@@ -71,7 +75,7 @@ export default function UserCart(){
           <p className="text-4xl mb-3">장바구니</p>
         <div>
           {/* 테스트 버튼 */}
-          <button onClick={() => onClickPatch(1,3)}>테스트 버튼</button>
+          <button onClick={() => onClickPatch('p-101','color=white&size=L',12)}>테스트 버튼</button>
           <CartToolbar 
           checkItemLength={cardChecked.length}
           dataLength ={cartGroup.length}
@@ -83,14 +87,22 @@ export default function UserCart(){
           <div className="flex flex-col mr-4">
             {/* 나중에 상품 없음 컴포넌트 추가 할것 */}
             {cartGroup.length === 0 ? '상품없음': null}
-            {cartGroup.map(el =>
+            {cartList.map(el =>
+             <CartCard
+              key={el.product}
+              data={el}
+              checkItems={cardChecked}
+              onChangeSelect={handleSingleCheck}
+              />
+            )}
+            {/* {cartGroup.map(el =>
               <CartCard
               key={el.product} 
               data={el}
               checkItems={cardChecked}
               onChangeSelect={handleSingleCheck}
               />
-            )}
+            )} */}
           </div>
           
 

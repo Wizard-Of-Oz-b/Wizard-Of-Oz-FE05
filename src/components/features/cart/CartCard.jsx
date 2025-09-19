@@ -3,8 +3,7 @@ import CartStepper from "./CartStepper"
 //각 주문 카트
 export default function CartCard({data, setItemCount, onChangeSelect, checkItems}) {
   // 최대 수량인지 확인
-  const price = 333333
-  console.log(data.count)
+  console.log(data.count, data.product)
   return(
     //사진 크기 키우기
     <div className="w-full py-4 border-b border-gray-200
@@ -20,7 +19,7 @@ export default function CartCard({data, setItemCount, onChangeSelect, checkItems
         <img src={`https://picsum.photos/id/1/160/225`} alt="상품 이미지"  
         className="w-[140px] h-[190px]"/>
         <div className="flex flex-col  w-[400px] ml-4">
-          <p className="text-lg">[내추럴코튼] 멀티 스트라이프 긴팔티_SPLSF49C01</p>
+          <p className="text-lg">{data.product_name}</p>
           <p className="text-gray-400">{`[옵션: NAVY/XL]`}</p>
 
         </div>

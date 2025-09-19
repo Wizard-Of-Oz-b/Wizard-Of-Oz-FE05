@@ -45,7 +45,12 @@ export function usePatchCart(){
   return useMutation({
     mutationFn:patchCartData,
     onSuccess: () => {
+      //성공하면 데이터 다시 불러오기
       queryClient.invalidateQueries({queryKey: ['userCart']})
+    },
+    onError:(error) =>{
+      //에러처리
+      console.error(error)
     }
 
   })

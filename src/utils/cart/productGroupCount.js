@@ -6,7 +6,7 @@
  */
 export function productGroupCount(data) {
   const groupData = data.reduce((acc, item) => {
-    const key = item.product
+    const key = `${item.product}-${item.option_key}`
     const group =  acc[key] ?? []
     acc[key] = [...group, item]
     return acc
