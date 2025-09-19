@@ -49,6 +49,11 @@ export default function AdminLayout() {
       icon: <ShoppingBag className="h-4 w-4" />,
     },
     {
+      to: '/admin/stock',
+      label: '상품 재고 관리',
+      icon: <ShoppingBag className="h-4 w-4" />,
+    },
+    {
       to: '/admin/orders',
       label: '주문 관리',
       icon: <Package className="h-4 w-4" />,

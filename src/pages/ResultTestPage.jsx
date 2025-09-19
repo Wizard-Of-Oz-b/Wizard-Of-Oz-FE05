@@ -16,7 +16,7 @@ export default function ResultTestPage() {
     const size = Number(params.get("size") ?? 20) || 20;
     return {
       q,
-      category_id: category_id ? Number(category_id) : null,
+      category_id: category_id || null,
       is_active,
       sort,
       page,
@@ -56,7 +56,7 @@ export default function ResultTestPage() {
 
   return (
     <>
-      <div className="px-6 py-4 max-w-5xl mx-auto">
+      <div className="px-6 py-4 max-w-5xl mx-auto overflow-x-hidden">
         <h1 className="text-xl font-bold">검색 결과</h1>
         <p className="text-sm text-gray-500 mt-1">{query.q ? `“${query.q}” 검색` : "전체 보기"}</p>
       </div>

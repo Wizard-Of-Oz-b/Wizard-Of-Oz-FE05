@@ -18,7 +18,7 @@ export default function CategoryTable({ pageData = [], openEdit, openDelete }) {
           <tr>
             <th className="px-4 py-3 rounded-tl-2xl">카테고리</th>
             <th className="px-4 py-3">분류</th>            
-            <th className="px-4 py-3">자식 수</th>
+            <th className="px-4 py-3">하위 계층 수</th>
             <th className="px-4 py-3">카테고리 생성일자</th>
             <th className="px-4 py-3">카테고리 고유 ID</th>
             <th className="px-4 py-3 text-center rounded-tr-2xl">기능</th>

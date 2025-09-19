@@ -31,6 +31,7 @@ import CustomerSupportAdminPage from "./pages/Admin/CustomerSupportAdminPage.jsx
 import AdminProtectedRoute from "./routes/AdminProtectedRoute.jsx";
 import AdminLogin from "./pages/Admin/AdminLogin.jsx";
 import ResultTestPage from "./pages/ResultTestPage.jsx";
+import AdminStockPage from "./pages/Admin/AdminStockPage.jsx";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +62,7 @@ export default function App() {
                 <Route path="categories" element={<CategoryAdminPage />} />
                 <Route path="coupons" element={<CouponPromoAdminPage />} />
                 <Route path="cs" element={<CustomerSupportAdminPage />} />
+                <Route path="stock" element={<AdminStockPage />} />
               </Route>
             </Route>
 
