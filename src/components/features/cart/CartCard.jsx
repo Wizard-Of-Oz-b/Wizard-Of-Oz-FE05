@@ -1,9 +1,18 @@
+import { useDeleteCartItem } from "../../../hooks/cart/useCart"
 import CartStepper from "./CartStepper"
 
 //각 주문 카트
 export default function CartCard({data, setItemCount, onChangeSelect, checkItems}) {
   // 최대 수량인지 확인
   console.log(data.count, data.product)
+  const deleteMutaition = useDeleteCartItem();
+
+  const handleOnClickDelete = () => {
+    deleteMutaition.mutate({
+      productId: data.product,
+      optionKey: data.option_key
+    })
+  }
   return(
     //사진 크기 키우기
     <div className="w-full py-4 border-b border-gray-200
@@ -37,7 +46,8 @@ export default function CartCard({data, setItemCount, onChangeSelect, checkItems
       <div className="flex flex-col">
         <button className="border border-gray-300 mb-2 py-0.5">주문하기</button>
         <button className="border border-gray-300 py-0.5"
-          onClick={()=> setItemCount(data.product, data.option_key, 0)}
+          // onClick={()=> setItemCount(data.product, data.option_key, 0)}
+          onClick={handleOnClickDelete}
         >삭제</button>
       </div>
     </div>

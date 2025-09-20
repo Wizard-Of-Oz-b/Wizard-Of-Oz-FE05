@@ -37,12 +37,19 @@ export const handlers = [
     return HttpResponse.json(dummyCart, {status: 200});
     //에러는 {status: 401} 자격인증 실패
   }),
-  http.delete(`${CART_BASE_URL}/items/:item_id?option_key`, async ({ params }) =>{
+  http.delete(`${CART_BASE_URL}/items/by-product/:item_id`, async ({ params, request }) =>{
     // 카트 삭제
     //성공시 204
     try {
-      const { item_id, option_key } = params;
-      dummyCart.items = adjustItems(dummyCart.items, item_id, option_key, 0);
+      const { item_id } = params;
+      const url = new URL(request.url);
+      const optionKey = url.searchParams.get('option_key')
+      
+      if(!optionKey){
+        return HttpResponse.json({status:400})
+      }
+
+      dummyCart.items = adjustItems(dummyCart.items, item_id, optionKey, 0);
       return HttpResponse.json({status:204})
     } catch (error) {
       console.error(error)

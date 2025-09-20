@@ -36,7 +36,7 @@ export default function UserCart(){
       acc += item.unit_price * item.count
       return acc 
     },0)
-  })
+  },[cartList])
   console.log(cartList)
   const handleSingleCheck = (checked, id) =>{
     if(checked){
@@ -93,13 +93,13 @@ export default function UserCart(){
             {/* 나중에 상품 없음 컴포넌트 추가 할것 중요! */}
             {cartList.length === 0 ? '상품없음': null}
             {cartList.map(el =>
-             <CartCard
+            <CartCard
               key={el.product+el.option_key}
               data={el}
               checkItems={cardChecked}
               setItemCount={onClickPatch}
               onChangeSelect={handleSingleCheck}
-              />
+            />
             )}
           </div>
           

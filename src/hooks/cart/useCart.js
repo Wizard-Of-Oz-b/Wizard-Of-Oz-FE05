@@ -28,9 +28,11 @@ async function patchCartData({id,updatedData}) {
 }
 
 //deleteCartItem
-async function deleteCartItem({id,option}){
+async function deleteCartItem({productId,optionKey}){
   try{
-    return await axios.delete(`${BASE_URL}/items/${id}`)
+    const queryString = `option_key=${encodeURIComponent(optionKey)}`
+    const response = await axios.delete(`${BASE_URL}/items/by-product/${productId}?${queryString}`)
+    return response.data
   }catch(error){
     console.error(`카트 아이템 삭제 실패${error}`)
     throw error
