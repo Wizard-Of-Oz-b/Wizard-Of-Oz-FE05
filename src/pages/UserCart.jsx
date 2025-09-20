@@ -4,7 +4,7 @@ import CartDays from "../components/features/cart/CartDays";
 import CartToolbar from "../components/features/cart/CartToolbar";
 import OrderSummary from "../components/features/cart/OrderSummary";
 import { productGroupCount } from "../utils/cart/productGroupCount";
-import { useCart, usePatchCart } from "../hooks/cart/useCart";
+import { useCart, useDeleteCartItem, usePatchCart } from "../hooks/cart/useCart";
 
 export default function UserCart(){
   
@@ -12,20 +12,32 @@ export default function UserCart(){
 
   // 카드 체크 예시
   const [cardChecked, setCardChecked] = useState([]);
-
- 
- 
   const { data: cart, isLoading, isError, error } = useCart();
   const updateCartQuantity = usePatchCart()
+  const deleteCartItem = useDeleteCartItem()
+  // 카트리스트 정렬
   // const cartList = cart ? productGroupCount(cart.items).sort((a,b)=> a.product.localeCompare(b.product)) : [];
   const cartList = useMemo(()=> {
     if(!cart?.items){
       return []
     }
 
-    return productGroupCount(cart.items).sort((a,b)=> a.product.localeCompare(b.product))
+    return productGroupCount(cart.items).sort((a,b)=> 
+      a.product.localeCompare(b.product) || a.option_key.localeCompare(b.option_key)
+    )
   }, [cart])
+  //총 액수 합산
+  const sumPrice = useMemo(() => {
+    if(!cartList){
+      return 0;
+    }
 
+    return cartList.reduce((acc, item)=>{
+      acc += item.unit_price * item.count
+      return acc 
+    },0)
+  })
+  console.log(cartList)
   const handleSingleCheck = (checked, id) =>{
     if(checked){
       setCardChecked(prev => [...prev, id])
@@ -44,16 +56,21 @@ export default function UserCart(){
     }
   }
 
-  const handleStepper = () =>{
-
-  }
   const onClickPatch = (itemId,option, newQuantity) =>{
     console.log(updateCartQuantity)
-    updateCartQuantity.mutate({id: itemId,
+    updateCartQuantity.mutate({
+      id: itemId,
       updatedData:{ 
         quantity: newQuantity,
         option_key: option
        } })
+  }
+
+  const onClickDelete = (itemId, option) => {
+    deleteCartItem.mutate({
+      id:itemId,
+      option: option
+    })
   }
 
   return(
@@ -63,7 +80,7 @@ export default function UserCart(){
           <p className="text-4xl mb-3">장바구니</p>
         <div>
           {/* 테스트 버튼 */}
-          <button onClick={() => onClickPatch('p-101','color=white&size=L',12)}>테스트 버튼</button>
+          <button onClick={() => onClickDelete('p-101','color=white&size=L')}>테스트 버튼</button>
           <CartToolbar 
           checkItemLength={cardChecked.length}
           dataLength ={cartList.length}
@@ -77,7 +94,7 @@ export default function UserCart(){
             {cartList.length === 0 ? '상품없음': null}
             {cartList.map(el =>
              <CartCard
-              key={el.product}
+              key={el.product+el.option_key}
               data={el}
               checkItems={cardChecked}
               setItemCount={onClickPatch}
@@ -91,8 +108,8 @@ export default function UserCart(){
             <button className="border border-gray-300 px-5 py-1">선택상품 삭제</button>
             <button className="border border-gray-300 px-5 py-1">장바구니 비우기</button>
           </div>
-
-          <OrderSummary />
+          <span className="text-sm mt-1">※ {(50000).toLocaleString()}원 이상 구매시 배송비 무료 </span>
+          <OrderSummary sumPrice={sumPrice}/>
           <CartDays />
         </div>
         <div className="flex items-center justify-center mt-3">

@@ -27,6 +27,16 @@ async function patchCartData({id,updatedData}) {
   
 }
 
+//deleteCartItem
+async function deleteCartItem({id,option}){
+  try{
+    return await axios.delete(`${BASE_URL}/items/${id}`)
+  }catch(error){
+    console.error(`카트 아이템 삭제 실패${error}`)
+    throw error
+  }
+}
+
 export function useCart(params) {
 
     const query = createQueryString(params)
@@ -56,3 +66,17 @@ export function usePatchCart(){
   })
 }
 
+export function useDeleteCartItem(){
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn:deleteCartItem,
+    onSuccess: () => {
+      //성공하면 데이터 다시 불러오기
+      queryClient.invalidateQueries({queryKey: ['userCart']})
+    },
+    onError:(error) =>{
+      //에러처리
+      console.error(error)
+    }
+  })
+}

@@ -203,6 +203,16 @@ export const dummyCart = {
       quantity: 70,
       unit_price: 55000,
       added_at: '2025-09-18T11:28:05.000Z'
+    },
+    {
+      id: 'c4a2a5a8-a352-4d13-8a8a-7b8e9f0c1b2a',
+      product: 'p-101',
+      product_name: '오버핏 반팔 티셔츠',
+      option_key: 'color=black&size=XL',
+      options: '색상: 화이트 / 사이즈: L',
+      quantity: 50, // 재고
+      unit_price: 29000,
+      added_at: '2025-09-18T11:10:00.000Z'
     }
   ]
 };

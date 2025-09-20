@@ -20,7 +20,7 @@ export default function CartCard({data, setItemCount, onChangeSelect, checkItems
         className="w-[140px] h-[190px]"/>
         <div className="flex flex-col  w-[400px] ml-4">
           <p className="text-lg">{data.product_name}</p>
-          <p className="text-gray-400">{`[옵션: NAVY/XL]`}</p>
+          <p className="text-gray-400">{data.option_key}</p>
 
         </div>
       </div>
@@ -36,7 +36,9 @@ export default function CartCard({data, setItemCount, onChangeSelect, checkItems
         <p className="text-center">{(data.unit_price * data.count).toLocaleString()}원</p>
       <div className="flex flex-col">
         <button className="border border-gray-300 mb-2 py-0.5">주문하기</button>
-        <button className="border border-gray-300 py-0.5">삭제</button>
+        <button className="border border-gray-300 py-0.5"
+          onClick={()=> setItemCount(data.product, data.option_key, 0)}
+        >삭제</button>
       </div>
     </div>
   )
