@@ -59,16 +59,60 @@ export async function patchProductStock(id, patch) {
     ...(patch.stock_quantity != null
       ? { stock_quantity: Number(patch.stock_quantity) }
       : {}),
+    ...(patch.is_active != null ? { is_active: !!patch.is_active } : {}),
+    ...(patch.is_deleted != null ? { is_deleted: !!patch.is_deleted } : {}),
   };
   const res = await api.patch(`/v1/admin/product-stocks/${id}/`, body);
   return res.data;
 }
 
-/** 삭제 */
-export async function deleteProductStock(id) {
-  const res = await api.delete(`/v1/admin/product-stocks/${id}/`);
-  return res.data;
+/* 삭제 */
+export async function deleteProductStock(id, { softFallback = true } = {}) {
+  try {
+    const res = await api.delete(`/v1/admin/product-stocks/${id}/`);
+    return { ok: true, softDeleted: false, data: res.data ?? true };
+  } catch (err) {
+    if (!softFallback) {
+      const e = new Error(
+        err?.response?.data?.detail ||
+        err?.response?.data?.message ||
+        (typeof err?.response?.data === 'string' ? err.response.data : '') ||
+        err?.message ||
+        '삭제 중 오류가 발생했습니다.'
+      );
+      e.status = err?.response?.status;
+      e.original = err;
+      throw e;
+    }
+
+    try {
+      await api.patch(`/v1/admin/product-stocks/${id}/`, { is_deleted: true });
+      return { ok: true, softDeleted: true, via: 'is_deleted' };
+    } catch {}
+
+    try {
+      await api.patch(`/v1/admin/product-stocks/${id}/`, { is_active: false, stock_quantity: 0 });
+      return { ok: true, softDeleted: true, via: 'is_active' };
+    } catch {}
+
+    try {
+      await api.patch(`/v1/admin/product-stocks/${id}/`, { stock_quantity: 0 });
+      return { ok: true, softDeleted: true, via: 'stock_zero' };
+    } catch (fallbackErr) {
+      const e = new Error(
+        err?.response?.data?.detail ||
+        err?.response?.data?.message ||
+        (typeof err?.response?.data === 'string' ? err.response.data : '') ||
+        err?.message ||
+        '삭제 중 오류가 발생했습니다.'
+      );
+      e.status = err?.response?.status;
+      e.original = err;
+      throw e;
+    }
+  }
 }
+
 
 export function labelFromOptions(options) {
   if (options && typeof options === 'object') {
@@ -96,24 +140,16 @@ function objectToLabel(obj) {
   return nice.join(' / ') || '-';
 }
 
-/** 제품 검색(라이트) — 서버 검색 미지원 대비 로컬 필터 폴백 포함 */
+/** 제품 검색 */
 export async function searchProductsLite(q, size = 12, extra = {}) {
   const page_size = Math.max(1, Math.min(Number(size) || 12, 50));
   const kw = (q || '').trim();
 
-  // 1) 가능한 다양한 키로 시도 (서버가 어떤 걸 보든 잡히게)
   const paramsFirst = {
     page: 1,
     page_size,
     ...(kw
-      ? {
-          q: kw,
-          search: kw,
-          name: kw,
-          product_name: kw,
-          keyword: kw,
-          query: kw,
-        }
+      ? { q: kw, search: kw, name: kw, product_name: kw, keyword: kw, query: kw }
       : {}),
     ...(extra.search ? { search: extra.search } : {}),
     ...(extra.category ? { category: extra.category } : {}),
@@ -124,7 +160,6 @@ export async function searchProductsLite(q, size = 12, extra = {}) {
   const res1 = await api.get('/v1/admin/products/', { params: paramsFirst });
   let items = unwrapList(res1.data);
 
-  // 2) 폴백: 서버가 검색을 안 먹으면 무검색으로 재요청 후 로컬 부분일치 필터
   if (kw && items.length === 0) {
     const res2 = await api.get('/v1/admin/products/', {
       params: {
@@ -137,7 +172,6 @@ export async function searchProductsLite(q, size = 12, extra = {}) {
     });
     const all = unwrapList(res2.data);
     const hay = kw.toLowerCase();
-
     items = all
       .filter((p) =>
         [
@@ -151,7 +185,7 @@ export async function searchProductsLite(q, size = 12, extra = {}) {
       .slice(0, page_size);
   }
 
-  // 3) 정규화 반환
+  // 정규화
   return items.map((p) => ({
     id: p.product_id || p.id,
     name: p.name,

@@ -26,7 +26,7 @@ export default function AdminStockPage() {
   const [sortOpen, setSortOpen] = useState(false);
   const sortBtnRef = React.useRef(null);
 
-  // 목록 조회 
+  // 목록 조회
   const fetchList = async (kwOverride) => {
     try {
       setLoading(true);
@@ -82,8 +82,16 @@ export default function AdminStockPage() {
         data = (await listProductStocks({ ordering })) || [];
       }
 
+      // 🔒 서버가 소프트삭제/0재고도 준다면 프런트에서 숨김
+      const cleaned = (data || []).filter((r) => {
+        if (r.is_deleted === true) return false;
+        if (r.is_active === false) return false; // 서버 정책에 맞춰 사용
+        if (Number(r.stock_quantity) === 0) return false;
+        return true;
+      });
+
       setRows(
-        (data || []).map((r) => ({
+        cleaned.map((r) => ({
           ...r,
           _qty: r.stock_quantity,
           _dirty: false,
@@ -99,7 +107,7 @@ export default function AdminStockPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ordering]);
 
-  // 드롭다운 외부 클릭/ESC 키다운 발생 닫힘
+  // 드롭다운 외부 클릭/ESC 키다운 닫힘
   useEffect(() => {
     const onClick = (e) => {
       if (!sortOpen) return;
@@ -146,10 +154,21 @@ export default function AdminStockPage() {
 
   const confirmDelete = async () => {
     if (!delTarget?.id) return;
-    await deleteProductStock(delTarget.id);
-    setDelOpen(false);
-    setDelTarget(null);
-    await fetchList();
+    const targetId = delTarget.id;
+    try {
+      const res = await deleteProductStock(targetId);
+      setDelOpen(false);
+      setDelTarget(null);
+
+      if (res?.softDeleted) {
+        setRows((prev) => prev.filter((r) => r.id !== targetId));
+      } else {
+        await fetchList();
+      }
+    } catch (e) {
+      console.error('delete failed', e);
+      alert(e?.message || '삭제에 실패했습니다.');
+    }
   };
 
   const table = useMemo(
