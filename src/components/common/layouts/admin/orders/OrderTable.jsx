@@ -1,11 +1,7 @@
 import { StatusBadge } from ".";
+const TERMINALS = new Set(["취소완료", "환불완료"]);
 
-export default function OrderTable({
-  orders = [],
-  onOpenDetails,
-  onOpenRequest,
-  onOpenStatus,
-}) {
+export default function OrderTable({ orders = [], onOpenDetails, onOpenRequest, onOpenStatus }) {
   return (
     <div className="relative overflow-x-auto rounded-2xl shadow-lg bg-white">
       <table className="min-w-[980px] w-full">
@@ -25,40 +21,30 @@ export default function OrderTable({
         <tbody className="divide-y divide-gray-100 text-sm">
           {orders.length === 0 ? (
             <tr>
-              <td colSpan={8} className="py-10 text-center text-gray-500">
-                주문이 없습니다.
-              </td>
+              <td colSpan={8} className="py-10 text-center text-gray-500">주문이 없습니다.</td>
             </tr>
           ) : (
             orders.map((o) => (
               <tr key={o.id} className="hover:bg-violet-50/40 transition-colors">
                 <td className="px-4 py-4 font-semibold text-gray-800">
-                  <button
-                    onClick={() => onOpenDetails?.(o.id)}
-                    className="underline decoration-violet-300 underline-offset-2 hover:text-violet-700"
-                  >
+                  <button onClick={() => onOpenDetails?.(o.id)} className="underline decoration-violet-300 underline-offset-2 hover:text-violet-700">
                     {o.orderNo}
                   </button>
                 </td>
 
-                <td className="px-4 py-4">{o.customer}</td>
+                <td className="px-4 py-4">{o.customer ? String(o.customer) : "-"}</td>
 
                 <td className="px-4 py-4 truncate">
-                  {o.items?.[0]?.name}
-                  {o.items && o.items.length > 1 && (
-                    <span className="text-xs text-gray-500"> 외 {o.items.length - 1}건</span>
-                  )}
+                  {o.items?.[0]?.name ? String(o.items[0].name) : "-"}
+                  {o.items && o.items.length > 1 && (<span className="text-xs text-gray-500"> 외 {o.items.length - 1}건</span>)}
                 </td>
 
                 <td className="px-4 py-4 text-right font-semibold text-violet-700">
-                  {o.amount.toLocaleString()}원
+                  {Number(o.amount || 0).toLocaleString()}원
                 </td>
 
                 <td className="px-4 py-4 text-center">
-                  <StatusBadge
-                    status={o.status}
-                    onClick={() => onOpenStatus?.(o.id)}
-                  />
+                  <StatusBadge status={o.status} onClick={() => onOpenStatus?.(o.id)} />
                 </td>
 
                 <td className="px-4 py-4 text-center">
@@ -72,11 +58,17 @@ export default function OrderTable({
                 </td>
 
                 <td className="px-4 py-4 text-center text-gray-600">
-                  {o.created_at}
+                  {o.created_at
+                    ? new Date(
+                        typeof o.created_at === "string" || typeof o.created_at === "number"
+                          ? o.created_at
+                          : String(o.created_at)
+                      ).toLocaleString()
+                    : "-"}
                 </td>
 
                 <td className="px-4 py-4 text-center">
-                  {o.request && !["취소완료", "환불완료"].includes(o.status) ? (
+                  {o.request && !TERMINALS.has(o.status) ? (
                     <button
                       onClick={() => onOpenRequest?.(o.id)}
                       className="inline-flex items-center gap-1 rounded-lg bg-amber-100 px-3 py-1.5 text-sm font-semibold text-amber-800 hover:bg-amber-200"
