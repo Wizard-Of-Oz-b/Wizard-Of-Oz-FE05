@@ -1,3 +1,4 @@
+import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Home, LayoutDashboard, LogOut } from 'lucide-react';
 import SidebarSection from './SidebarSection';
@@ -14,7 +15,11 @@ export default function Sidebar({ openSections, onToggleSection }) {
 
           {/* 대시보드 */}
           <div className="mb-3">
-            <NavLink to="/admin" end className={linkClass}>
+            <NavLink
+              to="/admin"
+              end
+              className={({ isActive }) => linkClass({ isActive })}
+            >
               <LayoutDashboard className="h-4 w-4" />
               <span>대시보드</span>
             </NavLink>
@@ -33,8 +38,13 @@ export default function Sidebar({ openSections, onToggleSection }) {
                 <ul className="space-y-1">
                   {sec.items.map((n) => (
                     <li key={n.to}>
-                      <NavLink to={n.to} end={n.end} className={linkClass}>
-                        {n.icon}
+                      <NavLink
+                        to={n.to}
+                        end={n.end}
+                        className={({ isActive }) => linkClass({ isActive })}
+                      >
+                        {n.icon &&
+                          React.createElement(n.icon, { className: 'h-4 w-4' })}
                         <span>{n.label}</span>
                       </NavLink>
                     </li>
