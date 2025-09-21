@@ -1,8 +1,10 @@
-export default function CartToolbar({
-  checkItemLength,
-  dataLength,
+export default function CartToolbar(
+  // {
+  // checkItemLength,
+  // dataLength,
   // onChangeCheckbox,
-}) {
+// }
+) {
   return(
 
     <div className="w-[1100px] py-3 border-t-2 border-b border-gray-200

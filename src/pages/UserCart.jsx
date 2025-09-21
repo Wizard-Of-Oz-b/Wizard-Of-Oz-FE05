@@ -6,7 +6,6 @@ import OrderSummary from "../components/features/cart/OrderSummary";
 import { productGroupCount } from "../utils/cart/productGroupCount";
 import {
   useCart,
-  usePatchCart,
 } from "../hooks/cart/useCart";
 import CartSkeleton from "../components/skeletons/CartSkeleton";
 import CartLoadingSpin from "../components/features/cart/CartLoadingSpin";
@@ -15,7 +14,7 @@ export default function UserCart() {
   //accessToken 추가필요(API 설정 할때 설정해주셔야 합니다.
 
   // 카드 체크 예시
-  const [cardChecked, setCardChecked] = useState([]);
+  // const [cardChecked, setCardChecked] = useState([]);
   const { data: cart, isLoading, isError, error } = useCart();
   // const {mutate: updateCartQuantity, isPending} = usePatchCart();
   
@@ -84,8 +83,8 @@ export default function UserCart() {
         <p className="text-4xl mb-3">장바구니</p>
         <div>
           <CartToolbar
-            checkItemLength={cardChecked.length}
-            dataLength={cartList.length}
+            // checkItemLength={cardChecked.length}
+            // dataLength={cartList.length}
             // onChangeCheckbox ={handleAllCheck}
           />
         </div>
@@ -97,7 +96,7 @@ export default function UserCart() {
               <CartCard
                 key={el.product + el.option_key}
                 data={el}
-                checkItems={cardChecked}
+                // checkItems={cardChecked}
                 // setItemCount={onClickPatch}
                 // onChangeSelect={handleSingleCheck}
               />
