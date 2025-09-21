@@ -38,12 +38,12 @@ const roleMap = {
   superadmin: 'admin',
   admin: 'admin',
   manager: 'manager',
-  cs: 'manager',
+  cs: 'cs',
   user: 'user',
   customer: 'user',
 };
 
-export default function AdminProtectedRoute({ allowRoles = ['admin', 'manager'] }) {
+export default function AdminProtectedRoute({ allowRoles = ['admin', 'manager', 'cs'] }) {
   const [status, setStatus] = useState('loading');
   const location = useLocation();
 
