@@ -59,6 +59,11 @@ export default function AdminLayout() {
       icon: <Package className="h-4 w-4" />,
     },
     {
+      to: '/admin/shipment',
+      label: '고객 배송 관리',
+      icon: <Package className="h-4 w-4" />,
+    },
+    {
       to: '/admin/customers',
       label: '회원 관리',
       icon: <Users className="h-4 w-4" />,
