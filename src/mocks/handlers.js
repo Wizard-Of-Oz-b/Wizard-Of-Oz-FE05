@@ -1,4 +1,4 @@
-import { http, HttpResponse } from "msw";
+import { delay, http, HttpResponse } from "msw";
 import { dummyProduct } from "./dummyProducts";
 import { dummyCart } from "./dummy/dummyCart";
 import { adjustItems } from "./utils/adjustItems";
@@ -32,8 +32,8 @@ export const handlers = [
   /**
    * 여기서 부터카트 관련 요청
    */
-  http.get(`${CART_BASE_URL}/me`, () => {
-
+  http.get(`${CART_BASE_URL}/me`, async () => {
+    await delay(1000)
     return HttpResponse.json(dummyCart, {status: 200});
     //에러는 {status: 401} 자격인증 실패
   }),
@@ -44,7 +44,7 @@ export const handlers = [
       const { item_id } = params;
       const url = new URL(request.url);
       const optionKey = url.searchParams.get('option_key')
-      
+      await delay(1000)
       if(!optionKey){
         return HttpResponse.json({status:400})
       }
@@ -63,6 +63,7 @@ export const handlers = [
       dummyCart.items = adjustItems(dummyCart.items, item_id, requestBody.option_key, requestBody.quantity)
       console.log('수량 조절')
       console.log(requestBody);
+      await delay(1000)
       return HttpResponse.json({},{status:200})
 
     } catch (error) {
