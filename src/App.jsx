@@ -1,12 +1,25 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Home from "./pages/Home";
 import ProductDetailPage from "./pages/ProductDetailPage";
+
+// 에러 컴포넌트
+import Error401 from "./pages/errors/Error401";
+import Error403 from "./pages/errors/Error403";
+import Error404 from "./pages/errors/Error404";
+import Error429 from "./pages/errors/Error429";
+import Error500 from "./pages/errors/Error500";
+import Error502 from "./pages/errors/Error502";
+import Error503 from "./pages/errors/Error503";
+import Error504 from "./pages/errors/Error504";
+
+// 전역 에러감지
+import { ErrorBoundary } from "./components/common/layouts/errors/ErrorBoundary";
 import "swiper/css";
-import Mypage from './pages/Mypage';
 import Layout from "./components/common/layouts/Layout";
 import ProductListTest from "./pages/ProductListTest";
+import Mypage from "./pages/Mypage";
 
 const queryClient = new QueryClient()
 
@@ -21,6 +34,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/products/:id" element={<ProductDetailPage />} />
             <Route path="/products/test" element={<ProductListTest />} />
+            <Route path="/mypage" element={<Mypage />} />
            </Route>
 
             {/* 상태코드별 에러 라우트 */}
