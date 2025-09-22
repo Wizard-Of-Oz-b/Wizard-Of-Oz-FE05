@@ -20,7 +20,7 @@ export default function StarRating({
             whileTap={{ scale: 0.85, rotate: -10 }}
             whileHover={!readOnly ? { scale: 1.2 } : {}}
             animate={filled ? { scale: [1, 1.3, 1] } : { scale: 1 }}
-            transition={{ type: "spring", stiffness: 300, damping: 15 }}
+            transition={{ type: "tween", duration: 0.25 }}
             onClick={
               !readOnly && onChange ? () => onChange(s) : undefined
             }

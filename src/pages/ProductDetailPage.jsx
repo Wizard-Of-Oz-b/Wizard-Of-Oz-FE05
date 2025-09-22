@@ -1,6 +1,7 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import ProductDetail from '../components/common/product/ProductDetail';
+import { useToasts } from '../components/common/layouts/reviews/hooks/useToasts';
 import RandomProducts from '../components/common/product/RandomProducts';
 
 const API_BASE = (
@@ -21,6 +22,7 @@ export default function ProductDetailPage() {
 
   const [product, setProduct] = useState(null);
   const [error, setError] = useState(null);
+  const { ToastHost, onToast } = useToasts();
 
   useEffect(() => {
     let alive = true;
@@ -93,20 +95,21 @@ export default function ProductDetailPage() {
   }
 
   const handleAddToCart = ({ product, color, size, qty }) => {
-    alert(
-      `장바구니: ${product.name} / ${color} / ${size} / ${qty}개 / ${KRW(
-        product.price * qty
-      )}`
-    );
+    onToast('success', `${product.name} 장바구니에 담김!`);
   };
 
   return (
     <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
-      <ProductDetail product={product} onAddToCart={handleAddToCart} />
+      <ProductDetail
+        product={product}
+        onAddToCart={handleAddToCart}
+        onToast={onToast}
+      />
 
       <RandomProducts />
-    </div>
 
-    
+      <ToastHost />
+
+    </div>
   );
 }
