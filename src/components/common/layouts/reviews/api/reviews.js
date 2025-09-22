@@ -1,4 +1,5 @@
-import api from "../../../../lib/axios";
+import api from "../../../../../lib/axios";
+
 
 /**
  * 리뷰 목록 가져오기

@@ -137,59 +137,60 @@ export default function ReviewSection({
 
   const canEditReview = (r) => isAdmin || `${r.user_id}` === `${currentUserId}`;
 
-  return (
-    <section className="w-full rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm">
-      <header className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-bold text-gray-900">리뷰</h2>
-        <span className="text-sm text-gray-500">
-          총 {rows.length.toLocaleString()}개
-        </span>
-      </header>
+return (
+  <section className="w-full rounded-xl border border-gray-200 bg-white p-5 sm:p-6">
+    <header className="mb-4 flex items-center justify-between border-b border-gray-200 pb-3">
+      <h2 className="text-[15px] font-semibold text-gray-900 tracking-tight">리뷰</h2>
+      <span className="text-xs text-gray-500">총 {rows.length.toLocaleString()}개</span>
+    </header>
 
-      {/* 작성 폼 */}
-      {enableCreate && (
-        <div className="mb-6 rounded-xl border border-gray-100 bg-gray-50 p-4">
-          <div className="flex items-center justify-between gap-3">
-            <StarRating value={rating} onChange={setRating} size={22} />
-            <button
-              onClick={handleCreate}
-              disabled={submitting}
-              className="rounded-lg bg-violet-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-violet-700 disabled:opacity-50"
-            >
-              등록
-            </button>
-          </div>
-          <div className="mt-3">
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              rows={3}
-              className="w-full rounded-lg border border-gray-200 bg-white p-2 text-sm outline-none focus:ring-2 focus:ring-violet-300"
-              placeholder="상품 사용 후기를 남겨주세요."
-            />
-          </div>
+    {/* 작성 폼 */}
+    {enableCreate && (
+      <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
+        <div className="flex items-center justify-between gap-3">
+          <StarRating value={rating} onChange={setRating} size={20} />
+          <button
+            onClick={handleCreate}
+            disabled={submitting}
+            className="inline-flex items-center rounded-md bg-black px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-900 disabled:opacity-50"
+          >
+            등록
+          </button>
         </div>
-      )}
+        <div className="mt-3">
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={3}
+            className="w-full rounded-md border border-gray-200 bg-white p-2 text-sm outline-none placeholder:text-gray-400 focus:border-slate-400 focus:ring-1 focus:ring-slate-300"
+            placeholder="상품 사용 후기를 남겨주세요."
+          />
+        </div>
+      </div>
+    )}
 
-      {/* 목록 */}
-      {loading ? (
-        <div className="py-10 text-center text-sm text-gray-500">불러오는 중…</div>
-      ) : rows.length === 0 ? (
-        <div className="py-10 text-center text-sm text-gray-500">아직 작성된 리뷰가 없습니다.</div>
-      ) : (
-        <ul className="grid gap-3">
-          {rows.map((r) => (
-            <li key={r.review_id ?? r.id}>
-              <ReviewCard
-                review={r}
-                canEdit={canEditReview(r)}
-                onSave={handleSave}
-                onDelete={handleDelete}
-              />
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
-  );
+    {/* 목록 */}
+    {loading ? (
+      <div className="py-10 text-center text-sm text-gray-500">불러오는 중…</div>
+    ) : rows.length === 0 ? (
+      <div className="py-8 text-center text-sm text-gray-500">아직 작성된 리뷰가 없습니다.</div>
+    ) : (
+      <ul className="divide-y divide-gray-100">
+        {rows.map((r) => (
+          <li key={r.review_id ?? r.id} className="py-4">
+            <ReviewCard
+              review={r}
+              canEdit={canEditReview(r)}
+              onSave={handleSave}
+              onDelete={handleDelete}
+              // (선택) 카드 내부도 같은 톤으로: 보더/그림자 제거
+              className="!border-0 !shadow-none !p-0"
+              actionClassName="text-xs text-gray-500 hover:text-gray-800"
+            />
+          </li>
+        ))}
+      </ul>
+    )}
+  </section>
+);
 }
