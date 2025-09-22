@@ -46,7 +46,7 @@ export default function ProductDetail({ product, onAddToCart }) {
 
       {/* 우: 구매패널 */}
       <aside className="lg:col-span-4">
-        <div className="lg:sticky lg:top-16">
+        <div className="lg:sticky lg:top-25">
           <p className="text-xs tracking-wider text-gray-500">{product.brand}</p>
           <h1 className="mt-1 text-2xl font-semibold leading-snug">{product.name}</h1>
 

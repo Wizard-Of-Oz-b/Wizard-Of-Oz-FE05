@@ -1,77 +1,6 @@
-// import api from "../../../../lib/axios";
-
-// function unwrapList(data) {
-//   if (Array.isArray(data)) return data;
-//   if (Array.isArray(data?.results)) return data.results;
-//   if (Array.isArray(data?.items)) return data.items;
-//   if (Array.isArray(data?.data)) return data.data;
-//   if (data && typeof data === "object") {
-//     const k = Object.keys(data).find((x) => Array.isArray(data[x]));
-//     if (k) return data[k];
-//   }
-//   return [];
-// }
-
-// function buildBodyAndHeaders(payload, isPartial = false) {
-//   const hasFile = Object.values(payload || {}).some((v) => v instanceof File);
-//   if (!hasFile) {
-//     // JSON
-//     return { body: payload, headers: undefined };
-//   }
-//   const fd = new FormData();
-//   Object.entries(payload || {}).forEach(([k, v]) => {
-//     if (v === undefined || v === null) return;
-//     if (v instanceof File) fd.append(k, v);
-//     else fd.append(k, typeof v === "boolean" ? String(v) : String(v));
-//   });
-//   return { body: fd, headers: { "Content-Type": "multipart/form-data" } };
-// }
-
-// /** 목록 조회 */
-// export async function listProducts({ page = 1, pageSize = 50, q = "", category = "" } = {}) {
-//   const res = await api.get("/v1/products/", {
-//     params: {
-//       page,
-//       page_size: pageSize,
-//       q: q || undefined,
-//       category: category || undefined,
-//     },
-//   });
-//   return unwrapList(res.data);
-// }
-
-// /* 생성 */
-// export async function createProduct(payload) {
-//   const { body, headers } = buildBodyAndHeaders(payload, false);
-//   const res = await api.post("/v1/products/", body, { headers });
-//   return res.data;
-// }
-
-// /* 수정(PATCH)  */
-// export async function updateProduct(id, payload) {
-//   const { body, headers } = buildBodyAndHeaders(payload, true);
-//   const res = await api.patch(`/v1/products/${id}/`, body, { headers });
-//   return res.data;
-// }
-
-// /* 삭제 */
-// export async function deleteProduct(id) {
-//   const res = await api.delete(`/v1/products/${id}/`);
-//   return res.data;
-// }
-
-// /* 판매상태 토글  */
-// export async function toggleAvailableAPI(id, is_active) {
-//   const res = await api.patch(`/v1/products/${id}/`, { is_active });
-//   return res.data;
-// }
-
-
-// src/components/common/api/admin/products.js
 import api from "../../../../lib/axios";
 import { normalizeProduct, normalizeId } from "../../../../lib/normalize";
 
-/** 다양한 페이로드 포맷을 안전하게 배열로 풀어주는 유틸 */
 function unwrapList(data) {
   if (Array.isArray(data)) return data;
   if (Array.isArray(data?.results)) return data.results;
@@ -84,7 +13,7 @@ function unwrapList(data) {
   return [];
 }
 
-/** 안전한 id 추출 */
+/** 안전하게 id 추출하기 */
 function ensureId(x) {
   const id = typeof x === "object" ? normalizeId(x) : x;
   if (id == null || id === "" || id === "undefined") {
@@ -93,22 +22,50 @@ function ensureId(x) {
   return id;
 }
 
+/** 대표 이미지 URL만 "문자열"로 추출 */
+function pickImageUrl(row = {}) {
+  if (!row || typeof row !== "object") return null;
+
+  if (typeof row.image_url === "string" && row.image_url.trim()) return row.image_url.trim();
+
+  const pi = row.primary_image;
+  if (typeof pi === "string" && pi.trim()) return pi.trim();
+  if (pi && typeof pi.url === "string" && pi.url.trim()) return pi.url.trim();
+
+  const imgs = row.images;
+  if (Array.isArray(imgs) && imgs.length) {
+    const first =
+      imgs.find((x) => typeof x?.url === "string" && x.url.trim()) ?? imgs[0];
+    if (typeof first === "string" && first.trim()) return first.trim();
+    if (typeof first?.url === "string" && first.url.trim()) return first.url.trim();
+    if (typeof first?.image_url === "string" && first.image_url.trim()) return first.image_url.trim();
+    if (typeof first?.remote_url === "string" && first.remote_url.trim()) return first.remote_url.trim();
+    if (typeof first?.file_url === "string" && first.file_url.trim()) return first.file_url.trim();
+  }
+
+  const gal = row.gallery;
+  if (Array.isArray(gal) && gal.length) {
+    const g0 = gal[0];
+    if (typeof g0 === "string" && g0.trim()) return g0.trim();
+    if (typeof g0?.url === "string" && g0.url.trim()) return g0.url.trim();
+  }
+  return null;
+}
+
 /**
  * 상품 목록 (Admin)
  * - 엔드포인트: /v1/admin/products/
- * - 쿼리: page, page_size, q | search, category
- * - 응답: 배열(기존 호출부 호환)
  */
 export async function listProducts(params = {}) {
   const {
     page = 1,
-    pageSize = 50,            // 과한 사이즈 방지
+    pageSize = 50,
     q,
-    search,                   // 백엔드가 search를 기대할 수도 있으니 둘 다 지원
+    search,
     category,
   } = params;
 
-  const safePageSize = Math.max(1, Math.min(Number(pageSize) || 50, 100)); // 최대 100 권장
+  const safePageSize = Math.max(1, Math.min(Number(pageSize) || 50, 100));
 
   const query = {
     page,
@@ -118,24 +75,29 @@ export async function listProducts(params = {}) {
     ...(category ? { category } : {}),
   };
 
-  // ✅ Admin 전용 엔드포인트로 교체
   const res = await api.get("/v1/admin/products/", { params: query });
 
-  // 호출부 호환을 위해 배열만 반환 (normalize까지)
-  return unwrapList(res.data).map(normalizeProduct);
+  return unwrapList(res.data).map((row) => {
+    const base = normalizeProduct ? normalizeProduct(row) : row;
+    return { ...base, image_url: pickImageUrl(row) };
+  });
 }
 
 /** 생성 (Admin) */
 export async function createProduct(payload) {
   const res = await api.post("/v1/admin/products/", payload);
-  return normalizeProduct(res.data);
+  const row = res.data;
+  const base = normalizeProduct ? normalizeProduct(row) : row;
+  return { ...base, image_url: pickImageUrl(row) };
 }
 
 /** 수정 (Admin) */
 export async function updateProduct(idOrObj, payload) {
   const id = ensureId(idOrObj);
   const res = await api.patch(`/v1/admin/products/${id}/`, payload);
-  return normalizeProduct(res.data);
+  const row = res.data;
+  const base = normalizeProduct ? normalizeProduct(row) : row;
+  return { ...base, image_url: pickImageUrl(row) };
 }
 
 /** 삭제 (Admin) */
@@ -149,7 +111,9 @@ export async function deleteProduct(idOrObj) {
 export async function toggleAvailableAPI(idOrObj, is_active) {
   const id = ensureId(idOrObj);
   const res = await api.patch(`/v1/admin/products/${id}/`, { is_active });
-  return normalizeProduct(res.data);
+  const row = res.data;
+  const base = normalizeProduct ? normalizeProduct(row) : row;
+  return { ...base, image_url: pickImageUrl(row) };
 }
 
 export { ensureId, unwrapList };

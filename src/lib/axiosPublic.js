@@ -1,16 +1,17 @@
 import axios from "axios";
 
+const BASE = (import.meta.env.VITE_API_BASE || "").trim() || "/api";
+
 const publicApi = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api",
-  withCredentials: false, 
+  baseURL: BASE,
+  withCredentials: false,
+  headers: { Accept: "application/json" },
+  timeout: 15000,
 });
 
 publicApi.interceptors.request.use((config) => {
-  if (config.headers) {
-    delete config.headers.Authorization;
-    delete config.headers.authorization;
-    delete config.headers["X-CSRFToken"];
-  }
+  if (config.headers?.Authorization) delete config.headers.Authorization;
+  config.withCredentials = false;
   return config;
 });
 
