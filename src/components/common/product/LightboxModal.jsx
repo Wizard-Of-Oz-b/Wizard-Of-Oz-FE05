@@ -65,7 +65,7 @@ export default function LightboxModal({ images = [], index = 0, onClose, onPrev,
               <button
                 key={i}
                 onClick={(e) => { e.stopPropagation(); if (i < index) onPrev?.(i); else if (i > index) onNext?.(i); }}
-                className={`h-16 w-12 md:w-16 rounded overflow-hidden border ${i === index ? "border-white" : "border-white/30"}`}
+                className={`h-24 w-12 md:w-16 rounded overflow-hidden border ${i === index ? "border-white" : "border-white/30"}`}
                 aria-label={`thumb-${i}`}
               >
                 <img src={s} alt="" className="h-full w-full object-cover" />

@@ -1,11 +1,9 @@
 import publicApi from "../../../../lib/axiosPublic";
 
-function pickImageUrl(row = {}) {
+/** 대표 이미지 URL만 문자열로 추출 */
+export function extractImageUrl(row = {}) {
   if (!row || typeof row !== "object") return null;
-
-  if (typeof row.image_url === "string" && row.image_url.trim()) {
-    return row.image_url.trim();
-  }
+  if (typeof row.image_url === "string" && row.image_url.trim()) return row.image_url.trim();
 
   const pi = row.primary_image;
   if (typeof pi === "string" && pi.trim()) return pi.trim();
@@ -15,7 +13,6 @@ function pickImageUrl(row = {}) {
   if (Array.isArray(imgs) && imgs.length) {
     const first =
       imgs.find((x) => typeof x?.url === "string" && x.url.trim()) ?? imgs[0];
-
     if (typeof first === "string" && first.trim()) return first.trim();
     if (typeof first?.url === "string" && first.url.trim()) return first.url.trim();
     if (typeof first?.image_url === "string" && first.image_url.trim()) return first.image_url.trim();
@@ -29,11 +26,10 @@ function pickImageUrl(row = {}) {
     if (typeof g0 === "string" && g0.trim()) return g0.trim();
     if (typeof g0?.url === "string" && g0.url.trim()) return g0.url.trim();
   }
-
   return null;
 }
 
-const normalizeProduct = (row = {}) => ({
+export const normalizeProduct = (row = {}) => ({
   id: row.product_id || row.id,
   name: row.name || "",
   price: Number(row.price ?? 0),
@@ -43,10 +39,13 @@ const normalizeProduct = (row = {}) => ({
   options: row.options ?? null,
   created_at: row.created_at,
   updated_at: row.updated_at,
-  image_url: pickImageUrl(row),
+  image_url: extractImageUrl(row),
 });
 
-/** 퍼블릭 제품 목록 */
+/**
+ * 퍼블릭 제품 목록
+ * - 추가 이미지 엔드포인트 호출하지 않음!
+ */
 export async function fetchProductsPublic(params = {}) {
   const {
     q,
@@ -63,49 +62,18 @@ export async function fetchProductsPublic(params = {}) {
     q: q || undefined,
     category_id: category_id || undefined,
     is_active,
-    ordering: sort, 
+    ordering: sort,
     page,
     size,
     min_price: min_price ?? undefined,
     max_price: max_price ?? undefined,
   };
 
-  const call = async (paramsToUse) => {
-    try {
-      const res = await publicApi.get("/v1/products/", { params: paramsToUse });
-      const data = res.data || {};
-      const list = Array.isArray(data.results) ? data.results : [];
-      return {
-        ok: true,
-        value: {
-          count: data.count ?? list.length,
-          results: list.map(normalizeProduct),
-        },
-      };
-    } catch (err) {
-      console.error("fetchProductsPublic ERROR", {
-        status: err?.response?.status,
-        data: err?.response?.data,
-        params: paramsToUse,
-      });
-      return { ok: false, err };
-    }
+  const res = await publicApi.get("/v1/products/", { params: baseParams });
+  const data = res.data || {};
+  const list = Array.isArray(data.results) ? data.results : [];
+  return {
+    count: data.count ?? list.length,
+    results: list.map(normalizeProduct),
   };
-
-  let r = await call(baseParams);
-  if (r.ok) return r.value;
-
-  const p2 = { ...baseParams };
-  delete p2.ordering;
-  r = await call(p2);
-  if (r.ok) return r.value;
-
-  const p3 = { ...p2 };
-  delete p3.q;
-  r = await call(p3);
-  if (r.ok) return r.value;
-
-  throw r.err;
 }
-
-export { normalizeProduct, pickImageUrl };
