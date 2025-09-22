@@ -8,16 +8,12 @@ import RightIcons from "./desktop/RightIcons";
 import DesktopDropdown from "./desktop/DesktopDropdown";
 import MobileMenu from "./mobile/MobileMenu";
 
-export default function Header({ className = "", onSelectSub, onSearch }) {
+export default function HeaderLight({ className = "", onSelectSub, onSearch }) {
   const [active, setActive] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [keyword, setKeyword] = useState("");
   const closeTimer = useRef(null);
   const inputRef = useRef(null);
-
-  const location = useLocation();
-  const isHomepage = location.pathname === "/";
-  const isLight = !!active || mobileOpen || !isHomepage;
 
   const open = (p) => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
@@ -50,14 +46,14 @@ export default function Header({ className = "", onSelectSub, onSearch }) {
       <div
         className={[
           "flex items-center justify-between px-6 py-4 transition-colors duration-200",
-          isLight ? "bg-white/95 text-black shadow-sm backdrop-blur" : "bg-transparent text-white",
-          isLight ? "border-b border-black/10" : "",
+          "bg-white/95 text-black shadow-sm backdrop-blur",
+          "border-b border-black/10",
         ].join(" ")}
       >
-        <TopBar isLight={isLight} onOpenMobile={() => setMobileOpen(true)} />
-        <PrimaryNav isLight={isLight} active={active} open={open} />
+        <TopBar isLight={true} onOpenMobile={() => setMobileOpen(true)} />
+        <PrimaryNav isLight={true} active={active} open={open} />
         <RightIcons
-          isLight={isLight}
+          isLight={true}
           onOpenSearch={() => {
             setMobileOpen(false);
             open(SEARCH);
