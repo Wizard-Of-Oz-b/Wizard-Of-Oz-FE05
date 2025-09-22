@@ -1,6 +1,6 @@
 export default function ProductDescription({ description }) {
   return (
-    <section className="my-12 bg-gradient-to-br from-white via-gray-50 to-white rounded-2xl shadow-lg p-10 border border-gray-100 relative overflow-hidden">
+    <section className="bg-gradient-to-br from-white via-gray-50 to-white rounded-2xl shadow-lg p-10 border border-gray-100 relative overflow-hidden">
       {/* 배경 포인트 장식 */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute -top-10 -left-10 w-40 h-40 bg-gray-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20" />

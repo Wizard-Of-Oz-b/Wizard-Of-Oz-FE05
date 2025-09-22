@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import ProductDetail from '../components/common/product/ProductDetail';
+import RandomProducts from '../components/common/product/RandomProducts';
 
 const API_BASE = (
   import.meta.env.VITE_API_BASE || 'http://127.0.0.1:8000/api/v1'
@@ -102,6 +103,10 @@ export default function ProductDetailPage() {
   return (
     <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
       <ProductDetail product={product} onAddToCart={handleAddToCart} />
+
+      <RandomProducts />
     </div>
+
+    
   );
 }
