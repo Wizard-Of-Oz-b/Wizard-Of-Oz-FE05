@@ -15,27 +15,32 @@ import { worker } from "./mocks/browser";
 //   </React.StrictMode>
 // );
 
+const container = document.getElementById("root");
+const root = createRoot(container);
 
-if(import.meta.env.MODE === 'development') {
-  worker.start().then(() => {
-    createRoot(document.getElementById('root')).render(
+if (import.meta.env.MODE === "development") {
+  worker
+    .start({
+      onUnhandledRequest: "bypass",
+      serviceWorker: {
+        url: "/mockServiceWorker.js",
+      },
+    })
+    .then(() => {
+      root.render(
+        <React.StrictMode>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </React.StrictMode>
+      );
+    });
+} else {
+  root.render(
     <React.StrictMode>
       <BrowserRouter>
         <App />
       </BrowserRouter>
     </React.StrictMode>
- 
-)
-  })
-}else{
-  createRoot(document.getElementById('root')).render(
-    <React.StrictMode>
-      <BrowserRouter>
-
-        <App />
-
-      </BrowserRouter>
-    </React.StrictMode>
- 
-)
+  );
 }

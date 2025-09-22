@@ -45,12 +45,11 @@ export default function HeroSlider({
   );
 
   if (!safeSteps.length) {
-    // ✅ steps가 아직 안 들어온 초기 상태 처리(스켈레톤)
     return <div className="w-full h-screen bg-black/5" />;
   }
 
   return (
-    <div className="absolute inset-0">
+    <div className="absolute inset-0 pointer-events-none select-none" style={{ touchAction: 'pan-y' }}>
       {safeSteps.map((step, i) => {
         const isActive = i === safeIndex;
         return (
@@ -97,7 +96,7 @@ export default function HeroSlider({
                 {step.ctaText && (
                   <a
                     href={step.ctaHref || "#"}
-                    className="inline-block mt-5 md:mt-8 px-6 md:px-8 py-3 md:py-4 rounded-2xl bg-white/90 text-gray-900 font-semibold hover:bg-white focus:outline-none focus:ring-2 focus:ring-white/80"
+                    className="pointer-events-auto inline-block mt-5 md:mt-8 px-6 md:px-8 py-3 md:py-4 rounded-2xl bg-white/90 text-gray-900 font-semibold hover:bg-white focus:outline-none focus:ring-2 focus:ring-white/80"
                   >
                     {step.ctaText}
                   </a>

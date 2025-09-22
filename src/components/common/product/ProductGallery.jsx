@@ -1,11 +1,10 @@
-import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 
 export default function ProductGallery({ images = [], onOpenLightbox }) {
   return (
     <>
-      <div className="block md:hidden mt-5">
+      <div className="block md:hidden mt-23">
         <Swiper
           slidesPerView={1}       // ← 한 장만 꽉 차게
           spaceBetween={0}        // ← 간격 0
@@ -21,7 +20,6 @@ export default function ProductGallery({ images = [], onOpenLightbox }) {
                 aria-label={`open-image-${i}`}
                 className="block w-full"
               >
-                {/* 높이 통일하기 : 3:4 비율 고정, 안하면 어떤건 낮고, 높음 */}
                 <div className="aspect-[3/4] w-full overflow-hidden rounded">
                   <img
                     src={src}
@@ -38,7 +36,7 @@ export default function ProductGallery({ images = [], onOpenLightbox }) {
       </div>
 
       {/* 데스크톱: 2열 그리드 */}
-      <div className="hidden md:grid grid-cols-2 gap-2 mt-8">
+      <div className="hidden md:grid grid-cols-2 gap-2 mt-20">
         {images.map((src, i) => (
           <button
             key={i}
