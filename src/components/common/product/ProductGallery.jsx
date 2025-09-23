@@ -4,7 +4,7 @@ import "swiper/css";
 export default function ProductGallery({ images = [], onOpenLightbox }) {
   return (
     <>
-      <div className="block md:hidden mt-23">
+      <div className="block md:hidden">
         <Swiper
           slidesPerView={1}       // ← 한 장만 꽉 차게
           spaceBetween={0}        // ← 간격 0
@@ -36,7 +36,7 @@ export default function ProductGallery({ images = [], onOpenLightbox }) {
       </div>
 
       {/* 데스크톱: 2열 그리드 */}
-      <div className="hidden md:grid grid-cols-2 gap-2 mt-20">
+      <div className="hidden md:grid grid-cols-2 gap-2">
         {images.map((src, i) => (
           <button
             key={i}

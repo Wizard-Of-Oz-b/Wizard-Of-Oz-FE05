@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { PRIMARY, SEARCH, SUGGEST } from "./constants";
 import { spring } from "./animations";
 import TopBar from "./desktop/TopBar";
@@ -15,6 +15,8 @@ export default function HeaderLight({ className = "", onSelectSub, onSearch }) {
   const closeTimer = useRef(null);
   const inputRef = useRef(null);
 
+  const navigate = useNavigate();
+
   const open = (p) => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
     setActive(p);
@@ -28,8 +30,31 @@ export default function HeaderLight({ className = "", onSelectSub, onSearch }) {
   const submitSearch = (e) => {
     if (e) e.preventDefault();
     if (!keyword.trim()) return;
-    onSearch?.(keyword.trim(), active && active !== SEARCH ? active : null);
+
+    const q = keyword.trim();
+    const primary = active && active !== SEARCH ? active : null;
+
+    onSearch?.(q, primary);
+
+    const qs = new URLSearchParams({ q, page: "1", sort: "created_at" });
+    if (primary) qs.set("primary", String(primary));
+
+    navigate({ pathname: "/results/test", search: `?${qs.toString()}` });
+
     setKeyword("");
+    setActive(null);
+  };
+
+  const handleSelectSub = (p, item) => {
+    const q = (item || "").trim();
+    if (!q) return;
+
+    onSelectSub?.(p, item);
+
+    const qs = new URLSearchParams({ q, page: "1", sort: "created_at" });
+    if (p) qs.set("primary", String(p));
+
+    navigate({ pathname: "/results/test", search: `?${qs.toString()}` });
     setActive(null);
   };
 
@@ -41,7 +66,10 @@ export default function HeaderLight({ className = "", onSelectSub, onSearch }) {
   }, [active]);
 
   return (
-    <header className={"fixed inset-x-0 top-0 z-40 select-none " + className} onMouseLeave={delayedClose}>
+    <header
+      className={"fixed inset-x-0 top-0 z-40 select-none " + className}
+      onMouseLeave={delayedClose}
+    >
       {/* 상단 바 */}
       <div
         className={[
@@ -68,7 +96,7 @@ export default function HeaderLight({ className = "", onSelectSub, onSearch }) {
         setKeyword={setKeyword}
         inputRef={inputRef}
         onSubmitSearch={submitSearch}
-        onSelectSub={(p, item) => onSelectSub?.(p, item)}
+        onSelectSub={handleSelectSub}
         open={open}
         delayedClose={delayedClose}
       />
@@ -80,7 +108,7 @@ export default function HeaderLight({ className = "", onSelectSub, onSearch }) {
         setKeyword={setKeyword}
         onClose={() => setMobileOpen(false)}
         onSubmitSearch={submitSearch}
-        onSelectSub={(p, item) => onSelectSub?.(p, item)}
+        onSelectSub={handleSelectSub}
       />
     </header>
   );

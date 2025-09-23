@@ -1,5 +1,18 @@
-html, body, #root { height: 100%; }
+html, body, #root {
+  min-height: 100%;
+  height: auto;
+}
 
+body {
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+}
+
+#root::after {
+  content: "";
+  display: block;
+  height: env(safe-area-inset-bottom, 0px);
+}
 @import "tailwindcss";
 
 /* 스크롤 숨기기 */

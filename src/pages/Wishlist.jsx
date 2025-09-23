@@ -59,7 +59,7 @@ export default function Wishlist() {
     else delete imgRefs.current[id];
   };
 
-  // 로컬 제거(낙관적)
+  // 로컬 제거
   const removeOneLocal = (id) => {
     setItems((prev) => prev.filter((i) => i.id !== id));
     setSelected((prev) => {
@@ -142,10 +142,10 @@ export default function Wishlist() {
 
   return (
     <motion.div
-      className="min-h-screen bg-neutral-50 text-neutral-900"
+      className="min-h-screen text-neutral-900"
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.18 }}
     >
-      <div className="mx-auto w-full max-w-7xl px-6 py-16 mt-8">
+      <div className="mx-auto w-full max-w-7xl px-6">
         {/* 헤더 + 카트 */}
         <header className="mb-6 flex items-end justify-between">
           <div>

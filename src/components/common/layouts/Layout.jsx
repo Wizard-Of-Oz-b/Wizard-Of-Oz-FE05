@@ -5,16 +5,26 @@ import HeaderLight from "./header/HeaderLight";
 import Footer from "./footer/Footer";
 
 export default function Layout() {
-  const location = useLocation();
-  const isHomepage = location.pathname === "/";
+  const { pathname } = useLocation();
+  const isHomepage = pathname === "/";
+
+  if (isHomepage) {
+    return (
+      <>
+        <Header />
+        <Outlet />
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
-      {isHomepage ? <Header /> : <HeaderLight />}
-      <main className={`flex-1 ${!isHomepage ? 'pt-24' : ''}`}>
+      <HeaderLight />
+      <main className="flex-1 pt-24">
         <Outlet />
       </main>
-      <Footer isHomepage={isHomepage} />
+      <Footer />
     </div>
   );
 }

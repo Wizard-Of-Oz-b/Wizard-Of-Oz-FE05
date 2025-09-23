@@ -8,6 +8,7 @@ export default function Home() {
   const [index, setIndex] = useState(0);
   const lockRef = useRef(false);
   const [scrollLocked, setScrollLocked] = useState(true);
+
   const firstMountRef = useRef(true);
 
   const steps = [
@@ -54,39 +55,22 @@ export default function Home() {
     },
   ];
 
-  // ===== 전환 도우미 =====
-  const goTo = useCallback(
-    (i) => {
-      if (i < 0 || i >= steps.length || lockRef.current) return;
-      lockRef.current = true;
-      setTimeout(() => {
-        setIndex(i);
-        setTimeout(() => (lockRef.current = false), 80);
-      }, 260);
-    },
-    [steps.length]
-  );
+  const goTo = useCallback((i) => {
+    if (i < 0 || i >= steps.length || lockRef.current) return;
+    lockRef.current = true;
+    setTimeout(() => {
+      setIndex(i);
+      setTimeout(() => (lockRef.current = false), 80);
+    }, 260);
+  }, [steps.length]);
 
   const next = useCallback(() => goTo(index + 1), [goTo, index]);
   const prev = useCallback(() => goTo(index - 1), [goTo, index]);
 
-  function snapToTopHard() {
-    window.scrollTo(0, 0);
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-    setTimeout(() => {
-      window.scrollTo(0, 0);
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-    }, 60);
-  }
-
-  // ===== 전역 스타일 잠금/해제 =====
   useEffect(() => {
     const html = document.documentElement;
     const body = document.body;
 
-    // 바운스 방지
     html.style.overscrollBehavior = "none";
     html.style.overflowX = "hidden";
     body.style.overflowX = "hidden";
@@ -99,8 +83,6 @@ export default function Home() {
       body.style.overflowY = "hidden";
       html.style.height = "100%";
       body.style.height = "100%";
-
-      requestAnimationFrame(() => snapToTopHard());
     } else {
       html.style.overflowY = "auto";
       body.style.overflowY = "auto";
@@ -121,12 +103,13 @@ export default function Home() {
     };
   }, [scrollLocked]);
 
-  const unlockAndRevealFooter = () => {
-    setScrollLocked(false);
-    setTimeout(() => {
-      window.scrollTo({ top: window.innerHeight, behavior: "smooth" });
-    }, 30);
-  };
+const unlockAndRevealFooter = () => {
+  setScrollLocked(false);
+  setTimeout(() => {
+    document.querySelector("footer")?.scrollIntoView({ behavior: "smooth" });
+  }, 30);
+};
+
 
   useEffect(() => {
     const onWheel = (e) => {
@@ -186,90 +169,18 @@ export default function Home() {
     };
   }, [index, next, prev, scrollLocked, steps.length]);
 
+  // ===== Footer에서 다시 위로가기 =====
   useEffect(() => {
     if (scrollLocked) return;
-
-    const TOP_ZONE = 80; 
-    let touchStartY = null;
-
-    const getY = () =>
-      window.scrollY ??
-      document.documentElement.scrollTop ??
-      document.body.scrollTop ??
-      0;
-
-    const isNearTop = () => getY() <= TOP_ZONE;
-
-    const onWheelUpNearTop = (e) => {
-      if (e.deltaY < -30 && isNearTop()) {
-        e.preventDefault(); 
-        snapToTopHard();
-        setScrollLocked(true);
-      }
-    };
-
-    const onTouchStart = (e) => {
-      touchStartY = e.touches?.[0]?.clientY ?? null;
-    };
-    const onTouchMove = (e) => {
-      if (touchStartY == null) return;
-      const dy = (e.touches?.[0]?.clientY ?? 0) - touchStartY;
-      if (dy > 60 && isNearTop()) {
-        e.preventDefault();
-        snapToTopHard();
-        setScrollLocked(true);
-      }
-    };
-
-    window.addEventListener("wheel", onWheelUpNearTop, { passive: false });
-    window.addEventListener("touchstart", onTouchStart, { passive: true });
-    window.addEventListener("touchmove", onTouchMove, { passive: false });
-
-    return () => {
-      window.removeEventListener("wheel", onWheelUpNearTop);
-      window.removeEventListener("touchstart", onTouchStart);
-      window.removeEventListener("touchmove", onTouchMove);
-    };
-  }, [scrollLocked]);
-
-  useEffect(() => {
-    if (scrollLocked) return;
-
-    const LOCK_THRESHOLD = 20;
-    const STABLE_MS = 30; 
-    let timer = null;
-    let lastY = null;
-
     const onScroll = () => {
-      const y =
-        window.scrollY ??
-        document.documentElement.scrollTop ??
-        document.body.scrollTop ??
-        0;
-
-      if (y <= LOCK_THRESHOLD) {
-        if (lastY !== null && Math.abs(lastY - y) > 1) {
-          clearTimeout(timer);
-        }
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-          setScrollLocked(true);
-          requestAnimationFrame(() => snapToTopHard());
-        }, STABLE_MS);
-      } else {
-        clearTimeout(timer);
+      if (window.scrollY <= 0) {
+        setScrollLocked(true);
       }
-      lastY = y;
     };
-
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener("scroll", onScroll);
-    };
+    return () => window.removeEventListener("scroll", onScroll);
   }, [scrollLocked]);
 
-  // ===== 점 네비 클릭 =====
   const handleDotClick = (i) => {
     if (i === index && scrollLocked) return;
     if (!scrollLocked) {
@@ -285,7 +196,7 @@ export default function Home() {
 
   return (
     <>
-      {/* 헤더 고정 */}
+      {/* 헤더 */}
       <Header
         onPrimarySelect={(p) => setActivePrimary(p)}
         className="fixed top-0 left-0 w-full z-[80]"
@@ -300,7 +211,11 @@ export default function Home() {
         }}
       />
 
-      <div className="relative h-screen w-screen overflow-hidden bg-gray-800">
+      <div
+        className={`relative min-h-screen flex-1 w-screen overflow-hidden bg-gray-800 ${
+          !scrollLocked ? "pointer-events-none" : ""
+        }`}
+      >
         <HeroSlider
           steps={steps}
           index={index}
@@ -326,7 +241,6 @@ export default function Home() {
           />
         ))}
       </div>
-
     </>
   );
 }
