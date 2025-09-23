@@ -1,3 +1,5 @@
+import { formatOptionsForDisplay, safeParseJSON } from "../public/options";
+
 export function mapStatusToKorean(apiStatus) {
   switch (apiStatus) {
     case "ready": return "주문접수";
@@ -28,7 +30,6 @@ export function mapKoreanToStatus(kor) {
   }
 }
 
-// 서버 status로 request 유추 (서버가 별도 필드를 안 준 케이스)
 function buildRequestFromStatus(row) {
   if (row?.status === "cancel_requested") {
     return { type: "cancel", reason: row?.request_reason || "" };
@@ -42,9 +43,13 @@ function buildRequestFromStatus(row) {
 export function adaptAdminOrderHeader(row) {
   const id = row.purchase_id;
   const orderNo = row.pg_tid || String(id).split("-")[0];
+  const optionRaw = row.options ?? row.option_key ?? "";
+  const optionsObj = safeParseJSON(optionRaw);
+  const optionsText = formatOptionsForDisplay(optionsObj);
 
   return {
     id,
+    purchase_id: id,
     orderNo,
     customer: row.user_email || "(이메일 없음)",
     amount: Number(row.amount || 0),
@@ -56,22 +61,35 @@ export function adaptAdminOrderHeader(row) {
     trackingNo: "",
     pg: row.pg || "",
     pg_tid: row.pg_tid || "",
+    option_key: row.option_key || "",
+    options: row.options ?? null,
+    optionsText,
+    product_name: row.product_name ?? "",
+    unit_price: Number(row.unit_price ?? 0),
   };
 }
 
 export function adaptOrderItems(items = []) {
-  return items.map((it) => ({
-    id: it.item_id,
-    name: it.product_name,
-    image_url: it.thumbnail_url || undefined,
-    option: it.options || it.option_key || "",
-    qty: Number(it.quantity || 0),
-    price: Number(it.unit_price || 0),
-    _meta: {
-      order_id: it.order_id,
-      product_id: it.product_id,
-      sku: it.sku,
-      option_key: it.option_key,
-    },
-  }));
+  return items.map((it) => {
+    const raw = it.options ?? it.option_key ?? ""; 
+    const optionsObj = safeParseJSON(raw);
+    const optionsText = formatOptionsForDisplay(optionsObj);
+
+    return {
+      id: it.item_id,
+      name: it.product_name,
+      image_url: it.thumbnail_url || undefined,
+      optionKey: it.option_key || "",
+      optionsObj,
+      optionsText,
+      qty: Number(it.quantity || 0),
+      price: Number(it.unit_price || 0),
+      _meta: {
+        order_id: it.order_id,
+        product_id: it.product_id,
+        sku: it.sku,
+        option_key: it.option_key,
+      },
+    };
+  });
 }

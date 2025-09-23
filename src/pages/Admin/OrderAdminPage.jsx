@@ -14,6 +14,7 @@ import {
   StatusChangeModal,
   RequestDecisionModal,
   OrderDetailsModal,
+  Pagination,
 } from '../../components/common/layouts/admin/orders';
 import IconButton from '../../components/common/layouts/admin/common/IconButton';
 import { getNextStatus } from '../../components/features/admin/orders/orderStatus';
@@ -63,7 +64,7 @@ export default function OrderAdminPage() {
   const [statusOpen, setStatusOpen] = useState(false);
   const [statusTargetId, setStatusTargetId] = useState(null);
 
-  // 토스트 (이 페이지 전용)
+  // 토스트 
   const [toasts, setToasts] = useState([]);
   const toastSeq = useRef(0);
   const pushToast = (message, { type = 'info', description, duration = 2600 } = {}) => {
@@ -148,7 +149,6 @@ export default function OrderAdminPage() {
     return () => {
       alive = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, PAGE_SIZE, q, statusFilter, startDate, endDate]);
 
   // 편집(주소/연락처/메모)
@@ -178,7 +178,8 @@ export default function OrderAdminPage() {
   const onChangeStatus = async (orderId, nextKor) => {
     try {
       if (nextKor === '취소완료') {
-        const resp = await cancelAdminOrder(orderId);
+        const items = (orders.find((o) => o.id === orderId)?.items) || [];
+        const resp = await cancelAdminOrder(orderId, items);
         const next = mapStatusToKorean(resp?.status) || '취소완료';
         setOrders((prev) =>
           prev.map((o) => (o.id === orderId ? { ...o, status: next, request: null } : o))
@@ -187,7 +188,8 @@ export default function OrderAdminPage() {
         return;
       }
       if (nextKor === '환불완료') {
-        const resp = await refundAdminOrder(orderId);
+        const items = (orders.find((o) => o.id === orderId)?.items) || [];
+        const resp = await refundAdminOrder(orderId, items);
         const next = mapStatusToKorean(resp?.status) || '환불완료';
         setOrders((prev) =>
           prev.map((o) => (o.id === orderId ? { ...o, status: next, request: null } : o))
@@ -214,7 +216,7 @@ export default function OrderAdminPage() {
     const isCancel = selectedOrder.request.type === 'cancel';
     try {
       if (isCancel) {
-        const resp = await cancelAdminOrder(selectedOrder.id);
+        const resp = await cancelAdminOrder(selectedOrder.id, selectedOrder.items || []);
         const next = mapStatusToKorean(resp?.status) || '취소완료';
         setOrders((prev) =>
           prev.map((o) =>
@@ -223,7 +225,7 @@ export default function OrderAdminPage() {
         );
         pushToast('취소 요청이 승인되었습니다.', { type: 'success' });
       } else {
-        const resp = await refundAdminOrder(selectedOrder.id);
+        const resp = await refundAdminOrder(selectedOrder.id, selectedOrder.items || []);
         const next = mapStatusToKorean(resp?.status) || '환불완료';
         setOrders((prev) =>
           prev.map((o) =>
@@ -316,47 +318,14 @@ export default function OrderAdminPage() {
       />
 
       {/* 페이지네이션 */}
-      <div className="mt-6 flex justify-center gap-2 items-center">
-        <IconButton
-          title="첫 페이지"
-          onClick={goFirst}
-          disabled={page <= 1}
-          className="h-9 w-9 p-0 rounded-full border-gray-200 text-gray-600 hover:text-violet-700 disabled:cursor-not-allowed"
-        >
-          <ChevronsLeft className="size-4" />
-        </IconButton>
-
-        <IconButton
-          title="이전"
-          onClick={goPrev}
-          disabled={page <= 1}
-          className="h-9 w-9 p-0 rounded-full border-gray-200 text-gray-600 hover:text-violet-700 disabled:cursor-not-allowed"
-        >
-          <ChevronLeft className="size-4" />
-        </IconButton>
-
-        <span className="px-2 text-sm font-medium tabular-nums select-none">
-          <span className="font-semibold text-violet-700">페이지 {page}</span> / {pageCount}
-        </span>
-
-        <IconButton
-          title="다음"
-          onClick={goNext}
-          disabled={page >= pageCount}
-          className="h-9 w-9 p-0 rounded-full border-gray-200 text-gray-600 hover:text-violet-700 disabled:cursor-not-allowed"
-        >
-          <ChevronRight className="size-4" />
-        </IconButton>
-
-        <IconButton
-          title="마지막"
-          onClick={goLast}
-          disabled={page >= pageCount}
-          className="h-9 w-9 p-0 rounded-full border-gray-200 text-gray-600 hover:text-violet-700 disabled:cursor-not-allowed"
-        >
-          <ChevronsRight className="size-4" />
-        </IconButton>
-      </div>
+      <Pagination
+        page={page}
+        pageCount={pageCount}
+        onFirst={goFirst}
+        onPrev={goPrev}
+        onNext={goNext}
+        onLast={goLast}
+      />
 
       {/* 상세 모달 */}
       <OrderDetailsModal

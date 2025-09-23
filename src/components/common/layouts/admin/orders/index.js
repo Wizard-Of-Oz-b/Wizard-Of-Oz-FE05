@@ -6,3 +6,4 @@ export { default as StatusChangeModal } from "./StatusChangeModal";
 export { default as RequestDecisionModal } from "./RequestDecisionModal";
 export { default as OrderDetailsModal } from "./OrderDetailsModal";
 export { default as OrderTable } from "./OrderTable";
+export { default as Pagination } from "./Pagination";
