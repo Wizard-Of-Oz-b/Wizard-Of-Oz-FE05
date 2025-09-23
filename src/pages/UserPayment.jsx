@@ -1,6 +1,7 @@
 import { useState } from "react";
 import VirtualAccountEx from "../components/features/payment/VirtualAccountEx";
 import TossEx from "../components/features/payment/TossEX";
+import AddressModal from "../components/features/payment/AddressModal";
 
 const SECTION_STYLE = 'w-full border border-gray-200 rounded-2xl px-4 py-5 shadow-sm mb-2';
 const SECTION_TITLE_STYLE = "text-xl font-bold";
@@ -15,12 +16,34 @@ export default function UserPayment() {
   // 결제 버튼
 
   // 설명란 활성화
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [payment, setPayment] = useState('')
-
+  const [isDefaultAddress, setIsDefaultAddress] = useState(true)
+  const [address, setAddress] = useState('')
+  const [zoneCode, setZoneCode] = useState('')
 
   const handlePaymentBtn = (payment) =>{
     console.log(payment)
     setPayment(payment)
+  }
+  const handleModalOpen = () =>{
+    setIsModalOpen(true)
+  }
+  const handleModalClose = () =>{
+    setIsModalOpen(false)
+  }
+  const handleCompleteAddress = (addressData) =>{
+    setAddress(addressData.address)
+    setZoneCode(addressData.zoneCode)
+    setIsDefaultAddress(false)
+    setIsModalOpen(false);
+    // detailAddressRef.current?.focus(); 이후에 상세 주소에 포커싱
+  }
+  const handleDefaultAddress = (data) =>{
+    setAddress('기본 배송지')
+    setZoneCode('기본 우편번호')
+    setIsDefaultAddress(true)
+
   }
 
   return(
@@ -29,18 +52,30 @@ export default function UserPayment() {
         <section className={SECTION_STYLE}>
           <div className="flex justify-between">
             <h2 className={SECTION_TITLE_STYLE}>배송지</h2>
-            <button className="border border-gray-400 rounded-lg px-1">배송지 변경</button>
+            <button 
+            type="button"
+            onClick={handleModalOpen}
+            className="border border-gray-400 rounded-lg px-1">배송지 변경</button>
           </div>
           <div  className="flex flex-col mt-3">
-            <span className="text-sm text-gray-500 text-center border rounded-sm border-gray-300 px-0.5 w-[75px]">
+            <span className={`text-sm text-gray-500 text-center border rounded-sm border-gray-300 px-0.5 w-[75px]
+              ${isDefaultAddress && 'bg-black text-white'}
+              cursor-pointer select-none`}
+              onClick={handleDefaultAddress}
+              >
               기본 배송지
             </span>
             <span className="font-semibold">홍길동</span>
-            <span>ㅇㅇㅇ도 ㅇㅇ시 ㅇㅇ구 ㅇㅇ로 00빌라 000호 (000)</span>
+            <div className="flex flex-col">
+              <span>{address}</span>
+              <span>{zoneCode}</span>
+              <input type="text" placeholder="상세 주소 입력"/>
+            </div>
+            {/* <span>ㅇㅇㅇ도 ㅇㅇ시 ㅇㅇ구 ㅇㅇ로 00빌라 000호 (000)</span> */}
             <span>전화번호: 000-0000-0000</span>
           </div>
         </section>
-
+        {isModalOpen && <AddressModal onClose={handleModalClose} onSearch={handleCompleteAddress} />}
 
         <section className={SECTION_STYLE}>
           <h2 className={SECTION_TITLE_STYLE}>주문 상품</h2>
