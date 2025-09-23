@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAlertModal } from "./useAlertModal"; // AlertModal 훅
+import { useAlertModal } from "../components/common/layouts/common/modal/useAlertModal"; // AlertModal 훅
 
 export default function Signup() {
   const [formData, setFormData] = useState({
