@@ -20,6 +20,7 @@
     "daisy": "^0.2.0",
     "dayjs": "^1.11.18",
     "framer-motion": "^12.23.12",
+    "js-cookie": "^3.0.5",
     "lucide-react": "^0.542.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
