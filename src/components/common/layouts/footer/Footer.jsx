@@ -1,20 +1,5 @@
-// // 이건, 좀 수정해야될것 같아요오 ㅠㅠ
-
-// export default function Footer() {
-//   return (
-//     <footer className="bg-gray-100">
-//       <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col md:flex-row justify-between text-sm text-gray-600">
-//         <p>© 2025 MyShop. All rights reserved.</p>
-//         <nav className="flex gap-4 mt-2 md:mt-0">
-//           <a href="#">고객센터</a>
-//           <a href="#">이용약관</a>
-//           <a href="#">개인정보처리방침</a>
-//         </nav>
-//       </div>
-//     </footer>
-//   );
-// }
-
+import React from "react";
+import { useLocation } from "react-router-dom"; // useLocation 훅을 추가로 가져옵니다.
 import {
   Mail, ChevronUp, Globe, Instagram, Facebook, Youtube, MessageCircle,
   ShieldCheck, Download
@@ -49,6 +34,9 @@ const CONFIG = {
 };
 
 export default function Footer() {
+  const location = useLocation(); // Footer 컴포넌트 내에서 현재 경로를 가져옵니다.
+  const isHomepage = location.pathname === "/";
+
   const onChangeFamily = (e) => {
     const url = e.target.value;
     if (url) window.open(url, "_blank", "noopener,noreferrer");
@@ -56,9 +44,12 @@ export default function Footer() {
   };
 
   const scrollTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+  
+  // 메인 페이지가 아닐 때만 mt-6 클래스를 추가합니다.
+  const footerClass = `bg-[#0e0f12] text-gray-200 ${!isHomepage ? 'mt-6' : ''}`;
 
   return (
-    <footer className="bg-[#0e0f12] text-gray-200">
+    <footer className={footerClass}>
       <div className="mx-auto max-w-8xl px-6 py-12">
         {/* 상단 */}
         <div className="flex flex-col gap-8 md:flex-row md:justify-between">
