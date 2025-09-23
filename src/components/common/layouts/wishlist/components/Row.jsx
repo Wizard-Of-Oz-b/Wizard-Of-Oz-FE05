@@ -39,7 +39,7 @@ export default function Row({
 
       {/* 이미지 */}
       <div className="col-span-2">
-        <div className="relative aspect-[4/5] w-24 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
+        <div className="relative aspect-[3/4] w-36 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
           <img
             ref={onImgRef}
             src={item.image}
@@ -53,7 +53,7 @@ export default function Row({
       <div className="col-span-5">
         <p className="line-clamp-2 text-sm font-medium tracking-tight">{item.title}</p>
         <span className="mt-2 inline-flex items-center rounded-full border border-neutral-300 px-2 py-0.5 text-xs text-neutral-600">
-          {item.options}
+          {item.optionsText || "-"}
         </span>
       </div>
 

@@ -135,6 +135,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import ProductOptions from "./ProductOptions";
 import SmartImage from "./SmartImage";
+import { Link } from "react-router-dom";
 
 const API_BASE = (import.meta.env.VITE_API_BASE || "").trim() || "/api";
 const API_ORIGIN = API_BASE.startsWith("http")
@@ -165,7 +166,7 @@ function pickFromRow(row = {}) {
   return null;
 }
 
-export default function ProductCard({ data = {}, onClick }) {
+export default function ProductCard({ data = {}, to, onClick }) {
   const firstInit = useRef(true);
   const [imgSrc, setImgSrc] = useState(null);
   const [useSmart, setUseSmart] = useState(false);
@@ -185,17 +186,21 @@ export default function ProductCard({ data = {}, onClick }) {
     setUseSmart(true);
   };
 
+  const Container = to ? Link : "div";
+  const containerProps = to
+    ? { to }
+    : { onClick: onClick || (() => {}) };
+
   return (
-    <div
+    <Container
       className="
         flex flex-col cursor-pointer
         basis-1/2 md:basis-1/3 lg:basis-1/4
         px-2 pb-8 overflow-hidden min-w-0
       "
-      onClick={onClick || (() => {})}
+      {...containerProps}
     >
       <div className="w-full aspect-[2/3] rounded-md overflow-hidden">
-        {/* 1순위: 정상 URL이면 일반 <img> */}
         {!useSmart && !!imgSrc ? (
           <img
             src={imgSrc}
@@ -206,7 +211,6 @@ export default function ProductCard({ data = {}, onClick }) {
             onError={handleError}
           />
         ) : (
-          // 2순위: 실패/없음 → SmartImage (프록시 재시도 + SVG 폴백)
           <SmartImage
             src={imgSrc || ""} 
             alt={data.name || "상품"}
@@ -229,6 +233,6 @@ export default function ProductCard({ data = {}, onClick }) {
         {Number(data.price ?? 0).toLocaleString()}원
       </p>
       <span>{data?.is_active ? "" : "품절"}</span>
-    </div>
+    </Container>
   );
 }

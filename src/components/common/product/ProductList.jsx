@@ -68,6 +68,18 @@ export default function ProductList({
     p?.code ??
     p?.pk ??
     Math.random().toString(36).slice(2);
+    
+      const detailPath = (p) => {
+    const slug = p?.slug;
+    const id =
+      p?.id ?? p?.uuid ?? p?.product_id ?? p?.pk ?? p?.code ?? p?.sku;
+    // 라우트 규칙에 맞게 조정하세요.
+    // 예: /products/:slug 우선 → 없으면 /products/:id
+    if (slug) return `/products/${encodeURIComponent(slug)}`;
+    if (id) return `/products/${encodeURIComponent(id)}`;
+    // 식별값이 없으면 리스트 유지
+    return "#";
+  };
 
   if (isLoading) return <>로딩....</>;
 
@@ -102,7 +114,7 @@ export default function ProductList({
 
         <div className="-mx-2 flex flex-wrap items-start pt-5">
           {results.map((item) => (
-            <ProductCard key={keyOf(item)} data={item} />
+            <ProductCard key={keyOf(item)} data={item} to={detailPath(item)}/>
           ))}
         </div>
 

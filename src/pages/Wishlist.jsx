@@ -1,5 +1,5 @@
-import React, { useRef, useState } from "react";
-import { motion } from "framer-motion";
+import React, { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import CartDock from "../components/common/layouts/wishlist/components/CartDock";
 import Toolbar from "../components/common/layouts/wishlist/components/Toolbar";
 import List from "../components/common/layouts/wishlist/components/List";
@@ -8,18 +8,14 @@ import Toasts from "../components/common/layouts/wishlist/components/Toasts";
 import EmptyState from "../components/common/layouts/wishlist/components/EmptyState";
 import { useToasts } from "../components/common/layouts/wishlist/hooks/useToasts";
 import { useFlyToCart } from "../components/common/layouts/wishlist/hooks/useFlyToCart";
-
-//목업데이터
-const initialItems = [
-  { id: "1", title: "[오버핏 셔츠] 바이오워싱, SKY BLUE", image: "https://placehold.co/120x150?text=IMG", options: "옵션: FREE", price: 35900 },
-  { id: "2", title: "코튼 베이직 티셔츠, WHITE", image: "https://placehold.co/120x150?text=IMG", options: "옵션: M",    price: 15900 },
-];
+import { adaptWishlistItem, formatOptionsForDisplay, listWishlist, moveWishlistToCart, removeWishlist } from "../components/common/api/public/wishlist";
 
 export default function Wishlist() {
-  const [items, setItems] = useState(initialItems);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [selected, setSelected] = useState(new Set());
   const [cartCount, setCartCount] = useState(0);
-
   const cartDockRef = useRef(null);
   const imgRefs = useRef({});
   const flyToCart = useFlyToCart(cartDockRef);
@@ -28,13 +24,30 @@ export default function Wishlist() {
 
   const allChecked = selected.size === items.length && items.length > 0;
   const indeterminate = selected.size > 0 && !allChecked;
-  const isEmpty = items.length === 0;
+  const isEmpty = !loading && items.length === 0;
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        setLoading(true);
+        const rows = await listWishlist();
+        if (!mounted) return;
+        setItems(rows.map(adaptWishlistItem));
+      } catch (e) {
+        console.error(e);
+        pushToast("위시리스트를 불러오지 못했어요.");
+      } finally {
+        setLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
 
   const toggleAll = () => {
     if (allChecked) setSelected(new Set());
     else setSelected(new Set(items.map((i) => i.id)));
   };
-
   const toggleOne = (id) => {
     const next = new Set(selected);
     next.has(id) ? next.delete(id) : next.add(id);
@@ -46,13 +59,8 @@ export default function Wishlist() {
     else delete imgRefs.current[id];
   };
 
-  const removeSelected = () => {
-    if (!selected.size) return;
-    setItems((prev) => prev.filter((i) => !selected.has(i.id)));
-    setSelected(new Set());
-  };
-
-  const removeOne = (id) => {
+  // 로컬 제거(낙관적)
+  const removeOneLocal = (id) => {
     setItems((prev) => prev.filter((i) => i.id !== id));
     setSelected((prev) => {
       const n = new Set(prev);
@@ -60,35 +68,91 @@ export default function Wishlist() {
       return n;
     });
   };
-
-  const addOneToCart = (id) => {
-    const img = imgRefs.current[id];
-    flyToCart(img);
-    setCartCount((c) => c + 1);
-    pushToast("장바구니에 담겼어요.");
-    // TODO: await api.cart.add(id)
-    removeOne(id);
-  };
-
-  const addSelectedToCart = () => {
+  const removeSelectedLocal = () => {
     if (!selected.size) return;
-    const first = [...selected][0];
-    flyToCart(imgRefs.current[first]);
-    setCartCount((c) => c + selected.size);
-    pushToast(`선택한 ${selected.size}개 담겼어요.`);
-    // TODO: await api.cart.add([...selected])
     setItems((prev) => prev.filter((i) => !selected.has(i.id)));
     setSelected(new Set());
   };
 
+  const removeOne = async (id) => {
+    const backup = items;
+    removeOneLocal(id); 
+    try {
+      await removeWishlist(id);
+      pushToast("삭제했어요.");
+    } catch (e) {
+      console.error(e);
+      setItems(backup);
+      pushToast("삭제 중 오류가 발생했어요.");
+    }
+  };
+
+  const removeSelected = async () => {
+    if (!selected.size) return;
+    const ids = [...selected];
+    const backup = items;
+    removeSelectedLocal();
+    try {
+      await Promise.all(ids.map((id) => removeWishlist(id)));
+      pushToast("선택 항목을 삭제했어요.");
+    } catch (e) {
+      console.error(e);
+      setItems(backup);
+      pushToast("일부 항목 삭제에 실패했어요.");
+    }
+  };
+
+  const addOneToCart = async (id) => {
+    try {
+      await moveWishlistToCart(id, { quantity: 1, remove_from_wishlist: true });
+      const img = imgRefs.current[id];
+      if (img) flyToCart(img);
+      setCartCount((c) => c + 1);
+      pushToast("장바구니에 담겼어요.");
+      removeOneLocal(id);
+    } catch (e) {
+      console.error(e);
+      pushToast("장바구니 담기 중 오류가 발생했어요.");
+    }
+  };
+
+  const addSelectedToCart = async () => {
+    if (!selected.size) return;
+    const ids = [...selected];
+    try {
+      const first = ids[0];
+      const firstImg = imgRefs.current[first];
+      if (firstImg) flyToCart(firstImg);
+
+      await Promise.all(
+        ids.map((id) =>
+          moveWishlistToCart(id, { quantity: 1, remove_from_wishlist: true })
+        )
+      );
+
+      setCartCount((c) => c + ids.length);
+      pushToast(`선택한 ${ids.length}개 담겼어요.`);
+      setItems((prev) => prev.filter((i) => !selected.has(i.id)));
+      setSelected(new Set());
+    } catch (e) {
+      console.error(e);
+      pushToast("일부 항목 담기에 실패했어요.");
+    }
+  };
+
   return (
-    <motion.div className="min-h-screen bg-neutral-50 text-neutral-900" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.18 }}>
+    <motion.div
+      className="min-h-screen bg-neutral-50 text-neutral-900"
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.18 }}
+    >
       <div className="mx-auto w-full max-w-7xl px-6 py-16 mt-8">
         {/* 헤더 + 카트 */}
         <header className="mb-6 flex items-end justify-between">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight">위시리스트</h1>
-            <p className="mt-1 text-sm text-neutral-500">총 {items.length}개</p>
+            <p className="mt-1 text-sm text-neutral-500">
+              {loading ? "불러오는 중…" : `총 ${items.length}개`}
+            </p>
           </div>
           <CartDock ref={cartDockRef} count={cartCount} />
         </header>
@@ -119,7 +183,7 @@ export default function Wishlist() {
         )}
       </div>
 
-      {/* 선택 스티키 바 */}
+      {/* 스티키 바 */}
       <StickyActionBar
         selectedCount={selected.size}
         onClearSelection={() => setSelected(new Set())}
