@@ -7,7 +7,7 @@ export function getAccessToken() {
   return Cookies.get(ACCESS_TOKEN_KEY)
 }
 
-// 액세스 토큰 설정하기
+// 액세스 토큰 설정하기/
 export function setAccessToken(token) {
   //1시간
   return Cookies.set(ACCESS_TOKEN_KEY, token, { expires: 1/24 })
