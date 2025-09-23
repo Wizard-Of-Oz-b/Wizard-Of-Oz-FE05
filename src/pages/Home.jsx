@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Header from "../components/common/layouts/header/Header";
-import Footer from "../components/common/layouts/footer/Footer";
 import HeroSlider from "../components/HeroSlider";
 import HeroSubmenuOverlay from "../components/HeroSubmenuOverlay";
 
@@ -236,7 +235,6 @@ export default function Home() {
         ))}
       </div>
 
-      {!scrollLocked && <Footer />}
     </>
   );
 }
