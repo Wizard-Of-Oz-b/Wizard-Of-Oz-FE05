@@ -35,6 +35,7 @@ import AdminProtectedRoute from "./routes/AdminProtectedRoute.jsx";
 import AdminLogin from "./pages/Admin/AdminLogin.jsx";
 import AdminStockPage from "./pages/Admin/AdminStockPage.jsx";
 import AdminShipmentsPage from "./pages/Admin/AdminShipmentsPage.jsx";
+import UserCart from "./pages/UserCart";
 
 const queryClient = new QueryClient();
 
@@ -70,7 +71,8 @@ export default function App() {
                 <Route path="stock" element={<AdminStockPage />} />
                 <Route path="shipment" element={<AdminShipmentsPage />} />
               </Route>
-            </Route>
+             <Route path="/cart" element={<UserCart />} />
+           </Route>
 
             {/* 상태코드별 에러 라우트 */}
             <Route path="/errors/401" element={<Error401 />} />

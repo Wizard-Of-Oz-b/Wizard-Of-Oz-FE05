@@ -24,7 +24,7 @@ export default function Layout() {
       <main className="flex-1 pt-24">
         <Outlet />
       </main>
-      <Footer />
+      <Footer isHomepage={isHomepage} />
     </div>
   );
 }
