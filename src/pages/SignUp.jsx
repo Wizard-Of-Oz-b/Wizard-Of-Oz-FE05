@@ -116,7 +116,7 @@ export default function Signup() {
     formData.terms;
 
   return (
-    <div className="min-h-screen bg-white py-20 px-6">
+    <div className="min-h-screen bg-white px-6">
       <h1 className="text-3xl font-bold mb-8">신규 회원가입</h1>
 
       <form className="grid grid-cols-1 md:grid-cols-2 gap-10" onSubmit={handleSubmit}>
