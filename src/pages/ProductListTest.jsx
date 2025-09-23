@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useProducts } from "../hooks/useProducts";
 import ProductList from "../components/common/product/ProductList";
+import SearchRow from "../components/common/layouts/header/desktop/SearchRow";
+import { SEARCH } from "../components/common/layouts/header/constants";
 
 
 // 해당 컴포넌트는 상품 리스트를 불러 오는 방법의 예시 이니 참고 바랍니다.
@@ -17,6 +19,9 @@ export default function ProductListTest () {
   })
   // console.log(query)
 
+  const [keyword, setKeyword] = useState(query.q);
+  const inputRef = useRef(null);
+
   //tanStack 쿼리
   const { data: products, isLoading, isError, error } = useProducts(query);
   console.log(products, '프로덕트')
@@ -25,6 +30,12 @@ export default function ProductListTest () {
   }
   const handlePageChange = (pageNum) => {
     setQuery(prev => ({ ...prev, page: pageNum }));
+  }
+
+  const handleSearchSubmit = (e) => {
+     e.preventDefault();
+     const q = (keyword || "").trim();
+     setQuery(prev => ({ ...prev, q, page: 1 }));
   }
 
   //임시 에러
@@ -39,6 +50,14 @@ export default function ProductListTest () {
 
   return(
   <>
+
+  <SearchRow
+    active={SEARCH}
+    keyword={keyword}
+    setKeyword={setKeyword}
+    inputRef={inputRef}
+    onSubmit={handleSearchSubmit}
+  />
     <div className="flex flex-col items-center justify-center">
       <h1 className="text-5xl">테스트 제목</h1>
       <h2> 카테고리 위치</h2>

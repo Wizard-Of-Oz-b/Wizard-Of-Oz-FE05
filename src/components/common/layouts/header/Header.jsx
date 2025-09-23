@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { PRIMARY, SEARCH, SUGGEST } from "./constants";
 import { spring } from "./animations";
 import TopBar from "./desktop/TopBar";
@@ -16,6 +16,7 @@ export default function Header({ className = "", onSelectSub, onSearch }) {
   const inputRef = useRef(null);
 
   const location = useLocation();
+  const navigate = useNavigate();
   const isHomepage = location.pathname === "/";
   const isLight = !!active || mobileOpen || !isHomepage;
 
@@ -32,10 +33,25 @@ export default function Header({ className = "", onSelectSub, onSearch }) {
   const submitSearch = (e) => {
     if (e) e.preventDefault();
     if (!keyword.trim()) return;
-    onSearch?.(keyword.trim(), active && active !== SEARCH ? active : null);
+    const q = keyword.trim();
+    const primary = active && active !== SEARCH ? active : null;
+    onSearch?.(q, primary);
+    const qs = new URLSearchParams({ q, page: "1", sort: "created_at" });
+    if (primary) qs.set("primary", String(primary));
+    navigate({ pathname: "/results/test", search: `?${qs.toString()}` });
     setKeyword("");
     setActive(null);
   };
+
+  const handleSelectSub = (p, item) => {
+    const q = (item || "").trim();
+    if (!q) return;
+    onSelectSub?.(p, item);
+    const qs = new URLSearchParams({ q, page: "1", sort: "created_at" });
+    if (p) qs.set("primary", String(p));
+    navigate({ pathname: "/results/test", search: `?${qs.toString()}` });
+    setActive(null);
+    };
 
   useEffect(() => {
     if (active === SEARCH && inputRef.current) {
@@ -72,7 +88,7 @@ export default function Header({ className = "", onSelectSub, onSearch }) {
         setKeyword={setKeyword}
         inputRef={inputRef}
         onSubmitSearch={submitSearch}
-        onSelectSub={(p, item) => onSelectSub?.(p, item)}
+        onSelectSub={handleSelectSub}
         open={open}
         delayedClose={delayedClose}
       />
