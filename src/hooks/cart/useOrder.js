@@ -11,7 +11,7 @@ const api = axios.create({
 
 // 백엔드의 주문 생성 API를 호출하는 함수
 const createPurchaseAPI = async () => {
-  const response = await api.post("/orders/purchases", {});
+  const response = await api.post("/orders/checkout", {});
   return response.data;
 };
 
