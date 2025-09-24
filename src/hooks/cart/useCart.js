@@ -6,13 +6,15 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import api from "../../lib/axios";
+import userApi from "../../lib/api/userAxios";
 
-const BASE_URL = "/api/v1";
-
+// const BASE_URL = "/api/v1";
+const BASE_URL = import.meta.env.VITE_API_BASE + '/v1'
 async function getCartData() {
   try {
-    const response = await api.get(`/carts/me`);
+    console.log(BASE_URL)
+
+    const response = await userApi.get(`/carts/me`);
     // const response = await axios.get(`${BASE_URL}/me`);
     console.log(response.data);
     return response.data;
@@ -27,7 +29,7 @@ async function patchCartData({ id, updatedData }) {
   try {
     console.log(updatedData, "패치 테스트");
     // return  await axios.patch(`${BASE_URL}/items/${id}`, updatedData)
-    return await api.patch(`${BASE_URL}/carts/items/${id}`, updatedData);
+    return await userApi.patch(`/carts/items/${id}/quantity`, updatedData);
   } catch (error) {
     console.error(`카트 업로드 실패${error}`);
     throw error;
@@ -39,8 +41,8 @@ async function deleteCartItem({ productId, optionKey }) {
   try {
     const queryString = `option_key=${encodeURIComponent(optionKey)}`;
     // const response = await axios.delete(`${BASE_URL}/items/by-product/${productId}?${queryString}`)
-    const response = await api.delete(
-      `${BASE_URL}/carts/items/by-product/${productId}?${queryString}`
+    const response = await userApi.delete(
+      `/carts/items/by-product/${productId}?${queryString}`
     );
     return response.data;
   } catch (error) {

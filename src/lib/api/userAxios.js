@@ -3,7 +3,8 @@ import { getAccessToken, setAccessToken } from "../../utils/cookie";
 
 // 1. 유저 axios 인스턴스 생성
 const userApi = axios.create({
-  baseURL: "/api/v1", // BASE_URL을 인스턴스 생성 시 설정
+  // baseURL: "/api/v1", // BASE_URL을 인스턴스 생성 시 설정
+  baseURL: import.meta.env.VITE_API_BASE + '/v1'
 });
 
 // 2. 요청 인터셉터: 모든 요청에 Access Token을 헤더에 담아 보냄
@@ -32,7 +33,7 @@ userApi.interceptors.response.use(
         // Refresh Token(HttpOnly 쿠키)을 이용해 새로운 Access Token을 요청
         // 브라우저가 자동으로 HttpOnly 쿠키를 담아 보내므로, 요청 본문은 비워둡니다.
         const { data } = await axios.post(
-          "/api/auth/refresh",
+          `${import.meta.env.VITE_API_BASE}/v1/auth/token/refresh`,
           {},
           {
             withCredentials: true, // cross-origin 요청 시 쿠키 전송을 위해 필요

@@ -1,17 +1,35 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { getAccessToken } from "../../utils/cookie";
 
 const BASE_URL = "/api/v1";
 
-const api = axios.create({
-  // baseURL: import.meta.env.VITE_API_BASE_URL, // 차후 실제 연결 할때 사용
-  baseURL: BASE_URL,
+const orderApi = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE + "/v1", // 차후 실제 연결 할때 사용
+  // baseURL: BASE_URL,
 });
+orderApi.interceptors.request.use(
+  (config) => {
+    // 쿠키에서 accessToken을 가져옵니다.
+    const accessToken = getAccessToken();
 
+    // 토큰이 존재하면 Authorization 헤더에 추가합니다.
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+
+    return config;
+  },
+  (error) => {
+    // 요청 에러 처리
+    return Promise.reject(error);
+  }
+);
+// ▲
 // 백엔드의 주문 생성 API를 호출하는 함수
 const createPurchaseAPI = async () => {
-  const response = await api.post("/orders/checkout", {});
+  const response = await orderApi.post("/orders/checkout");
   return response.data;
 };
 
@@ -43,7 +61,7 @@ export const useCreatePurchase = () => {
         "알 수 없는 오류가 발생했습니다."; // 그 외의 경우
 
       console.error("주문 실패:", errorData);
-      alert(errorMessage); // 사용자에게 에러 메시지 표시
+      alert(errorMessage); // 사용자에게 에러 메시지 나중에 모달창을 교체
 
       // 인증 에러(401)인 경우, 로그인 페이지로 보내는 등의 추가 처리도 가능
       if (error.response?.status === 401) {
