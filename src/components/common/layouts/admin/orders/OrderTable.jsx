@@ -1,6 +1,47 @@
 import { StatusBadge } from ".";
 const TERMINALS = new Set(["취소완료", "환불완료"]);
 
+function calcTotalKRW(o) {
+  if (Array.isArray(o?.items) && o.items.length > 0) {
+    const sum = o.items.reduce((acc, it) => {
+      const unit = Number(it?.price ?? it?.unit_price ?? 0) || 0;
+      const qty = Number(it?.qty ?? it?.quantity ?? 0) || 0;
+      return acc + unit * qty;
+    }, 0);
+    if (!Number.isNaN(sum) && sum > 0) return sum;
+  }
+
+  if (o?.totalAmount != null) {
+    const tot = Number(o.totalAmount);
+    if (!Number.isNaN(tot) && tot >= 0) return tot;
+  }
+
+  const unit = Number(o?.unit_price ?? o?.price ?? 0) || 0;
+  const qty = Number(o?.amount ?? o?.qty ?? 1) || 1;
+  return unit * qty;
+}
+
+/** 대표 상품명 */
+function getPrimaryName(o) {
+  if (o?.items?.[0]?.name) return String(o.items[0].name);
+  if (o?.product_name) return String(o.product_name);
+  return "-";
+}
+
+/** 주문일 */
+function fmtDate(value) {
+  if (!value) return "-";
+  const v =
+    typeof value === "string" || typeof value === "number"
+      ? value
+      : String(value);
+  try {
+    return new Date(v).toLocaleString();
+  } catch {
+    return "-";
+  }
+}
+
 export default function OrderTable({ orders = [], onOpenDetails, onOpenRequest, onOpenStatus }) {
   return (
     <div className="relative overflow-x-auto rounded-2xl shadow-lg bg-white">
@@ -24,63 +65,71 @@ export default function OrderTable({ orders = [], onOpenDetails, onOpenRequest, 
               <td colSpan={8} className="py-10 text-center text-gray-500">주문이 없습니다.</td>
             </tr>
           ) : (
-            orders.map((o) => (
-              <tr key={o.id} className="hover:bg-violet-50/40 transition-colors">
-                <td className="px-4 py-4 font-semibold text-gray-800">
-                  <button onClick={() => onOpenDetails?.(o.id)} className="underline decoration-violet-300 underline-offset-2 hover:text-violet-700">
-                    {o.orderNo}
-                  </button>
-                </td>
+            orders.map((o) => {
+              const totalKRW = calcTotalKRW(o);
+              const primaryName = getPrimaryName(o);
+              const extraCount =
+                Array.isArray(o.items) && o.items.length > 1
+                  ? o.items.length - 1
+                  : 0;
 
-                <td className="px-4 py-4">{o.customer ? String(o.customer) : "-"}</td>
-
-                <td className="px-4 py-4 truncate">
-                  {o.items?.[0]?.name ? String(o.items[0].name) : "-"}
-                  {o.items && o.items.length > 1 && (<span className="text-xs text-gray-500"> 외 {o.items.length - 1}건</span>)}
-                </td>
-
-                <td className="px-4 py-4 text-right font-semibold text-violet-700">
-                  {Number(o.amount || 0).toLocaleString()}원
-                </td>
-
-                <td className="px-4 py-4 text-center">
-                  <StatusBadge status={o.status} onClick={() => onOpenStatus?.(o.id)} />
-                </td>
-
-                <td className="px-4 py-4 text-center">
-                  {o.request ? (
-                    <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                      {o.request.type === "cancel" ? "취소요청" : "환불요청"}
-                    </span>
-                  ) : (
-                    <span className="text-xs text-gray-400">-</span>
-                  )}
-                </td>
-
-                <td className="px-4 py-4 text-center text-gray-600">
-                  {o.created_at
-                    ? new Date(
-                        typeof o.created_at === "string" || typeof o.created_at === "number"
-                          ? o.created_at
-                          : String(o.created_at)
-                      ).toLocaleString()
-                    : "-"}
-                </td>
-
-                <td className="px-4 py-4 text-center">
-                  {o.request && !TERMINALS.has(o.status) ? (
+              return (
+                <tr key={o.id ?? o.purchase_id ?? o.orderNo} className="hover:bg-violet-50/40 transition-colors">
+                  <td className="px-4 py-4 font-semibold text-gray-800">
                     <button
-                      onClick={() => onOpenRequest?.(o.id)}
-                      className="inline-flex items-center gap-1 rounded-lg bg-amber-100 px-3 py-1.5 text-sm font-semibold text-amber-800 hover:bg-amber-200"
+                      onClick={() => onOpenDetails?.(o.id ?? o.purchase_id)}
+                      className="underline decoration-violet-300 underline-offset-2 hover:text-violet-700"
                     >
-                      {o.request.type === "cancel" ? "취소요청 처리" : "환불요청 처리"}
+                      {o.orderNo ?? (o.pg_tid || String(o.id ?? o.purchase_id ?? "-").split("-")[0])}
                     </button>
-                  ) : (
-                    <span className="text-xs text-gray-400">—</span>
-                  )}
-                </td>
-              </tr>
-            ))
+                  </td>
+
+                  <td className="px-4 py-4">{o.customer ? String(o.customer) : "-"}</td>
+
+                  <td className="px-4 py-4 truncate">
+                    {primaryName}
+                    {extraCount > 0 && (
+                      <span className="text-xs text-gray-500"> 외 {extraCount}건</span>
+                    )}
+                  </td>
+
+                  <td className="px-4 py-4 text-right font-semibold text-violet-700">
+                    {Number(totalKRW || 0).toLocaleString()}원
+                  </td>
+
+                  <td className="px-4 py-4 text-center">
+                    <StatusBadge status={o.status} onClick={() => onOpenStatus?.(o.id ?? o.purchase_id)} />
+                  </td>
+
+                  <td className="px-4 py-4 text-center">
+                    {o.request ? (
+                      <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                        {o.request.type === "cancel" ? "취소요청" : "환불요청"}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-gray-400">-</span>
+                    )}
+                  </td>
+
+                  <td className="px-4 py-4 text-center text-gray-600">
+                    {fmtDate(o.created_at)}
+                  </td>
+
+                  <td className="px-4 py-4 text-center">
+                    {o.request && !TERMINALS.has(o.status) ? (
+                      <button
+                        onClick={() => onOpenRequest?.(o.id ?? o.purchase_id)}
+                        className="inline-flex items-center gap-1 rounded-lg bg-amber-100 px-3 py-1.5 text-sm font-semibold text-amber-800 hover:bg-amber-200"
+                      >
+                        {o.request.type === "cancel" ? "취소요청 처리" : "환불요청 처리"}
+                      </button>
+                    ) : (
+                      <span className="text-xs text-gray-400">—</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })
           )}
         </tbody>
       </table>
