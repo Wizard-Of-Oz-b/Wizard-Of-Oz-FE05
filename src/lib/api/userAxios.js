@@ -1,13 +1,13 @@
 import axios from "axios";
 import { getAccessToken, setAccessToken } from "../../utils/cookie";
 
-// 1. 우리만의 axios 인스턴스 생성
-const api = axios.create({
+// 1. 유저 axios 인스턴스 생성
+const userApi = axios.create({
   baseURL: "/api/v1", // BASE_URL을 인스턴스 생성 시 설정
 });
 
 // 2. 요청 인터셉터: 모든 요청에 Access Token을 헤더에 담아 보냄
-api.interceptors.request.use(
+userApi.interceptors.request.use(
   (config) => {
     const accessToken = getAccessToken();
     if (accessToken) {
@@ -19,7 +19,7 @@ api.interceptors.request.use(
 );
 
 // 3. 응답 인터셉터: 401 에러 발생 시 Access Token을 재발급받고, 원래 요청을 다시 시도
-api.interceptors.response.use(
+userApi.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
@@ -46,7 +46,7 @@ api.interceptors.response.use(
         originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
 
         // 원래 요청을 다시 시도
-        return api(originalRequest);
+        return userApi(originalRequest);
       } catch (refreshError) {
         // Refresh Token도 만료된 경우 (로그아웃 처리)
         console.error("토큰 재발급 실패:", refreshError);
@@ -59,4 +59,4 @@ api.interceptors.response.use(
   }
 );
 
-export default api;
+export default userApi;
