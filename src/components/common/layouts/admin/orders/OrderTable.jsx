@@ -1,4 +1,6 @@
 import { StatusBadge } from ".";
+import { normalizeShipmentStatus, SHIPMENT_STATUS_LABEL } from "../../../api/common/shipments";
+
 const TERMINALS = new Set(["취소완료", "환불완료"]);
 
 function calcTotalKRW(o) {
@@ -98,7 +100,14 @@ export default function OrderTable({ orders = [], onOpenDetails, onOpenRequest, 
                   </td>
 
                   <td className="px-4 py-4 text-center">
-                    <StatusBadge status={o.status} onClick={() => onOpenStatus?.(o.id ?? o.purchase_id)} />
+                    {(() => {
+                      let sKey = normalizeShipmentStatus(o?.shipment?.status);
+                      if (!sKey && (o?.shipmentId || o?.trackingNo || o?.shipment?.tracking_number)) {
+                      sKey = '-';
+                      }
+                      const label = SHIPMENT_STATUS_LABEL[sKey] || (sKey ? sKey : '—');
+                      return <StatusBadge status={label} />;
+                    })()}
                   </td>
 
                   <td className="px-4 py-4 text-center">

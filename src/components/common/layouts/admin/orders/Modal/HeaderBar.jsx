@@ -1,7 +1,12 @@
 import { ClipboardList } from "lucide-react";
-import StatusSelect from "../StatusSelect";
+import { normalizeShipmentStatus, SHIPMENT_STATUS_LABEL } from "../../../../api/common/shipments";
+import StatusBadge from "../StatusBadge";
 
-export default function HeaderBar({ order, onChangeStatus }) {
+export default function HeaderBar({ order , onChangeStatus }) {
+  const sKey = normalizeShipmentStatus(order?.shipment?.status);
+  const keyOrPending = sKey || (order?.shipmentId || order?.shipment?.tracking_number ? "pending" : "");
+  const shipLabel = SHIPMENT_STATUS_LABEL[keyOrPending] || (keyOrPending ? keyOrPending : "—");
+
   return (
     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
       <div className="flex items-center gap-3 min-w-0">
@@ -15,7 +20,7 @@ export default function HeaderBar({ order, onChangeStatus }) {
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 shrink-0">
-        <StatusSelect value={order.status} onChange={(next) => onChangeStatus?.(order.id, next)} />
+        <StatusBadge status={shipLabel} />
       </div>
     </div>
   );
