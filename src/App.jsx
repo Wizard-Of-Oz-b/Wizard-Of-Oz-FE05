@@ -39,7 +39,7 @@ import AdminLogin from "./pages/Admin/AdminLogin.jsx";
 import AdminStockPage from "./pages/Admin/AdminStockPage.jsx";
 import AdminShipmentsPage from "./pages/Admin/AdminShipmentsPage.jsx";
 import UserCart from "./pages/UserCart";
-import UserPayment from "./pages/UserPayment";
+import UserPayment from "./pages/Payments/UserPayment.jsx";
 
 const queryClient = new QueryClient();
 
