@@ -2,10 +2,10 @@ import React from "react";
 import Modal from "./Modal";
 import HeaderBar from "./Modal/HeaderBar";
 import MetaCard from "./Modal/MetaCard";
-import CustomerShippingForm from "./Modal/CustomerShippingForm";
 import OrderItems from "./Modal/OrderItems";
 import TrackingCard from "./Modal/TrackingCard";
 import { usePurchaseOption } from "./Modal/usePurchaseOption";
+import CustomerAddressList from "./Modal/CustomerAddressList";
 
 export default function OrderDetailsModal({
   open,
@@ -31,7 +31,7 @@ export default function OrderDetailsModal({
         {/* 바디 */}
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-5 gap-6">
           {/* 좌: 고객/배송 정보 */}
-          <CustomerShippingForm order={order} onSaveContact={onSaveContact} />
+          <CustomerAddressList />
 
           {/* 우: 품목 + 운송장 */}
           <section className="lg:col-span-3 space-y-5">
