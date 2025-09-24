@@ -1,12 +1,14 @@
-import axios from "axios";
+// import axios from "axios";
 import { createQueryString } from "../../utils/createQueryString";
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import api from "../../lib/axios";
 
 const BASE_URL = '/api/v1/carts'
 
 async function getCartData() {
   try {
-    const response = await axios.get(`${BASE_URL}/me`);
+    const response = await api.get(`/carts/me`);
+    // const response = await axios.get(`${BASE_URL}/me`);
     console.log(response.data)
     return response.data
   } catch (error) {
@@ -19,7 +21,8 @@ async function getCartData() {
 async function patchCartData({id,updatedData}) {
   try{
     console.log(updatedData,'패치 테스트')
-    return  await axios.patch(`${BASE_URL}/items/${id}`, updatedData)
+    // return  await axios.patch(`${BASE_URL}/items/${id}`, updatedData)
+    return await api.patch(`/carts/items/${id}`, updatedData)
   }catch(error){
     console.error(`카트 업로드 실패${error}`)
     throw error
@@ -31,7 +34,8 @@ async function patchCartData({id,updatedData}) {
 async function deleteCartItem({productId,optionKey}){
   try{
     const queryString = `option_key=${encodeURIComponent(optionKey)}`
-    const response = await axios.delete(`${BASE_URL}/items/by-product/${productId}?${queryString}`)
+    // const response = await axios.delete(`${BASE_URL}/items/by-product/${productId}?${queryString}`)
+    const response = await api.delete(`/carts/items/by-product/${productId}?${queryString}`)
     return response.data
   }catch(error){
     console.error(`카트 아이템 삭제 실패${error}`)
