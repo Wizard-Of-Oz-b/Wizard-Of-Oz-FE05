@@ -44,6 +44,7 @@ import {
   deleteReview,
 } from "./api";
 import { useAuth } from "../../../../context/AuthContext";
+import { toKoreanMessage } from "./api/errors";
 
 export default function ReviewSection({
   productId,
@@ -61,6 +62,8 @@ export default function ReviewSection({
   const [rows, setRows] = useState(initialReviews);
   const [loading, setLoading] = useState(false);
 
+  const [loadError, setLoadError] = useState(null);
+
   // 작성 상태
   const [rating, setRating] = useState(0);
   const [content, setContent] = useState("");
@@ -68,19 +71,25 @@ export default function ReviewSection({
 
   const canCreate = enableCreate && !!authedUserId;
 
+  const load = async () => {
+    if (!productId) return;
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const list = await listReviewsByProduct(productId, { page: 1, size: pageSize });
+      setRows(Array.isArray(list) ? list : []);
+    } catch (e) {
+      setLoadError(e);
+      const msg = toKoreanMessage(e) || "리뷰를 불러오지 못했습니다.";
+      toast("error", msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     let alive = true;
-    (async () => {
-      if (!productId) return;
-      setLoading(true);
-      try {
-        const list = await listReviewsByProduct(productId, { page: 1, size: pageSize });
-        if (alive && list && list.length) setRows(list);
-      } catch (e) {
-      } finally {
-        if (alive) setLoading(false);
-      }
-    })();
+    (async () => { if (alive) await load(); })();
     return () => { alive = false; };
   }, [productId, pageSize]);
 
@@ -109,7 +118,7 @@ export default function ReviewSection({
       setContent("");
       toast("success", "리뷰가 등록되었습니다.");
     } catch (e) {
-      const msg = e?.response?.data?.detail || e?.message || "리뷰 등록에 실패했습니다.";
+      const msg = toKoreanMessage(e) || "리뷰 등록에 실패했습니다.";
       toast("error", msg);
     } finally {
       setSubmitting(false);
@@ -125,7 +134,7 @@ export default function ReviewSection({
       toast("success", "리뷰가 수정되었습니다.");
       return res;
     } catch (e) {
-      toast("error", e?.response?.data?.detail || e?.message || "리뷰 수정에 실패했습니다.");
+      toast("error", toKoreanMessage(e) || "리뷰 수정에 실패했습니다.");
       throw e;
     }
   };
@@ -136,7 +145,7 @@ export default function ReviewSection({
       setRows((prev) => prev.filter((r) => (r.review_id ?? r.id) !== reviewId));
       toast("success", "리뷰가 삭제되었습니다.");
     } catch (e) {
-      toast("error", e?.response?.data?.detail || e?.message || "리뷰 삭제에 실패했습니다.");
+      toast("error", toKoreanMessage(e) || "리뷰 삭제에 실패했습니다.");
     }
   };
 
@@ -189,6 +198,16 @@ return (
     {/* 목록 */}
     {loading ? (
       <div className="py-10 text-center text-sm text-gray-500">불러오는 중…</div>
+    ) : loadError ? (
+      <div className="py-8 text-center text-sm text-red-600">
+        리뷰를 불러오지 못했습니다.{" "}
+        <button
+          onClick={() => load()}
+          className="text-red-700 hover:text-red-800"
+        >
+          다시 시도하기
+        </button>
+      </div>
     ) : rows.length === 0 ? (
       <div className="py-8 text-center text-sm text-gray-500">아직 작성된 리뷰가 없습니다.</div>
     ) : (

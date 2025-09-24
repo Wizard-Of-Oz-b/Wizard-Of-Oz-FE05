@@ -21,9 +21,14 @@ export async function listReviewsByProduct(productId, { page = 1, size = 20, ord
       ? { results, count: paged.count, next: paged.next, previous: paged.previous, avg_rating: paged.avg_rating }
       : results;
   } catch (e) {
-    if ([401, 403].includes(e?.response?.status)) rethrowWithKorean(e);
-    return withMeta ? { results: [], count: 0, next: null, previous: null, avg_rating: 0 } : [];
-  }
+    const s = e?.response?.status;
+    if (s === 404) {
+        return withMeta
+            ? { results: [], count: 0, next: null, previous: null, avg_rating: 0}
+            : [];
+        }
+        rethrowWithKorean(e);
+    }
 }
 
 /** 단건 조회 */
