@@ -122,7 +122,7 @@ export default function TrackingCard({ order, onSaveTracking }) {
         if (!code) {
           onSaveTracking?.(order.id, { 
           __error: true,
-          message: "지원하지 않는 택배사입니다. (CJ대한통운 / 롯데 / 한진 / 우체국)",
+          message: "지원하지 않는 택배사입니다. (CJ대한통운 / 롯데 / 한진 / 우체국 / 로젠)",
       });
       return;
     }
