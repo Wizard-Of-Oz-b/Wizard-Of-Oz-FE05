@@ -1,6 +1,12 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { getShipment, normalizeShipmentStatus, registerShipment, SHIPMENT_STATUS_LABEL, syncShipment } from "../../../../api/common/shipments";
+import {  getShipment, 
+          normalizeShipmentStatus, 
+          registerShipment, 
+          SHIPMENT_STATUS_LABEL, 
+          syncShipment 
+        } from "../../../../api/common/shipments";
 import dayjs from "dayjs";
+import { CARRIER_LABEL, toCarrierCode } from "../../../../api/common/carrierCode";
 
 const fmt = (ts) =>
   ts ? dayjs(ts).format("YYYY-MM-DD HH:mm") : "—";
@@ -112,12 +118,22 @@ export default function TrackingCard({ order, onSaveTracking }) {
     if (!order?.id || !trackingNo) return;
     try {
       setLoading(true);
+      const code = toCarrierCode(carrier);
+        if (!code) {
+          onSaveTracking?.(order.id, { 
+          __error: true,
+          message: "지원하지 않는 택배사입니다. (CJ대한통운 / 롯데 / 한진 / 우체국)",
+      });
+      return;
+    }
+
       const res = await registerShipment({
         purchase_id: order.id,
         tracking_number: trackingNo,
-        carrier,
-        carrier_code: carrier,
+        carrier: code,
+        carrier_code: code,
       });
+
       onSaveTracking?.(order.id, {
         carrier: res.carrier ?? carrier,
         trackingNo: res.tracking_number ?? trackingNo,
@@ -170,7 +186,7 @@ export default function TrackingCard({ order, onSaveTracking }) {
       </div>
       {(order.carrier || order.trackingNo) && (
         <p className="mt-2 text-xs text-gray-500">
-          현재 등록된 송장 정보: {order.carrier || "-"} {order.trackingNo || "-"}
+          현재 등록된 송장 정보: {CARRIER_LABEL[order.carrier] || order.carrier || "-"} {order.trackingNo || "-"}
         </p>
       )}
 
