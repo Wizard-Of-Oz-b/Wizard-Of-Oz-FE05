@@ -213,7 +213,20 @@ export default function OrderAdminPage() {
       return;
     }
 
+  const silent = !!payload?.__silent;
   const { carrier, trackingNo, shipmentId, status, last_synced_at } = payload || {};
+
+  const prev = orders.find(o => o.id === orderId);
+  const prevShip = prev?.shipment || {};
+  const isSame =
+    (prev?.carrier || "") === (carrier || "").trim() &&
+    (prev?.trackingNo || "") === (trackingNo || "").trim() &&
+    (prev?.shipmentId || "") === (shipmentId || "") &&
+    (normalizeShipmentStatus(prevShip?.status) || "") === (normalizeShipmentStatus(status) || "") &&
+    (prevShip?.last_synced_at || "") === (last_synced_at || "");
+  if (isSame) {
+    return
+  }
 
   setOrders((prev) =>
     prev.map((o) =>
@@ -248,8 +261,9 @@ export default function OrderAdminPage() {
       };
       localStorage.setItem("shipmentByPurchase", JSON.stringify(map));
     } catch {}
-
-    pushToast("운송장 정보가 저장되었습니다.", { type: "success" });
+    if (!silent) {
+      pushToast("운송장 정보가 저장되었습니다.", { type: "success" });
+    }
   };
 
   // 상태 변경
