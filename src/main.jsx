@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "./index.css";
 import { worker } from "./mocks/browser";
+import { AuthProvider } from "./context/AuthContext";
 
 // createRoot(document.getElementById("root")).render(
 //   <React.StrictMode>
@@ -29,18 +30,22 @@ if (import.meta.env.MODE === "development") {
     .then(() => {
       root.render(
         <React.StrictMode>
+          <AuthProvider>
           <BrowserRouter>
             <App />
           </BrowserRouter>
+          </AuthProvider>
         </React.StrictMode>
       );
     });
 } else {
   root.render(
-    <React.StrictMode>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </React.StrictMode>
+        <React.StrictMode>
+          <AuthProvider>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+          </AuthProvider>
+        </React.StrictMode>
   );
 }

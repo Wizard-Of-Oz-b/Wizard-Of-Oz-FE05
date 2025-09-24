@@ -42,7 +42,8 @@ import {
   createReview,
   patchReview,
   deleteReview,
-} from "./api/reviews";
+} from "./api";
+import { useAuth } from "../../../../context/AuthContext";
 
 export default function ReviewSection({
   productId,
@@ -54,6 +55,9 @@ export default function ReviewSection({
   pageSize = 20,
   onToast,
 }) {
+  const { user, isLoggedIn } = useAuth?.() || { user: null, isLoggedIn: false };
+  const authedUserId = currentUserId ?? user?.id ?? null;
+
   const [rows, setRows] = useState(initialReviews);
   const [loading, setLoading] = useState(false);
 
@@ -61,6 +65,8 @@ export default function ReviewSection({
   const [rating, setRating] = useState(0);
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  const canCreate = enableCreate && !!authedUserId;
 
   useEffect(() => {
     let alive = true;
@@ -86,26 +92,25 @@ export default function ReviewSection({
 
   const handleCreate = async () => {
     if (!productId) return;
+    if (!authedUserId) {
+      toast("error", "리뷰를 작성하려면 로그인하세요.");
+      return;
+    }
     if (!rating || !content.trim()) {
       toast("error", "별점과 내용을 입력해주세요.");
       return;
     }
     setSubmitting(true);
     try {
-      let created;
-      if (onCreate) {
-        created = await onCreate({ product_id: productId, rating, content });
-      } else {
-        // 입력 시도
-        created = await createReview({ product_id: productId, rating, content });
-      }
-      // UI 갱신
-      setRows((prev) => [created, ...prev]);
+      const payload = { product_id: productId, rating, content };
+      const created = onCreate ? await onCreate(payload) : await createReview(payload);
+      setRows((prev) => [{ ...created, user_id: authedUserId }, ...prev]);
       setRating(0);
       setContent("");
       toast("success", "리뷰가 등록되었습니다.");
     } catch (e) {
-      toast("error", e?.response?.data?.detail || e?.message || "리뷰 등록에 실패했습니다.");
+      const msg = e?.response?.data?.detail || e?.message || "리뷰 등록에 실패했습니다.";
+      toast("error", msg);
     } finally {
       setSubmitting(false);
     }
@@ -135,7 +140,7 @@ export default function ReviewSection({
     }
   };
 
-  const canEditReview = (r) => isAdmin || `${r.user_id}` === `${currentUserId}`;
+  const canEditReview = (r) => isAdmin || `${r.user_id}` === `${authedUserId}`;
 
 return (
   <section className="w-full rounded-xl border border-gray-200 bg-white p-5 sm:p-6">
@@ -144,30 +149,42 @@ return (
       <span className="text-xs text-gray-500">총 {rows.length.toLocaleString()}개</span>
     </header>
 
-    {/* 작성 폼 */}
-    {enableCreate && (
-      <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
-        <div className="flex items-center justify-between gap-3">
-          <StarRating value={rating} onChange={setRating} size={20} />
-          <button
-            onClick={handleCreate}
-            disabled={submitting}
-            className="inline-flex items-center rounded-md bg-black px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-900 disabled:opacity-50"
-          >
-            등록
-          </button>
+    {/* 작성 폼: 로그인한 사람만 */}
+      {canCreate ? (
+        <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
+          <div className="flex items-center justify-between gap-3">
+            <StarRating value={rating} onChange={setRating} size={20} />
+            <button
+              onClick={handleCreate}
+              disabled={submitting}
+              className="inline-flex items-center rounded-md bg-black px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-900 disabled:opacity-50"
+            >
+              등록
+            </button>
+          </div>
+          <div className="mt-3">
+            <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              rows={3}
+              className="w-full rounded-md border border-gray-200 bg-white p-2 text-sm outline-none placeholder:text-gray-400 focus:border-slate-400 focus:ring-1 focus:ring-slate-300"
+              placeholder="상품 사용 후기를 남겨주세요."
+            />
+          </div>
         </div>
-        <div className="mt-3">
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={3}
-            className="w-full rounded-md border border-gray-200 bg-white p-2 text-sm outline-none placeholder:text-gray-400 focus:border-slate-400 focus:ring-1 focus:ring-slate-300"
-            placeholder="상품 사용 후기를 남겨주세요."
-          />
+      ) : enableCreate && (
+        <div className="mb-6 rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-600 flex items-center justify-between">
+          <span>리뷰를 작성하려면 로그인해 주세요.</span>
+          {typeof onLoginClick === "function" && (
+            <button
+              onClick={onLoginClick}
+              className="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium hover:bg-white"
+            >
+              로그인
+            </button>
+          )}
         </div>
-      </div>
-    )}
+      )}
 
     {/* 목록 */}
     {loading ? (
@@ -183,7 +200,6 @@ return (
               canEdit={canEditReview(r)}
               onSave={handleSave}
               onDelete={handleDelete}
-              // (선택) 카드 내부도 같은 톤으로: 보더/그림자 제거
               className="!border-0 !shadow-none !p-0"
               actionClassName="text-xs text-gray-500 hover:text-gray-800"
             />
