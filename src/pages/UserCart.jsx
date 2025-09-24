@@ -4,11 +4,11 @@ import CartDays from "../components/features/cart/CartDays";
 import CartToolbar from "../components/features/cart/CartToolbar";
 import OrderSummary from "../components/features/cart/OrderSummary";
 import { productGroupCount } from "../utils/cart/productGroupCount";
-import {
-  useCart,
-} from "../hooks/cart/useCart";
+import { useCart } from "../hooks/cart/useCart";
 import CartSkeleton from "../components/skeletons/CartSkeleton";
 import CartLoadingSpin from "../components/features/cart/CartLoadingSpin";
+import { useCreatePurchase } from "../hooks/cart/useOrder";
+import { useNavigate } from "react-router-dom";
 
 export default function UserCart() {
   //accessToken 추가필요(API 설정 할때 설정해주셔야 합니다.
@@ -16,8 +16,10 @@ export default function UserCart() {
   // 카드 체크 예시
   // const [cardChecked, setCardChecked] = useState([]);
   const { data: cart, isLoading, isError, error } = useCart();
+  const purchaseMutation = useCreatePurchase();
+  const nagivate = useNavigate()
   // const {mutate: updateCartQuantity, isPending} = usePatchCart();
-  
+
   // 카트리스트 정렬
   // const cartList = cart ? productGroupCount(cart.items).sort((a,b)=> a.product.localeCompare(b.product)) : [];
   const cartList = useMemo(() => {
@@ -42,6 +44,14 @@ export default function UserCart() {
       return acc;
     }, 0);
   }, [cartList]);
+
+  const handlePurchaseClick = () => {
+    console.log("결제하기 버튼 클릭! API 요청을 보냅니다.");
+    purchaseMutation.mutate();
+  };
+  const OnClickShopping = () =>{
+    nagivate(`/`)
+  }
   // console.log(cartList);
   // 체크 비활
   // const handleSingleCheck = (checked, id) =>{
@@ -83,9 +93,9 @@ export default function UserCart() {
         <p className="text-4xl mb-3">장바구니</p>
         <div>
           <CartToolbar
-            // checkItemLength={cardChecked.length}
-            // dataLength={cartList.length}
-            // onChangeCheckbox ={handleAllCheck}
+          // checkItemLength={cardChecked.length}
+          // dataLength={cartList.length}
+          // onChangeCheckbox ={handleAllCheck}
           />
         </div>
         <div className="flex flex-col mt-3">
@@ -115,10 +125,15 @@ export default function UserCart() {
         </div>
         <div className="flex items-center justify-center mt-3">
           {/* <button className="border border-gray-300 text-xl px-8 py-2 mx-2">선택 상품 주문</button> */}
-          <button className="border border-gray-300 text-xl px-8 py-2 mx-2">
+          <button className="border border-gray-300 text-xl px-8 py-2 mx-2"
+            onClick={OnClickShopping}>
             쇼핑 계속하기
           </button>
-          <button className="border border-gray-300 text-xl px-8 py-2 mx-2 bg-black text-white">
+
+          <button className="border border-gray-300 text-xl px-8 py-2 mx-2 bg-black text-white"
+            onClick={handlePurchaseClick}
+            disabled={purchaseMutation.isPending}
+          >
             전체 상품 주문
           </button>
         </div>
