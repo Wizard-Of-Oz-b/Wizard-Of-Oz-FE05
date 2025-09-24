@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { listReviewsByUser, deleteReview, patchReview } from "./api/reviews";
+import { listReviewsByUser, deleteReview, patchReview } from "./api";
 import ReviewCard from "./ui/ReviewCard";
 
 /**

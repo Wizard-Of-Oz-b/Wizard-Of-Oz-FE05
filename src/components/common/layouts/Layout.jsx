@@ -3,15 +3,17 @@ import { useLocation, Outlet } from "react-router-dom";
 import Header from "./header/Header";
 import HeaderLight from "./header/HeaderLight";
 import Footer from "./footer/Footer";
+import { useAuth } from '../../../context/AuthContext';
 
 export default function Layout() {
   const { pathname } = useLocation();
+  const { isLoggedIn, user } = useAuth();
   const isHomepage = pathname === "/";
 
   if (isHomepage) {
     return (
       <>
-        <Header />
+        <Header isLoggedIn={isLoggedIn} user={user} />
         <Outlet />
         <Footer />
       </>
@@ -20,7 +22,7 @@ export default function Layout() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <HeaderLight />
+      <HeaderLight isLoggedIn={isLoggedIn} user={user} />
       <main className="flex-1 pt-24">
         <Outlet />
       </main>

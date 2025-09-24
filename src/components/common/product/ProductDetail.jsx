@@ -17,7 +17,7 @@ import {
 import HeartBurst from '../layouts/wishlist/components/HeartBurst';
 import { motion } from "framer-motion"; // ✅ whileTap, spring 등 사용
 
-export default function ProductDetail({ product, onAddToCart }) {
+export default function ProductDetail({ product, onAddToCart, onToast }) {
   const [color, setColor] = useState(product.colors?.[0]?.code);
   const [size, setSize] = useState(product.sizes?.[0] || 'M');
   const [qty, setQty] = useState(1);
@@ -129,7 +129,7 @@ export default function ProductDetail({ product, onAddToCart }) {
     } catch (e) {
       setWish(prevWish);
       console.error('wishlist toggle failed', e);
-      alert('위시리스트 처리 중 오류가 발생했어요.');
+      onToast?.('error', '위시리스트 처리 중 오류가 발생했어요.');
     }
   };
 
@@ -249,7 +249,7 @@ export default function ProductDetail({ product, onAddToCart }) {
             productId={product.product_id}
             currentUserId={123}
             isAdmin={false}
-            onToast={(type, msg) => alert(`${type}: ${msg}`)}
+            onToast={onToast}
           />
         </div>
       </section>
