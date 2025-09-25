@@ -53,6 +53,8 @@ export default function App() {
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/results/test" element={<ResultTestPage />} />
               <Route path="/signup" element={<SignUp />} />
+              <Route path="/cart" element={<UserCart />} />
+
             </Route>
 
             {/* 인증/접근제어 예외 페이지 */}
@@ -71,7 +73,6 @@ export default function App() {
                 <Route path="stock" element={<AdminStockPage />} />
                 <Route path="shipment" element={<AdminShipmentsPage />} />
               </Route>
-             <Route path="/cart" element={<UserCart />} />
            </Route>
 
             {/* 상태코드별 에러 라우트 */}

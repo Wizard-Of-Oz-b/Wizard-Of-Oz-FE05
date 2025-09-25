@@ -1,4 +1,5 @@
 import { useDeleteCartItem, usePatchCart } from "../../../hooks/cart/useCart";
+import { fetchPublicMainImageUrl } from "../../common/api/admin/productImagesPublic";
 import CartLoadingSpin from "./CartLoadingSpin";
 import CartStepper from "./CartStepper";
 /**
@@ -41,7 +42,7 @@ export default function CartCard({ data }) {
   
   const {mutate: deleteMutaition, isPending } = useDeleteCartItem();
   const {mutate: updateCartQuantity, isPending: patchPending} = usePatchCart();
-  
+  const productsImg = fetchPublicMainImageUrl(data.product)
   const option = formatOptionKey(data.option_key)
   const handleOnClickDelete = () => {
     deleteMutaition({
@@ -75,11 +76,16 @@ export default function CartCard({ data }) {
       {(isPending || patchPending) && <CartLoadingSpin />}
 
       <div className="flex justify-center items-center">
-        <img
-          src={`https://picsum.photos/id/1/160/225`}
-          alt="상품 이미지"
-          className="w-[140px] h-[190px]"
-        />
+        <div className="w-[140px h-[190px]">
+          <img
+            src={productsImg}
+            onError={(e) => {
+              e.target.src ='https://picsum.photos/id/1/160/225' //이미지 없으면
+            }}
+            alt="상품 이미지"
+            className="w-[140px] h-[190px]"
+          />
+        </div>
         <div className="flex flex-col  w-[400px] ml-4">
           <p className="text-lg">{data.product_name}</p>
           <p className="text-gray-400">{option}</p>
@@ -87,15 +93,14 @@ export default function CartCard({ data }) {
       </div>
 
       <CartStepper
-        value={data.count}
-        itemId={data.product}
+        value={data.quantity}
+        itemId={data.id}
         option={data.option_key}
         onChageValue={onClickPatch}
-        max={data.quantity}
       />
       <p className="text-center">택배 배송</p>
       <p className="text-center">
-        {(data.unit_price * data.count).toLocaleString()}원
+        {(data.unit_price * data.quantity).toLocaleString()}원
       </p>
       <div className="flex flex-col">
         {/* <button className="border border-gray-300 mb-2 py-0.5">주문하기</button> */}
