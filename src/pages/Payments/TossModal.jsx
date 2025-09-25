@@ -78,7 +78,9 @@ export default function PaymentModal({ isOpen, onClose, paymentData }) {
     if (amount.value !== newAmountValue) {
       setAmount({ currency: "KRW", value: newAmountValue });
       console.log(newAmountValue ,'테스트 금액 변경');
-      widgets.setAmount(amount);
+      // widgets.setAmount(amount);
+      widgets.setAmount({ currency: "KRW", value: newAmountValue });
+
     }
   }, [widgets, paymentData?.amount]);
 

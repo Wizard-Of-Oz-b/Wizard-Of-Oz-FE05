@@ -15,7 +15,7 @@ export default function UserPayment() {
 
   const testPaymentInfo = {
     method: "CARD",
-    amount: 30000,
+    amount: 25000,
     customerKey: TEST_CUSTOMER_KEY,
     orderId: `order_${new Date().getTime()}`,
     orderName: "베이직 티셔츠 외 1건",
@@ -90,7 +90,7 @@ export default function UserPayment() {
   };
 
   return (
-    <div className="mt-30 flex w-full items-center justify-center">
+    <div className="flex w-full items-center justify-center">
       <form className="w-2/4 flex flex-col justify-center items-center">
         <section className={SECTION_STYLE}>
           <div className="flex justify-between">
