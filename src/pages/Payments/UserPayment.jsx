@@ -15,7 +15,7 @@ export default function UserPayment() {
 
   const testPaymentInfo = {
     method: "CARD",
-    amount: 50000,
+    amount: 30000,
     customerKey: TEST_CUSTOMER_KEY,
     orderId: `order_${new Date().getTime()}`,
     orderName: "베이직 티셔츠 외 1건",

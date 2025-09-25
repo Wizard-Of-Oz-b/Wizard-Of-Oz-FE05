@@ -39,7 +39,7 @@ import AdminLogin from "./pages/Admin/AdminLogin.jsx";
 import AdminStockPage from "./pages/Admin/AdminStockPage.jsx";
 import AdminShipmentsPage from "./pages/Admin/AdminShipmentsPage.jsx";
 import UserCart from "./pages/UserCart";
-import UserPayment from "./pages/Payments/UserPayment.jsx";
+import UserPayment from "./pages/UserPayment";
 
 const queryClient = new QueryClient();
 
@@ -59,7 +59,8 @@ export default function App() {
               <Route path="/results/test" element={<ResultTestPage />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/payment" element={<UserPayment />} />
-              <Route path="/Mypage" element={<Mypage />} />              <Route path="/login" element={<Login />} />
+              <Route path="/Mypage" element={<Mypage />} />
+              <Route path="/login" element={<Login />} />
             </Route>
             <Route path="/auth/callback/:provider" element={<OAuthCallback />} />
 

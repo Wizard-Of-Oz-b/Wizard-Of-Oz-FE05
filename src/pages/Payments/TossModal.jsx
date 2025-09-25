@@ -3,11 +3,10 @@ import { useEffect, useState } from "react";
 
 // 공식 예제 코드의 로직을 Modal 컴포넌트 안에 재구성합니다.
 export default function PaymentModal({ isOpen, onClose, paymentData }) {
-  // 1. 공식 예제와 동일하게 state들을 선언합니다.
   const [widgets, setWidgets] = useState(null);
   const [amount, setAmount] = useState({
     currency: "KRW",
-    value: 50_000,
+    value: 30000,
   });
   const [ready, setReady] = useState(false);
 
@@ -78,7 +77,7 @@ export default function PaymentModal({ isOpen, onClose, paymentData }) {
     const newAmountValue = Number(paymentData.amount);
     if (amount.value !== newAmountValue) {
       setAmount({ currency: "KRW", value: newAmountValue });
-      // console.log(newAmountValue ,'테스트 금액 변경');
+      console.log(newAmountValue ,'테스트 금액 변경');
       widgets.setAmount(amount);
     }
   }, [widgets, paymentData?.amount]);
@@ -125,9 +124,9 @@ export default function PaymentModal({ isOpen, onClose, paymentData }) {
           disabled={!ready}
           className="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded mt-8 disabled:bg-gray-400"
         >
-          {console.log(amount.value, '테스트')}
+          {console.log(amount, '테스트')}
           {ready
-            ? `${amount.value.toLocaleString()}원 결제하기`
+            ? `${paymentData.amount.toLocaleString()}원 결제하기`
             : "결제 정보 로딩 중..."}
         </button>
       </div>
