@@ -9,10 +9,10 @@ import {
 import userApi from "../../lib/api/userAxios";
 
 // const BASE_URL = "/api/v1";
-const BASE_URL = import.meta.env.VITE_API_BASE + '/v1'
+const BASE_URL = import.meta.env.VITE_API_BASE + "/v1";
 async function getCartData() {
   try {
-    console.log(BASE_URL)
+    console.log(BASE_URL);
 
     const response = await userApi.get(`/carts/me`);
     // const response = await axios.get(`${BASE_URL}/me`);
@@ -44,8 +44,8 @@ async function deleteCartItem({ productId, optionKey }) {
       `/carts/items/by-product/${productId}/`,
       {
         params: {
-          option_key: optionKey
-        }
+          option_key: optionKey,
+        },
       }
     );
     return response.data;
@@ -55,7 +55,11 @@ async function deleteCartItem({ productId, optionKey }) {
   }
 }
 
-
+async function clearCartAPI() {
+  // 이 요청은 별도의 body나 파라미터가 필요 없습니다.
+  const response = await userApi.delete("/carts/clear/");
+  return response.data;
+}
 
 export function useCart(params) {
   const query = createQueryString(params);
@@ -97,3 +101,25 @@ export function useDeleteCartItem() {
     },
   });
 }
+
+/**
+ * 장바구니 전체 비우기 useMutation 훅
+ */
+export const useClearCart = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: clearCartAPI,
+
+    onSuccess: () => {
+      console.log("장바구니를 성공적으로 비웠습니다.");
+      queryClient.invalidateQueries({ queryKey: ["userCart"] });
+    },
+
+    onError: (error) => {
+      // 차후 모달창으로 변경 할것
+      console.error("장바구니 비우기 실패:", error);
+      alert("장바구니를 비우는 중 오류가 발생했습니다.");
+    },
+  });
+};
