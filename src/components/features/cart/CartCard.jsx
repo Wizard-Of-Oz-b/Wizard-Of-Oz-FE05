@@ -87,15 +87,14 @@ export default function CartCard({ data }) {
       </div>
 
       <CartStepper
-        value={data.count}
-        itemId={data.product}
+        value={data.quantity}
+        itemId={data.id}
         option={data.option_key}
         onChageValue={onClickPatch}
-        max={data.quantity}
       />
       <p className="text-center">택배 배송</p>
       <p className="text-center">
-        {(data.unit_price * data.count).toLocaleString()}원
+        {(data.unit_price * data.quantity).toLocaleString()}원
       </p>
       <div className="flex flex-col">
         {/* <button className="border border-gray-300 mb-2 py-0.5">주문하기</button> */}

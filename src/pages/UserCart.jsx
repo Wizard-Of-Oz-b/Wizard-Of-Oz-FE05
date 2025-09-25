@@ -11,17 +11,11 @@ import { useCreatePurchase } from "../hooks/cart/useOrder";
 import { useNavigate } from "react-router-dom";
 
 export default function UserCart() {
-  //accessToken 추가필요(API 설정 할때 설정해주셔야 합니다.
 
-  // 카드 체크 예시
-  // const [cardChecked, setCardChecked] = useState([]);
   const { data: cart, isLoading, isError, error } = useCart();
   const purchaseMutation = useCreatePurchase();
   const nagivate = useNavigate()
-  // const {mutate: updateCartQuantity, isPending} = usePatchCart();
-
-  // 카트리스트 정렬
-  // const cartList = cart ? productGroupCount(cart.items).sort((a,b)=> a.product.localeCompare(b.product)) : [];
+  console.log(cart , '카트')
   const cartList = useMemo(() => {
     if (!cart?.items) {
       return [];
@@ -29,21 +23,10 @@ export default function UserCart() {
 
     return productGroupCount(cart.items).sort(
       (a, b) =>
-        a.product.localeCompare(b.product) ||
+        a.product.localeCompare(b.id) ||
         a.option_key.localeCompare(b.option_key)
     );
   }, [cart]);
-  //총 액수 합산
-  const sumPrice = useMemo(() => {
-    if (!cartList) {
-      return 0;
-    }
-
-    return cartList.reduce((acc, item) => {
-      acc += item.unit_price * item.count;
-      return acc;
-    }, 0);
-  }, [cartList]);
 
   const handlePurchaseClick = () => {
     console.log("결제하기 버튼 클릭! API 요청을 보냅니다.");
@@ -52,36 +35,6 @@ export default function UserCart() {
   const OnClickShopping = () =>{
     nagivate(`/`)
   }
-  // console.log(cartList);
-  // 체크 비활
-  // const handleSingleCheck = (checked, id) =>{
-  //   if(checked){
-  //     setCardChecked(prev => [...prev, id])
-  //   }else{
-  //     setCardChecked(cardChecked.filter((el) => el !== id))
-  //   }
-  // }
-
-  // const handleAllCheck = (checked) => {
-  //   if(checked){
-  //     const productArray = [];
-  //     cartList.forEach((el) => productArray.push(el.product));
-  //     setCardChecked(productArray)
-  //   }else{
-  //     setCardChecked([])
-  //   }
-  // }
-
-  // const onClickPatch = (itemId, option, newQuantity) => {
-  //   console.log(updateCartQuantity);
-  //   updateCartQuantity({
-  //     id: itemId,
-  //     updatedData: {
-  //       quantity: newQuantity,
-  //       option_key: option,
-  //     },
-  //   });
-  // };
 
   if (isLoading) {
     return <CartSkeleton />;
@@ -93,34 +46,37 @@ export default function UserCart() {
         <p className="text-4xl mb-3">장바구니</p>
         <div>
           <CartToolbar
-          // checkItemLength={cardChecked.length}
-          // dataLength={cartList.length}
-          // onChangeCheckbox ={handleAllCheck}
           />
         </div>
         <div className="flex flex-col mt-3">
           <div className="flex flex-col mr-4">
             {/* 나중에 상품 없음 컴포넌트 추가 할것 중요! */}
-            {cartList.length === 0 ? "상품없음" : null}
+            {/* {cartList.length === 0 ? "상품없음" : null}
             {cartList.map((el) => (
               <CartCard
-                key={el.product + el.option_key}
+                key={el.id}
                 data={el}
-                // checkItems={cardChecked}
-                // setItemCount={onClickPatch}
-                // onChangeSelect={handleSingleCheck}
+              />
+            ))} */}
+            {
+              cart?.items.lengnth === 0 ? "상품없음" : null
+            }
+            {cart.items.map(el => (
+              <CartCard
+              key={el.id}
+              data={el} 
               />
             ))}
           </div>
 
-          {/* <div className="flex w-full justify-between mt-2">
-            <button className="border border-gray-300 px-5 py-1">선택상품 삭제</button>
+          <div className="flex w-full justify-end mt-2">
+            {/* <button className="border border-gray-300 px-5 py-1">선택상품 삭제</button> */}
             <button className="border border-gray-300 px-5 py-1">장바구니 비우기</button>
-          </div> */}
+          </div>
           <span className="text-sm mt-1">
             ※ {(50000).toLocaleString()}원 이상 구매시 배송비 무료{" "}
           </span>
-          <OrderSummary sumPrice={sumPrice} />
+          <OrderSummary sumPrice={cart.items_total} />
           <CartDays />
         </div>
         <div className="flex items-center justify-center mt-3">
@@ -141,15 +97,4 @@ export default function UserCart() {
     </div>
   );
 
-  // return(
-  //   <div className="flex w-full  justify-center">
-  //     <table className="mt-30">
-  //       <CartToolbar
-  //         checkItemLength={cardChecked.length}
-  //         dataLength ={cartList.length}
-  //         onChangeCheckbox ={handleAllCheck}
-  //         />
-  //     </table>
-  //   </div>
-  // )
 }

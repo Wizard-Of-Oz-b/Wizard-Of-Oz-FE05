@@ -29,7 +29,7 @@ async function patchCartData({ id, updatedData }) {
   try {
     console.log(updatedData, "패치 테스트");
     // return  await axios.patch(`${BASE_URL}/items/${id}`, updatedData)
-    return await userApi.patch(`/carts/items/${id}/quantity`, updatedData);
+    return await userApi.patch(`/carts/items/${id}/update/`, updatedData);
   } catch (error) {
     console.error(`카트 업로드 실패${error}`);
     throw error;
@@ -39,10 +39,14 @@ async function patchCartData({ id, updatedData }) {
 //deleteCartItem
 async function deleteCartItem({ productId, optionKey }) {
   try {
-    const queryString = `option_key=${encodeURIComponent(optionKey)}`;
     // const response = await axios.delete(`${BASE_URL}/items/by-product/${productId}?${queryString}`)
     const response = await userApi.delete(
-      `/carts/items/by-product/${productId}?${queryString}`
+      `/carts/items/by-product/${productId}/`,
+      {
+        params: {
+          option_key: optionKey
+        }
+      }
     );
     return response.data;
   } catch (error) {
@@ -50,6 +54,8 @@ async function deleteCartItem({ productId, optionKey }) {
     throw error;
   }
 }
+
+
 
 export function useCart(params) {
   const query = createQueryString(params);

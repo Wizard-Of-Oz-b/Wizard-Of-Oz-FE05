@@ -10,7 +10,7 @@ export default function OrderSummary({sumPrice}){
     <div className="flex justify-center items-center border border-gray-200 bg-gray-200 w-full mt-2 py-6">
       <div className="flex flex-col mx-5 items-center">
         <span className="text-sm">총 상품금액</span>
-        <span className="text-2xl">{sumPrice.toLocaleString()}</span>
+        <span className="text-2xl">{Math.floor(sumPrice.toLocaleString())}</span>
       </div>
       <span>+</span>
       <div className="flex flex-col items-center mx-5 ">
@@ -20,7 +20,7 @@ export default function OrderSummary({sumPrice}){
       <span>=</span>
       <div className="flex flex-col items-center mx-5">
         <span className="text-sm">결제예정금액</span>
-        <span className="text-2xl">{(sumPrice+delive_fee).toLocaleString()}</span>
+        <span className="text-2xl">{Math.floor((sumPrice+delive_fee).toLocaleString())}</span>
       </div>
     </div>
   )
