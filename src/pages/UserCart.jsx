@@ -20,14 +20,11 @@ export default function UserCart() {
     if (!cart?.items) {
       return [];
     }
-
-    return productGroupCount(cart.items).sort(
-      (a, b) =>
-        a.product.localeCompare(b.id) ||
-        a.option_key.localeCompare(b.option_key)
-    );
+    return cart.items.sort((a, b) =>
+      a.id.localeCompare(b.id)
+    )
   }, [cart]);
-
+  console.log(cartList, '정렬')
   const handlePurchaseClick = () => {
     console.log("결제하기 버튼 클릭! API 요청을 보냅니다.");
     purchaseMutation.mutate();
@@ -66,7 +63,7 @@ export default function UserCart() {
               />
             ))} */}
             {cart?.items.lengnth === 0 ? "상품없음" : null}
-            {cart.items.map((el) => (
+            {cartList.map((el) => (
               <CartCard key={el.id} data={el} />
             ))}
           </div>

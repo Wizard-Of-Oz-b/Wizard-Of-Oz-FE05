@@ -29,7 +29,7 @@ orderApi.interceptors.request.use(
 // ▲
 // 백엔드의 주문 생성 API를 호출하는 함수
 const createPurchaseAPI = async () => {
-  const response = await orderApi.post("/orders/checkout");
+  const response = await orderApi.post("/orders/checkout/");
   return response.data;
 };
 
