@@ -1,47 +1,47 @@
 import axios from "axios";
-import { getCookie, isUnsafe } from "./csrf";
-import { getToken, setToken, getRefreshToken, setRefreshToken, clearToken } from "./auth";
+import Cookies from "js-cookie";
 
 const BASE = (import.meta.env.VITE_API_BASE || "").trim() || "/api";
 
+const ACCESS_KEY = "accessToken";
+const REFRESH_FALLBACK_KEY = "refreshToken";
+
 const api = axios.create({
   baseURL: BASE,
-  withCredentials: true,
+  withCredentials: true, 
   headers: { Accept: "application/json" },
   timeout: 15000,
 });
 
 api.interceptors.request.use((config) => {
-  const method = String(config.method || "get").toLowerCase();
-  if (isUnsafe(method)) {
-    const csrf = getCookie("csrftoken");
-    if (csrf && !config.headers["X-CSRFToken"]) {
-      config.headers["X-CSRFToken"] = csrf;
-    }
-  }
-  // Authorization 헤더
-  const token = getToken();
-  if (token) {
-    config.headers["Authorization"] = `Bearer ${token}`;
+  const access = Cookies.get(ACCESS_KEY);
+  if (access) {
+    config.headers["Authorization"] = `Bearer ${access}`;
+  } else {
+    delete config.headers?.Authorization;
   }
   return config;
 });
 
-export async function refreshAccessToken() {
-  const refresh = getRefreshToken();
-  if (!refresh) throw new Error("No refresh token");
+async function doTokenRefresh() {
+  const refresh = Cookies.get(REFRESH_FALLBACK_KEY);
+  if (!refresh) throw new Error("No refresh token in client cookie");
 
   const r = await axios.post(
     `${BASE}/v1/auth/token/refresh/`,
     { refresh },
-    { headers: { Accept: "application/json" } }
+    { withCredentials: true, headers: { Accept: "application/json" } }
   );
-  if (r.data?.access) {
-    setToken(r.data.access);
-    if (r.data.refresh) setRefreshToken(r.data.refresh);
-    return r.data.access;
-  }
-  throw new Error("refresh failed");
+
+  const newAccess = r.data?.access;
+  const newRefresh = r.data?.refresh;
+
+  if (!newAccess) throw new Error("Refresh returned no access");
+
+  Cookies.set(ACCESS_KEY, newAccess, { expires: 1 / 24 });
+  if (newRefresh) Cookies.set(REFRESH_FALLBACK_KEY, newRefresh, { expires: 7 });
+
+  return newAccess;
 }
 
 api.interceptors.response.use(
@@ -51,11 +51,13 @@ api.interceptors.response.use(
     if (error?.response?.status === 401 && !original._retry) {
       original._retry = true;
       try {
-        const newAccess = await refreshAccessToken();
+        const newAccess = await doTokenRefresh();
+        original.headers = original.headers || {};
         original.headers["Authorization"] = `Bearer ${newAccess}`;
         return api(original);
       } catch (e) {
-        clearToken();
+        Cookies.remove(ACCESS_KEY);
+        Cookies.remove(REFRESH_FALLBACK_KEY);
         return Promise.reject(e);
       }
     }
@@ -64,3 +66,24 @@ api.interceptors.response.use(
 );
 
 export default api;
+
+export async function loginAndStore({ email, password, AUTH_BASE = "/api/v1/auth" }) {
+  const r = await api.post(`${AUTH_BASE}/login/`, { email, password }, {
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+  });
+
+  const access = r.data?.access;
+  const refresh = r.data?.refresh;
+
+  if (!access || !refresh) throw new Error("Login must return access/refresh");
+
+  Cookies.set(ACCESS_KEY, access, { expires: 1 / 24 });
+  Cookies.set(REFRESH_FALLBACK_KEY, refresh, { expires: 7 });
+
+  return r.data;
+}
+
+export function logoutLocal() {
+  Cookies.remove(ACCESS_KEY);
+  Cookies.remove(REFRESH_FALLBACK_KEY);
+}
