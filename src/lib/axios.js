@@ -1,7 +1,10 @@
 import axios from "axios";
 import { getToken, clearToken } from "./auth";
 
-const BASE = (import.meta.env.VITE_API_BASE || "").trim() || "/api";
+const ROOT = ((
+  import.meta.env.VITE_API_BASE || "http://127.0.0.1:8000"
+).trim()).replace(/\/+$/, "");
+const BASE = `${ROOT}`;
 
 const api = axios.create({
   baseURL: BASE,
@@ -10,8 +13,8 @@ const api = axios.create({
   timeout: 15000,
 });
 
-const AUTH_PATH_RE = /\/auth\/(login|token(?:\/(refresh|verify))?)(\/|$)/;
-const AUTH_ZONE_401_RE = /\/v1\/auth\/|\/v1\/admin(?:s)?\//;
+const AUTH_PATH_RE = /\/auth\/(login|token(?:\/(refresh|verify))?)(\/|$)/i;
+const AUTH_ZONE_401_RE = /\/v1\/auth\/|\/v1\/admin(?:s)?\//i;
 
 api.interceptors.request.use((config) => {
   const url = config.url || "";
@@ -22,15 +25,18 @@ api.interceptors.request.use((config) => {
     String(config.headers?.["X-No-Auth"] || "").toLowerCase() === "true";
 
   config.headers = config.headers || {};
-  const token = getToken?.();
 
-  const shouldAttachToken = !!token && !isAuthPath && !forceNoAuth;
+  const token = typeof getToken === "function" ? getToken() : undefined;
 
-  if (shouldAttachToken) {
+  if (token && !isAuthPath && !forceNoAuth) {
     config.headers.Authorization = `Bearer ${token}`;
   } else {
-    if ("Authorization" in config.headers) delete config.headers.Authorization;
-    if (forceNoAuth) config.withCredentials = false; 
+    if ("Authorization" in config.headers) {
+      delete config.headers.Authorization;
+    }
+    if (forceNoAuth) {
+      config.withCredentials = false;
+    }
   }
 
   return config;
@@ -43,7 +49,11 @@ api.interceptors.response.use(
     const url = err?.config?.url || "";
 
     if (status === 401 && AUTH_ZONE_401_RE.test(url)) {
-      try { clearToken?.(); } catch {}
+      try {
+        if (typeof clearToken === "function") clearToken();
+      } catch {
+        // ignore clearToken error
+      }
     }
     return Promise.reject(err);
   }
