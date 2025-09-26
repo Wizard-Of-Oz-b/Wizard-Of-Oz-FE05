@@ -1,10 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  listWishlist,
-  addWishlist,
-  removeWishlist,
-  moveWishlistToCart,
-} from "../../api/wishlist.api";
+import { addWishlist, listWishlist, moveWishlistToCart, removeWishlist } from "../../components/common/api/public/wishlist";
 
 const WISHLIST_QK = ["wishlist"];
 const CART_QK = ["userCart"];
