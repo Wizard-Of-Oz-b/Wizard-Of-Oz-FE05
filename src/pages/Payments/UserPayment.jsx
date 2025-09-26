@@ -3,7 +3,10 @@ import VirtualAccountEx from "../../components/features/payment/VirtualAccountEx
 import TossEx from "../../components/features/payment/TossEX";
 import AddressModal from "../../components/features/payment/AddressModal";
 import { useMyProfile } from "../../hooks/useUser";
-import TossModal from "./TossModal";
+import TossModal from "../../components/features/payment/TossModal";
+import { useGetMyOrders } from "../../hooks/payments/useOrderPayment";
+import Ordercard from "../../components/features/payment/OrderCard";
+import { filterOrders } from "../../utils/filterOrders";
 
 const SECTION_STYLE =
   "w-full border border-gray-200 rounded-2xl px-4 py-5 shadow-sm mb-2";
@@ -12,7 +15,11 @@ const TEST_CUSTOMER_KEY = "YbX2HuSlsC9uVJW6NMRMj";
 
 export default function UserPayment() {
   const { data: userProfile, isLoading } = useMyProfile();
-
+  const { data: userOrder, isLoading : orderLoading, isError, error, isFetching } = useGetMyOrders( 1, 50 ); //임시
+  console.log(userOrder)
+  console.log(userProfile)
+  const filterOrder = filterOrders(userOrder?.results, 'ready') //ready 상태만 가져옴
+  
   const testPaymentInfo = {
     method: "CARD",
     amount: 25000,
@@ -131,28 +138,9 @@ export default function UserPayment() {
 
         <section className={SECTION_STYLE}>
           <h2 className={SECTION_TITLE_STYLE}>주문 상품</h2>
-          <div className="flex mt-2">
-            <img
-              src={`https://picsum.photos/id/1/50/70`}
-              className="w-[70px] h-[90px]"
-            />
-            <div className="flex flex-col ml-3">
-              <span>[데일리지] 트윌 코튼 와이드 팬츠_SPTCF49G01</span>
-              <span className="text-gray-500">[옵션] 색상:BEIGE/사이즈:XL</span>
-              <span className="mt-3">{(30000).toLocaleString()}원</span>
-            </div>
-          </div>
-          <div className="flex mt-2">
-            <img
-              src={`https://picsum.photos/id/2/50/70`}
-              className="w-[70px] h-[90px]"
-            />
-            <div className="flex flex-col ml-3">
-              <span>[데일리지] 트윌 코튼 와이드 팬츠_SPTCF49G01</span>
-              <span className="text-gray-500">[옵션] 색상:BEIGE/사이즈:XL</span>
-              <span className="mt-3">{(30000).toLocaleString()}원</span>
-            </div>
-          </div>
+          {filterOrder.map(el => 
+            <Ordercard key={el.product} data={el} />
+          )}
         </section>
 
         <section className={SECTION_STYLE}>
