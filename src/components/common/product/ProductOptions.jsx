@@ -35,10 +35,10 @@ function RenderSize({size}){
 
 export default function ProductOptions({options}) {
   // console.log(options)
-
-  const optColor = options.filter(el => el.id === 'OPT_COLOR');
+  const optionsArray = Array.isArray(options) ? options : [];
+  const optColor = optionsArray.filter(el => el.id === 'OPT_COLOR');
   // console.log(optColor)
-  const optSize = options.filter(el=> el.id ==='OPT_SIZE')
+  const optSize = optionsArray.filter(el=> el.id ==='OPT_SIZE')
   return(
   <>
     <RenderColorOption color={optColor} />

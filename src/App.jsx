@@ -72,7 +72,6 @@ export default function App() {
                 <Route path="stock" element={<AdminStockPage />} />
                 <Route path="shipment" element={<AdminShipmentsPage />} />
               </Route>
-             
            </Route>
 
             {/* 상태코드별 에러 라우트 */}
