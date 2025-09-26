@@ -37,6 +37,7 @@ import AdminLogin from "./pages/Admin/AdminLogin.jsx";
 import AdminStockPage from "./pages/Admin/AdminStockPage.jsx";
 import AdminShipmentsPage from "./pages/Admin/AdminShipmentsPage.jsx";
 import UserCart from "./pages/UserCart";
+import Mypage from "./pages/Mypage.jsx";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +58,7 @@ export default function App() {
               <Route path="/cart" element={<UserCart />} />
 
               <Route path="/login" element={<Login/>} />
+              <Route path="/Mypage" element={<Mypage/>} />
             </Route>
 
             {/* 인증/접근제어 예외 페이지 */}
