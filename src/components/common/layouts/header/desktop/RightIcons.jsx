@@ -31,14 +31,18 @@ export default function RightIcons({ isLight, onOpenSearch }) {
         <Heart className="w-7 h-7" />
       </button>
       <button
-  aria-label="Account"
-  className={base}
-  onClick={() => navigate("/mypage")}
+        aria-label="Account"
+        className={base}
+        onClick={() => navigate("/mypage")}
 >
   <User className="w-7 h-7" />
 </button>
 
-      <button aria-label="Cart" className={base}>
+      <button 
+        aria-label="Cart" 
+        className={base}
+        onClick={() => navigate("/cart")}
+        >
         <ShoppingCart className="w-7 h-7 cursor-pointer hover:scale-110 hover:opacity-80 transition" />
       </button>
       <button aria-label="Logout" className={base} onClick={handleLogout}>
