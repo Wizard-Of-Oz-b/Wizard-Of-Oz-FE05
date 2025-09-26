@@ -1,13 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Header from "../components/common/layouts/header/Header";
-import Footer from "../components/common/layouts/footer/Footer";
 import HeroSlider from "../components/HeroSlider";
 import HeroSubmenuOverlay from "../components/HeroSubmenuOverlay";
 
 export default function Home() {
   const [activePrimary, setActivePrimary] = useState(null);
-  const [index, setIndex] = useState(0);   
-  const lockRef = useRef(false);                            
+  const [index, setIndex] = useState(0);
+  const lockRef = useRef(false);
   const [scrollLocked, setScrollLocked] = useState(true);
 
   const firstMountRef = useRef(true);
@@ -56,7 +55,6 @@ export default function Home() {
     },
   ];
 
-  // ===== 전환 도우미 =====
   const goTo = useCallback((i) => {
     if (i < 0 || i >= steps.length || lockRef.current) return;
     lockRef.current = true;
@@ -105,12 +103,13 @@ export default function Home() {
     };
   }, [scrollLocked]);
 
-  const unlockAndRevealFooter = () => {
-    setScrollLocked(false);
-    setTimeout(() => {
-      window.scrollTo({ top: window.innerHeight, behavior: "smooth" });
-    }, 30);
-  };
+const unlockAndRevealFooter = () => {
+  setScrollLocked(false);
+  setTimeout(() => {
+    document.querySelector("footer")?.scrollIntoView({ behavior: "smooth" });
+  }, 30);
+};
+
 
   useEffect(() => {
     const onWheel = (e) => {
@@ -182,7 +181,6 @@ export default function Home() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [scrollLocked]);
 
-
   const handleDotClick = (i) => {
     if (i === index && scrollLocked) return;
     if (!scrollLocked) {
@@ -198,7 +196,7 @@ export default function Home() {
 
   return (
     <>
-      {/* 헤더 고정 */}
+      {/* 헤더 */}
       <Header
         onPrimarySelect={(p) => setActivePrimary(p)}
         className="fixed top-0 left-0 w-full z-[80]"
@@ -213,14 +211,20 @@ export default function Home() {
         }}
       />
 
-      <div className={`relative h-screen w-screen overflow-hidden bg-gray-800 ${!scrollLocked ? "pointer-events-none" : ""}`}>
+      <div
+        className={`relative min-h-screen flex-1 w-screen overflow-hidden bg-gray-800 ${
+          !scrollLocked ? "pointer-events-none" : ""
+        }`}
+      >
         <HeroSlider
           steps={steps}
           index={index}
           activePrimary={activePrimary}
           setActivePrimary={setActivePrimary}
           firstMount={firstMountRef.current}
-          onFirstFadeEnd={() => { firstMountRef.current = false; }}
+          onFirstFadeEnd={() => {
+            firstMountRef.current = false;
+          }}
         />
       </div>
 
@@ -230,13 +234,13 @@ export default function Home() {
           <button
             key={i}
             onClick={() => handleDotClick(i)}
-            className={`w-2 h-2 rounded-full ${i === index ? "bg-white" : "bg-white/40"}`}
+            className={`w-2 h-2 rounded-full ${
+              i === index ? "bg-white" : "bg-white/40"
+            }`}
             aria-label={`Go to slide ${i + 1}`}
           />
         ))}
       </div>
-
-      {!scrollLocked && <Footer />}
     </>
   );
 }
