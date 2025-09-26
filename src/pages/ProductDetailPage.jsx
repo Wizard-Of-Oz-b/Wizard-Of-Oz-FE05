@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom';
 import ProductDetail from '../components/common/product/ProductDetail';
 import { useToasts } from '../components/common/layouts/reviews/hooks/useToasts';
 import RandomProducts from '../components/common/product/RandomProducts';
+import { useQueryClient } from '@tanstack/react-query';
+import { addCartItem } from '../hooks/cart/cartHook';
 
 const API_BASE = (
   import.meta.env.VITE_API_BASE || 'http://127.0.0.1:8000/api/v1'
@@ -23,6 +25,8 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState(null);
   const [error, setError] = useState(null);
   const { ToastHost, onToast } = useToasts();
+
+  const qc = useQueryClient();
 
   useEffect(() => {
     let alive = true;
@@ -94,8 +98,11 @@ export default function ProductDetailPage() {
     );
   }
 
-  const handleAddToCart = ({ product, color, size, qty }) => {
-    onToast('success', `${product.name} 장바구니에 담김!`);
+  const handleAddToCart = async ({ product, option_key, qty }) => {
+    const product_id = product.product_id ?? product.id;
+    await addCartItem({ product_id, option_key, quantity: qty ?? 1 });
+    onToast('success', `${product.name} 장바구니에 담겼어요.`);
+    qc.invalidateQueries({ queryKey: ['userCart'] });
   };
 
   return (

@@ -14,6 +14,9 @@ export function toCarrierCode(input) {
     "우체국": "kr.koreapost",
     "우체국택배": "kr.koreapost",
     "koreapost": "kr.koreapost",
+    "로젠": "kr.logen",
+    "로젠택배": "kr.logen",
+    "logen": "kr.logen",
   };
 
   if (k.startsWith("kr.")) return k;
@@ -26,4 +29,5 @@ export const CARRIER_LABEL = {
   "kr.lotte": "롯데택배",
   "kr.hanjin": "한진택배",
   "kr.koreapost": "우체국택배",
+  "kr.logen": "로젠택배",
 };

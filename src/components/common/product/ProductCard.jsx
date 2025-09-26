@@ -133,7 +133,7 @@
 // }
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import ProductOptions from "./ProductOptions";
+import ProductOptions from "./ProductSelectOptions";
 import SmartImage from "./SmartImage";
 import { Link } from "react-router-dom";
 
