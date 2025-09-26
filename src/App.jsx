@@ -53,13 +53,14 @@ export default function App() {
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/results/test" element={<ResultTestPage />} />
               <Route path="/signup" element={<SignUp />} />
+              <Route path="/cart" element={<UserCart />} />
             </Route>
 
             {/* 인증/접근제어 예외 페이지 */}
             <Route path="/admin/login" element={<AdminLogin />} />
 
             {/* 어드민 보호 라우트 */}
-            <Route element={<AdminProtectedRoute allowRoles={["super", "manager", "cs"]} />}> 
+            <Route element={<AdminProtectedRoute allowRoles={["manager"]} />}> 
               <Route path="/admin" element={<AdminLayout />}> 
                 <Route index element={<AdminDashboard />} />
                 <Route path="products" element={<ProductAdminPage />} />
@@ -71,7 +72,7 @@ export default function App() {
                 <Route path="stock" element={<AdminStockPage />} />
                 <Route path="shipment" element={<AdminShipmentsPage />} />
               </Route>
-             <Route path="/cart" element={<UserCart />} />
+             
            </Route>
 
             {/* 상태코드별 에러 라우트 */}

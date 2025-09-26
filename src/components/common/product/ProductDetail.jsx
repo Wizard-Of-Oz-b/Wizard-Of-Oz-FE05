@@ -16,6 +16,7 @@ import {
 } from '../api/public/wishlist';
 import HeartBurst from '../layouts/wishlist/components/HeartBurst';
 import { motion } from "framer-motion"; // ✅ whileTap, spring 등 사용
+import { addCartItem } from '../../../hooks/cart/useCart';
 
 export default function ProductDetail({ product, onAddToCart, onToast }) {
   const [color, setColor] = useState(product.colors?.[0]?.code);
@@ -23,19 +24,23 @@ export default function ProductDetail({ product, onAddToCart, onToast }) {
   const [qty, setQty] = useState(1);
   const [wish, setWish] = useState(false);
   const [wishId, setWishId] = useState(null);
-
+  const [adding, setAdding] = useState(false);
   // ✅ 하트 파티클 관련 상태
   const [burstKey, setBurstKey] = useState(0);
   const [allowBurst, setAllowBurst] = useState(true);
 
-  // (선택) 시스템 접근성 설정에 따라 모션 줄이기
+  
+
   useEffect(() => {
     const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)');
     if (mq) setAllowBurst(!mq.matches);
   }, []);
 
-  const option_key = '';
-  const optionsStr = `color=${color || ''};size=${size || ''}`;
+const option_key = new URLSearchParams(
+Object.fromEntries(
+     Object.entries({ color, size }).filter(([,v]) => v) // 빈 값 제거
+   )
+ ).toString();
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -99,11 +104,10 @@ export default function ProductDetail({ product, onAddToCart, onToast }) {
 
     try {
       if (!prevWish) {
-        // 추가
         await addWishlist({
           product_id: product.product_id || product.id,
           option_key,
-          options: optionsStr,
+          options: `color=${color || ""};size=${size || ""}`
         });
         const rows = await listWishlist();
         const found = rows.find(
@@ -134,6 +138,33 @@ export default function ProductDetail({ product, onAddToCart, onToast }) {
   };
 
   const price = useMemo(() => KRW(product.price), [product.price]);
+
+  const handleAddToCart = async () => {
+    if (adding) return;
+    setAdding(true);
+    try {
+      const product_id = product.product_id ?? product.id;
+      if (!product_id) throw new Error('missing product_id');
+
+      if (typeof onAddToCart === 'function') {
+        await onAddToCart({ product, option_key, qty });
+      } else if (typeof addCartItem === 'function') {
+        await addCartItem({
+          product_id,
+          option_key,
+          quantity: qty ?? 1,
+        });
+        onToast?.('success', '장바구니에 담겼어요.');
+      } else {
+        throw new Error('addCartItem not available (import path?)');
+      }
+    } catch (e) {
+      console.error(e);
+      onToast?.('error', '장바구니 담기 중 오류가 발생했어요.');
+    } finally {
+      setAdding(false);
+    }
+  };
 
   return (
     <>
@@ -199,11 +230,14 @@ export default function ProductDetail({ product, onAddToCart, onToast }) {
               <QtyInput value={qty} onChange={setQty} />
 
               <button
-                onClick={() => onAddToCart?.({ product, color, size, qty })}
-                className="flex-1 inline-flex items-center justify-center gap-2 rounded bg-black px-4 py-3 text-white hover:bg-gray-900"
+                onClick={handleAddToCart}
+                disabled={adding}
+                className={`flex-1 inline-flex items-center justify-center gap-2 rounded px-4 py-3 text-white ${
+                  adding ? 'bg-gray-500 cursor-not-allowed' : 'bg-black hover:bg-gray-900'
+                }`}
               >
                 <ShoppingCart size={18} />
-                장바구니 담기
+                {adding ? '담는 중…' : '장바구니 담기'}
               </button>
 
               <div className="relative">

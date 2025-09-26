@@ -1,4 +1,5 @@
 import publicApi from "../../../../lib/axiosPublic";
+import { normalizeOptions } from "../../../../utils/normalizeOptions";
 
 /** 대표 이미지 URL만 문자열로 추출 */
 export function extractImageUrl(row = {}) {
@@ -36,7 +37,7 @@ export const normalizeProduct = (row = {}) => ({
   is_active: !!row.is_active,
   category: row.category_id || null,
   category_name: row.category_name || "",
-  options: row.options ?? null,
+  options: normalizeOptions(row.options),
   created_at: row.created_at,
   updated_at: row.updated_at,
   image_url: extractImageUrl(row),
