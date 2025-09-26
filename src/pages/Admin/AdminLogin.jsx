@@ -11,30 +11,14 @@ import {
   EyeOff,
   UserCog,
 } from "lucide-react";
-import api from "../../lib/axios";
-import { setToken, setRefreshToken, clearToken } from "../../lib/auth";
+import apiFixed, { loginAndStore } from "../../lib/axios";
 
 const BACKEND_READY = import.meta.env.VITE_BACKEND_READY === "true";
-const AUTH_API = import.meta.env.VITE_AUTH_API_BASE ?? "/api/v1/auth";
-const ADMIN_API = import.meta.env.VITE_ADMIN_API_BASE ?? "/api/v1/admin";
+const AUTH_API  = import.meta.env.VITE_AUTH_API_BASE  ?? "/v1/auth";
+const ADMIN_API = import.meta.env.VITE_ADMIN_API_BASE ?? "/v1/admin";
 
-async function login(email, password) {
-  const r = await api.post(
-    `${AUTH_API}/login/`,
-    { email, password },
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-    }
-  );
-  return r.data; // { access, refresh }
-}
-
-// 관리자 권한 확인 API
 async function detectAdminRole() {
-  const r = await api.get(`${ADMIN_API}/users/`);
+  const r = await apiFixed.get(`${ADMIN_API}/users/`);
   return r.status === 200 ? "admin" : null;
 }
 
@@ -61,15 +45,10 @@ export default function AdminLogin() {
     try {
       setLoading(true);
 
-      // 로그인 → 토큰 저장
-      const { access, refresh } = await login(email, password);
-      setToken(access);
-      setRefreshToken(refresh);
+      await loginAndStore({ email, password, AUTH_BASE: AUTH_API });
 
-      // 관리자 권한 확인
       const role = await detectAdminRole();
       if (!role) {
-        clearToken();
         navigate("/errors/403", { replace: true });
         return;
       }
@@ -77,12 +56,11 @@ export default function AdminLogin() {
       localStorage.setItem("admin_role", role);
       navigate(from || "/admin", { replace: true });
     } catch (err) {
-      clearToken();
       const code = err?.response?.status || err?.status;
-      if (code === 403) navigate("/errors/403", { replace: true });
+      if (code === 403)      navigate("/errors/403", { replace: true });
       else if (code === 401) navigate("/admin/login", { replace: true });
       else if (code === 404) navigate("/errors/404", { replace: true });
-      else navigate("/errors/500", { replace: true });
+      else                   navigate("/errors/500", { replace: true });
     } finally {
       setLoading(false);
     }
@@ -133,6 +111,7 @@ export default function AdminLogin() {
                     <br /> 권한이 없을 경우 접근이 제한됩니다
                   </p>
                 </div>
+                {/* 서버 상태 배지 */}
                 <div className="ml-auto">
                   <span
                     className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-semibold ring-1 ${
@@ -213,11 +192,7 @@ export default function AdminLogin() {
                     className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-white/50 hover:bg-white/10"
                     tabIndex={-1}
                   >
-                    {showPw ? (
-                      <EyeOff className="size-4" />
-                    ) : (
-                      <Eye className="size-4" />
-                    )}
+                    {showPw ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                   </button>
                 </div>
 
