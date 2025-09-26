@@ -24,34 +24,61 @@ export async function removeWishlist(wishlist_id) {
 }
 
 /** 위시리스트 → 장바구니 이동 */
-export async function moveWishlistToCart(wishlist_id, {
-  quantity = 1,
-  remove_from_wishlist = true,
-} = {}) {
+export async function moveWishlistToCart(
+  wishlist_id,
+  { quantity = 1, remove_from_wishlist = true } = {}
+) {
   const res = await api.post(
     `/v1/wishlist/items/${wishlist_id}/move-to-cart/`,
     { quantity, remove_from_wishlist }
   );
-  return res.data;
+  return adaptCartItemFromMove(res.data);
 }
 
+/** wishlist row */
 export function adaptWishlistItem(row) {
   const optionsObj =
     row?.options && typeof row.options === "object"
       ? row.options
-      : safeParseJSON(row?.options); 
+      : safeParseJSON(row?.options);
 
   return {
     id: row.wishlist_id,
     productId: row.product_id,
     title: row.product_name,
-    image: row.primary_image?.url || row.images?.[0]?.url || "/no-image.png",
+    image: pickImage(row),
     price: Number(row.price ?? 0),
     optionKey: row.option_key ?? "",
-    options: optionsObj, 
-    optionsText: formatOptionsForDisplay(optionsObj), 
+    options: optionsObj,
+    optionsText: formatOptionsForDisplay(optionsObj),
     createdAt: row.created_at,
   };
+}
+
+/** move-to-cart */
+export function adaptCartItemFromMove(row) {
+  const optionsObj = safeParseJSON(row?.options);
+  return {
+    id: row.id,
+    productId: row.product,
+    title: row.product_name,
+    image: pickImage(row),
+    unitPrice: Number(row.unit_price ?? 0),
+    quantity: Number(row.quantity ?? 1),
+    optionKey: row.option_key ?? "",
+    options: optionsObj,
+    optionsText: formatOptionsForDisplay(optionsObj),
+    addedAt: row.added_at,
+  };
+}
+
+/** 이미지 선택 유틸 */
+function pickImage(row) {
+  const v = row?.image_url ?? row?.primary_image ?? row?.images?.[0];
+  if (!v) return "/no-image.png";
+  if (typeof v === "string") return v || "/no-image.png";
+  if (typeof v === "object") return v?.url || "/no-image.png";
+  return "/no-image.png";
 }
 
 function safeParseJSON(v) {
@@ -72,6 +99,7 @@ function safeParseJSON(v) {
   }
 }
 
+/** 옵션 표시 포맷 */
 export function formatOptionsForDisplay(optionsObj) {
   if (!optionsObj || typeof optionsObj !== "object") return "-";
 

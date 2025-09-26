@@ -1,4 +1,4 @@
-import { useDeleteCartItem, usePatchCart } from "../../../hooks/cart/useCart";
+import { useDeleteCartItem, usePatchCart } from "../../../hooks/cart/cartHook";
 import { fetchPublicMainImageUrl } from "../../common/api/admin/productImagesPublic";
 import CartLoadingSpin from "./CartLoadingSpin";
 import CartStepper from "./CartStepper";
