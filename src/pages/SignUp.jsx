@@ -188,7 +188,7 @@ setNicknameMessage(isDuplicate ? "❌ 이미 사용 중인 닉네임입니다." 
         terms: false, defaultAddress: false,
       });
       setPasswordStrength(""); setNicknameMessage("");
-      navigate("/");
+      navigate("/wishlist");
     } catch (err) {
       const msg =
         err?.response?.data?.detail ||

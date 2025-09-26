@@ -4,7 +4,7 @@ import { getToken, clearToken } from "./auth";
 const ROOT = ((
   import.meta.env.VITE_API_BASE || "http://127.0.0.1:8000"
 ).trim()).replace(/\/+$/, "");
-const BASE = `${ROOT}/api`;
+const BASE = `${ROOT}`;
 
 const api = axios.create({
   baseURL: BASE,
