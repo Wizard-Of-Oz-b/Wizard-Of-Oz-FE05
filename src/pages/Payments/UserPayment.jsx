@@ -7,6 +7,7 @@ import TossModal from "../../components/features/payment/TossModal";
 import { useGetMyOrders } from "../../hooks/payments/useOrderPayment";
 import Ordercard from "../../components/features/payment/OrderCard";
 import { filterOrders } from "../../utils/filterOrders";
+import tempTotalPrice from "../../utils/tempTotalPrice";
 
 const SECTION_STYLE =
   "w-full border border-gray-200 rounded-2xl px-4 py-5 shadow-sm mb-2";
@@ -16,21 +17,20 @@ const TEST_CUSTOMER_KEY = "YbX2HuSlsC9uVJW6NMRMj";
 export default function UserPayment() {
   const { data: userProfile, isLoading } = useMyProfile();
   const { data: userOrder, isLoading : orderLoading, isError, error, isFetching } = useGetMyOrders( 1, 50 ); //임시
-  console.log(userOrder)
+  console.log(userOrder ,'주문')
   console.log(userProfile)
   const filterOrder = filterOrders(userOrder?.results, 'ready') //ready 상태만 가져옴
-  
-  const testPaymentInfo = {
+  const [testPaymentInfo, setTestPaymentInfo] = useState({
     method: "CARD",
-    amount: 25000,
+    amount: 0,
     customerKey: TEST_CUSTOMER_KEY,
     orderId: `order_${new Date().getTime()}`,
     orderName: "베이직 티셔츠 외 1건",
-  }
+  })
 
   const [shippingAddress, setShippingAddress] = useState({
     postalCode: "",
-    address1: "", //기본주소
+    address1: "", //기본주소면 여기만 출력
     address2: "", //상세 주소
   });
   const [userData, setUserData] = useState({
@@ -45,19 +45,29 @@ export default function UserPayment() {
   useEffect(() => {
     // userProfile 데이터가 있고, 그 안에 주소 정보가 있다면
     if (userProfile?.address) {
+      console.log('hello')
       setShippingAddress({
         // postalCode: userProfile.address.postalCode || "",
-        address1: userProfile.address.address1 || "",
+        address1: userProfile.address|| "",
         // address2: userProfile.address.address2 || "",
       });
     }
-    if (userProfile?.name) {
+    if (userProfile?.nickname) {
       setUserData({
-        name: userProfile.name,
+        // name: userProfile.name,
+        name: userProfile.nickname,
         phoneNumber: userProfile.phone_number,
       });
     }
   }, [userProfile]);
+
+  useEffect(()=>{
+    if(userOrder){
+      const totalPrice = tempTotalPrice(filterOrder) // 임시 값 추후 제거
+      setTestPaymentInfo(prev => ({...prev, amount:totalPrice}))
+    }
+  },[userOrder])
+
 
   const handlePurchase = () => {
     setIsPaymentModalOpen(true);
@@ -95,7 +105,7 @@ export default function UserPayment() {
       setIsDefaultAddress(true);
     }
   };
-
+  console.log(shippingAddress)
   return (
     <div className="flex w-full items-center justify-center">
       <form className="w-2/4 flex flex-col justify-center items-center">
@@ -120,13 +130,12 @@ export default function UserPayment() {
               기본 배송지
             </span>
             <span className="font-semibold">{userData.name}</span>
+            <span>연락처 {userData.phoneNumber}</span>
             <div className="flex flex-col">
               <span>{shippingAddress.address1}</span>
               <span>{shippingAddress.postalCode}</span>
-              <input type="text" placeholder="상세 주소 입력" />
+              { !isDefaultAddress && <input type="text" placeholder="상세 주소 입력"  required/>}
             </div>
-            {/* <span>ㅇㅇㅇ도 ㅇㅇ시 ㅇㅇ구 ㅇㅇ로 00빌라 000호 (000)</span> */}
-            <span>{userData.phoneNumber}</span>
           </div>
         </section>
         {isModalOpen && (
@@ -145,7 +154,7 @@ export default function UserPayment() {
 
         <section className={SECTION_STYLE}>
           <h2 className={SECTION_TITLE_STYLE}>총 주문 금액</h2>
-          <div>60,000원</div>
+          <div>{testPaymentInfo.amount.toLocaleString()}원</div>
         </section>
 
         <section className={SECTION_STYLE}>
@@ -188,7 +197,7 @@ export default function UserPayment() {
           <h2 className={SECTION_TITLE_STYLE}>약관</h2>
           <div>
             <span>[필수] 개인정보 수집 및 이용 동의</span>
-            <input type="checkbox" name="" id="" className="ml-2" />
+            <input type="checkbox" name="" id="" className="ml-2" required/>
           </div>
         </section>
 
@@ -198,7 +207,7 @@ export default function UserPayment() {
           className="w-100 border rounded-sm bg-black text-white py-1"
           onClick={handlePurchase}
         >
-          60,000원 결제하기
+          {testPaymentInfo.amount.toLocaleString()}원 결제
         </button>
       </form>
       <TossModal
