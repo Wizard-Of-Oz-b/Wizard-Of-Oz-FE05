@@ -1,5 +1,6 @@
 import axios from "axios";
-import { getToken, clearToken } from "./auth";
+import { getCookie, isUnsafe } from "./csrf";
+import { getToken, setToken, getRefreshToken, setRefreshToken, clearToken } from "./auth";
 
 const BASE = (import.meta.env.VITE_API_BASE || "").trim() || "/api";
 
@@ -10,42 +11,55 @@ const api = axios.create({
   timeout: 15000,
 });
 
-const AUTH_PATH_RE = /\/auth\/(login|token(?:\/(refresh|verify))?)(\/|$)/;
-const AUTH_ZONE_401_RE = /\/v1\/auth\/|\/v1\/admin(?:s)?\//;
-
 api.interceptors.request.use((config) => {
-  const url = config.url || "";
-  const isAuthPath = AUTH_PATH_RE.test(url);
-
-  const forceNoAuth =
-    config.noAuth === true ||
-    String(config.headers?.["X-No-Auth"] || "").toLowerCase() === "true";
-
-  config.headers = config.headers || {};
-  const token = getToken?.();
-
-  const shouldAttachToken = !!token && !isAuthPath && !forceNoAuth;
-
-  if (shouldAttachToken) {
-    config.headers.Authorization = `Bearer ${token}`;
-  } else {
-    if ("Authorization" in config.headers) delete config.headers.Authorization;
-    if (forceNoAuth) config.withCredentials = false; 
+  const method = String(config.method || "get").toLowerCase();
+  if (isUnsafe(method)) {
+    const csrf = getCookie("csrftoken");
+    if (csrf && !config.headers["X-CSRFToken"]) {
+      config.headers["X-CSRFToken"] = csrf;
+    }
   }
-
+  // Authorization 헤더
+  const token = getToken();
+  if (token) {
+    config.headers["Authorization"] = `Bearer ${token}`;
+  }
   return config;
 });
 
+export async function refreshAccessToken() {
+  const refresh = getRefreshToken();
+  if (!refresh) throw new Error("No refresh token");
+
+  const r = await axios.post(
+    `${BASE}/v1/auth/token/refresh/`,
+    { refresh },
+    { headers: { Accept: "application/json" } }
+  );
+  if (r.data?.access) {
+    setToken(r.data.access);
+    if (r.data.refresh) setRefreshToken(r.data.refresh);
+    return r.data.access;
+  }
+  throw new Error("refresh failed");
+}
+
 api.interceptors.response.use(
   (res) => res,
-  (err) => {
-    const status = err?.response?.status;
-    const url = err?.config?.url || "";
-
-    if (status === 401 && AUTH_ZONE_401_RE.test(url)) {
-      try { clearToken?.(); } catch {}
+  async (error) => {
+    const original = error.config || {};
+    if (error?.response?.status === 401 && !original._retry) {
+      original._retry = true;
+      try {
+        const newAccess = await refreshAccessToken();
+        original.headers["Authorization"] = `Bearer ${newAccess}`;
+        return api(original);
+      } catch (e) {
+        clearToken();
+        return Promise.reject(e);
+      }
     }
-    return Promise.reject(err);
+    return Promise.reject(error);
   }
 );
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import CartDock from "../components/common/layouts/wishlist/components/CartDock";
 import Toolbar from "../components/common/layouts/wishlist/components/Toolbar";
 import List from "../components/common/layouts/wishlist/components/List";
@@ -8,7 +8,12 @@ import Toasts from "../components/common/layouts/wishlist/components/Toasts";
 import EmptyState from "../components/common/layouts/wishlist/components/EmptyState";
 import { useToasts } from "../components/common/layouts/wishlist/hooks/useToasts";
 import { useFlyToCart } from "../components/common/layouts/wishlist/hooks/useFlyToCart";
-import { adaptWishlistItem, formatOptionsForDisplay, listWishlist, moveWishlistToCart, removeWishlist } from "../components/common/api/public/wishlist";
+import {
+  adaptWishlistItem,
+  listWishlist,
+  moveWishlistToCart,
+  removeWishlist,
+} from "../components/common/api/public/wishlist";
 
 export default function Wishlist() {
   const [items, setItems] = useState([]);
@@ -41,7 +46,9 @@ export default function Wishlist() {
         setLoading(false);
       }
     })();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const toggleAll = () => {
@@ -76,7 +83,7 @@ export default function Wishlist() {
 
   const removeOne = async (id) => {
     const backup = items;
-    removeOneLocal(id); 
+    removeOneLocal(id);
     try {
       await removeWishlist(id);
       pushToast("삭제했어요.");
@@ -143,7 +150,9 @@ export default function Wishlist() {
   return (
     <motion.div
       className="min-h-screen text-neutral-900"
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.18 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.18 }}
     >
       <div className="mx-auto w-full max-w-7xl px-6">
         {/* 헤더 + 카트 */}
