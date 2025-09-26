@@ -10,6 +10,7 @@ import Wishlist from "./pages/Wishlist";
 import ResultTestPage from "./pages/ResultTestPage";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/login.jsx";
+import Mypage from "./pages/Mypage.jsx";
 
 // 에러 컴포넌트
 import Error401 from "./pages/errors/Error401";
@@ -37,7 +38,7 @@ import AdminLogin from "./pages/Admin/AdminLogin.jsx";
 import AdminStockPage from "./pages/Admin/AdminStockPage.jsx";
 import AdminShipmentsPage from "./pages/Admin/AdminShipmentsPage.jsx";
 import UserCart from "./pages/UserCart";
-import Mypage from "./pages/Mypage.jsx";
+
 
 const queryClient = new QueryClient();
 
