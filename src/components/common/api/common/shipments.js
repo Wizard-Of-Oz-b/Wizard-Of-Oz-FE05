@@ -33,7 +33,9 @@ export const SHIPMENT_STATUS_LABEL = {
   out_for_delivery: '배송출발',
   delivered: '배송완료',
   canceled: '취소',
+  returned: '반송',
 };
+
 export function fmtShipDate(d) {
   if (!d) return '-';
   const dt = new Date(d);
@@ -42,3 +44,12 @@ export function fmtShipDate(d) {
   const dd = String(dt.getDate()).padStart(2,'0');
   return `${dt.getFullYear()}-${mm}-${dd}`;
 }
+
+
+export const normalizeShipmentStatus = (s) => {
+  if (!s) return '';
+  const key = String(s).trim().toLowerCase().replace(/\s+/g, '_');
+  if (SHIPMENT_STATUS_LABEL[key]) return key;
+  if (key === 'deliverd') return 'delivered';
+  return key;
+};

@@ -1,62 +1,89 @@
 import axios from "axios";
-import { getToken, clearToken } from "./auth";
+import Cookies from "js-cookie";
 
-const ROOT = ((
-  import.meta.env.VITE_API_BASE || "http://127.0.0.1:8000"
-).trim()).replace(/\/+$/, "");
-const BASE = `${ROOT}`;
+const BASE = (import.meta.env.VITE_API_BASE || "").trim() || "/api";
+
+const ACCESS_KEY = "accessToken";
+const REFRESH_FALLBACK_KEY = "refreshToken";
 
 const api = axios.create({
   baseURL: BASE,
-  withCredentials: true,
+  withCredentials: true, 
   headers: { Accept: "application/json" },
   timeout: 15000,
 });
 
-const AUTH_PATH_RE = /\/auth\/(login|token(?:\/(refresh|verify))?)(\/|$)/i;
-const AUTH_ZONE_401_RE = /\/v1\/auth\/|\/v1\/admin(?:s)?\//i;
-
 api.interceptors.request.use((config) => {
-  const url = config.url || "";
-  const isAuthPath = AUTH_PATH_RE.test(url);
-
-  const forceNoAuth =
-    config.noAuth === true ||
-    String(config.headers?.["X-No-Auth"] || "").toLowerCase() === "true";
-
-  config.headers = config.headers || {};
-
-  const token = typeof getToken === "function" ? getToken() : undefined;
-
-  if (token && !isAuthPath && !forceNoAuth) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const access = Cookies.get(ACCESS_KEY);
+  if (access) {
+    config.headers["Authorization"] = `Bearer ${access}`;
   } else {
-    if ("Authorization" in config.headers) {
-      delete config.headers.Authorization;
-    }
-    if (forceNoAuth) {
-      config.withCredentials = false;
-    }
+    delete config.headers?.Authorization;
   }
-
   return config;
 });
 
+async function doTokenRefresh() {
+  const refresh = Cookies.get(REFRESH_FALLBACK_KEY);
+  if (!refresh) throw new Error("No refresh token in client cookie");
+
+  const r = await axios.post(
+    `${BASE}/v1/auth/token/refresh/`,
+    { refresh },
+    { withCredentials: true, headers: { Accept: "application/json" } }
+  );
+
+  const newAccess = r.data?.access;
+  const newRefresh = r.data?.refresh;
+
+  if (!newAccess) throw new Error("Refresh returned no access");
+
+  Cookies.set(ACCESS_KEY, newAccess, { expires: 1 / 24 });
+  if (newRefresh) Cookies.set(REFRESH_FALLBACK_KEY, newRefresh, { expires: 7 });
+
+  return newAccess;
+}
+
 api.interceptors.response.use(
   (res) => res,
-  (err) => {
-    const status = err?.response?.status;
-    const url = err?.config?.url || "";
-
-    if (status === 401 && AUTH_ZONE_401_RE.test(url)) {
+  async (error) => {
+    const original = error.config || {};
+    if (error?.response?.status === 401 && !original._retry) {
+      original._retry = true;
       try {
-        if (typeof clearToken === "function") clearToken();
-      } catch {
-        // ignore clearToken error
+        const newAccess = await doTokenRefresh();
+        original.headers = original.headers || {};
+        original.headers["Authorization"] = `Bearer ${newAccess}`;
+        return api(original);
+      } catch (e) {
+        Cookies.remove(ACCESS_KEY);
+        Cookies.remove(REFRESH_FALLBACK_KEY);
+        return Promise.reject(e);
       }
     }
-    return Promise.reject(err);
+    return Promise.reject(error);
   }
 );
 
 export default api;
+
+export async function loginAndStore({ email, password, AUTH_BASE = "/api/v1/auth" }) {
+  const r = await api.post(`${AUTH_BASE}/login/`, { email, password }, {
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+  });
+
+  const access = r.data?.access;
+  const refresh = r.data?.refresh;
+
+  if (!access || !refresh) throw new Error("Login must return access/refresh");
+
+  Cookies.set(ACCESS_KEY, access, { expires: 1 / 24 });
+  Cookies.set(REFRESH_FALLBACK_KEY, refresh, { expires: 7 });
+
+  return r.data;
+}
+
+export function logoutLocal() {
+  Cookies.remove(ACCESS_KEY);
+  Cookies.remove(REFRESH_FALLBACK_KEY);
+}
