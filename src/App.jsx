@@ -54,12 +54,9 @@ export default function App() {
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/results/test" element={<ResultTestPage />} />
               <Route path="/signup" element={<SignUp />} />
-<<<<<<< HEAD
               <Route path="/cart" element={<UserCart />} />
 
-=======
               <Route path="/login" element={<Login/>} />
->>>>>>> 97ee33a (fix: 회원가입 페이지 api 연동)
             </Route>
 
             {/* 인증/접근제어 예외 페이지 */}
