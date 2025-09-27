@@ -1,48 +1,178 @@
-import React from "react";
-import { motion } from "framer-motion";
-import { Search, User, ShoppingCart, Heart, LogOut } from "lucide-react";
+import React, { useRef, useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, User, ShoppingCart, Heart, ChevronRight, LogOut, User2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { clearToken } from "../../../../../lib/auth";
+import { logoutLocal } from "../../../../../lib/axios";
+import { useAuth } from "../../../../../context/AuthContext";
 
 export default function RightIcons({ isLight, onOpenSearch }) {
   const navigate = useNavigate();
+  const { isLoggedIn, user, setUser } = useAuth();
   const base = isLight ? "hover:opacity-80 text-black" : "hover:opacity-80 text-white";
 
-    function handleLogout() {
-    clearToken();
-    localStorage.removeItem("admin_role");
-    localStorage.removeItem("mock_admin_role");
-    window.location.href = "/"; 
+  const [openMenu, setOpenMenu] = useState(false);
+  const menuRef = useRef(null);
+  const firstItemRef = useRef(null);
+
+  // 외부 클릭 혹은 ESC로 드롭다운 메뉴 닫기
+  useEffect(() => {
+    function onClickOutside(e) {
+      if (!menuRef.current) return;
+      if (!menuRef.current.contains(e.target)) setOpenMenu(false);
+    }
+    function onKeyDown(e) {
+      if (e.key === "Escape") setOpenMenu(false);
+    }
+    if (openMenu) {
+      document.addEventListener("mousedown", onClickOutside);
+      document.addEventListener("keydown", onKeyDown);
+      setTimeout(() => firstItemRef.current?.focus(), 0);
+    }
+    return () => {
+      document.removeEventListener("mousedown", onClickOutside);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [openMenu]);
+
+  const displayName = user?.displayName || user?.nickname || user?.name || "사용자";
+  const emailText = user?.email || "";
+  const initials = (displayName || "U")
+    .split(" ")
+    .map((s) => s[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  function handleUserClick() {
+    if (!isLoggedIn) return navigate("/login");
+    setOpenMenu((v) => !v);
+  }
+
+  function handleLogout() {
+    logoutLocal();
+    setUser(null);
+    setOpenMenu(false);
+    navigate("/", { replace: true });
   }
 
   return (
     <motion.div
-      className="flex items-center gap-4 text-xl"
+      className="relative flex items-center gap-4 text-xl"
       initial={{ opacity: 0, y: -6 }}
       animate={{ opacity: 1, y: 0, transition: { duration: 0.2, delay: 0.06 } }}
     >
+      {/* 검색 */}
       <button aria-label="Search" className={base} onClick={onOpenSearch}>
         <Search className="w-7 h-7" />
       </button>
-      <button aria-label="Wishlist"
-              className={base}
-              onClick={() => navigate("/wishlist")}
-              >
+
+      {/* 위시리스트 */}
+      <button
+        aria-label="Wishlist"
+        className={base}
+        onClick={() => navigate("/wishlist")}
+      >
         <Heart className="w-7 h-7" />
       </button>
-      <button
-  aria-label="Account"
-  className={base}
-  onClick={() => navigate("/mypage")}
->
-  <User className="w-7 h-7" />
-</button>
 
-      <button aria-label="Cart" className={base}>
+      {/* 유저 */}
+      <div className="relative" ref={menuRef}>
+        <button
+          aria-label="Account"
+          className={`${base} relative`}
+          onClick={handleUserClick}
+        >
+          <User className="w-7 h-7" />
+        </button>
+
+        {/* 오버레이 */}
+        <AnimatePresence>
+          {isLoggedIn && openMenu && (
+            <motion.div
+              key="overlay"
+              className="fixed inset-0 z-40"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setOpenMenu(false)}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* 드롭다운 */}
+        <AnimatePresence>
+          {isLoggedIn && openMenu && (
+            <motion.div
+              key="user-menu"
+              initial={{ opacity: 0, y: -8, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.98 }}
+              transition={{ duration: 0.15 }}
+              className="absolute right-0 mt-2 w-72 z-50"
+            >
+              {/* caret */}
+              <div className="relative">
+                <div className="absolute right-6 -top-2 w-3 h-3 rotate-45 bg-white border border-gray-200"></div>
+              </div>
+
+              <div className="overflow-hidden rounded-xl border border-gray-200 shadow-xl bg-white">
+                {/* 헤더 섹션 */}
+                <div className="p-4 bg-gradient-to-br from-gray-50 to-white">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-gray-900 text-white grid place-items-center font-semibold">
+                      {initials || <User2 className="w-5 h-5" />}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold leading-5 truncate text-black">{displayName} 님</p>
+                      {emailText ? (
+                        <p className="text-xs text-gray-500 truncate">{emailText}</p>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="h-px bg-gray-100" />
+
+                {/* 메뉴 섹션 */}
+                <div className="py-1">
+                  <button
+                    ref={firstItemRef}
+                    className="w-full px-4 py-3 text-left text-sm flex items-center justify-between hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+                    onClick={() => {
+                      setOpenMenu(false);
+                      navigate("/mypage");
+                    }}
+                  >
+                    <span className="flex items-center gap-2 text-black">
+                      <User2 className="w-4 h-4 text-black" />
+                      마이페이지
+                    </span>
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                  </button>
+
+                  <button
+                    className="w-full px-4 py-3 text-left text-sm flex items-center justify-between text-red-600 hover:bg-red-50 focus:bg-red-50 focus:outline-none"
+                    onClick={handleLogout}
+                  >
+                    <span className="flex items-center gap-2">
+                      <LogOut className="w-4 h-4" />
+                      로그아웃
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* 장바구니 */}
+      <button
+        aria-label="Cart"
+        className={base}
+        onClick={() => navigate("/cart")}
+      >
         <ShoppingCart className="w-7 h-7 cursor-pointer hover:scale-110 hover:opacity-80 transition" />
-      </button>
-      <button aria-label="Logout" className={base} onClick={handleLogout}>
-        <LogOut className="w-7 h-7" />
       </button>
     </motion.div>
   );

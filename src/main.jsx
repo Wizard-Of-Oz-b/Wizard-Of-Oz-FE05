@@ -6,6 +6,7 @@ import "./index.css";
 import { worker } from "./mocks/browser";
 import { AuthProvider } from "./context/AuthContext";
 
+
 // createRoot(document.getElementById("root")).render(
 //   <React.StrictMode>
 //     <BrowserRouter>

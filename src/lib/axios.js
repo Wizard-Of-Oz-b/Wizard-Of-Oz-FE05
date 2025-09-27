@@ -67,7 +67,7 @@ api.interceptors.response.use(
 
 export default api;
 
-export async function loginAndStore({ email, password, AUTH_BASE = "/api/v1/auth" }) {
+export async function loginAndStore({ email, password, AUTH_BASE = "/v1/auth" }) {
   const r = await api.post(`${AUTH_BASE}/login/`, { email, password }, {
     headers: { "Content-Type": "application/json", Accept: "application/json" },
   });

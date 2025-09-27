@@ -2,10 +2,12 @@ import React, { useState, useEffect } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useAlertModal } from "../components/common/layouts/common/modal/useAlertModal"; // ✅ 모달 훅
-import { loginUser } from "../components/common/api/signup/auth"; // ✅ 로그인 API
+import { useAuth } from "../context/AuthContext";
+import api, { loginAndStore } from "../lib/axios";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { setUser } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -45,13 +47,20 @@ export default function Login() {
 
     try {
       setLoading(true);
-      const data = await loginUser({
+      const data = await loginAndStore({
         email: formData.email,
         password: formData.password,
       });
 
-      // 로그인 성공 시 accessToken 저장
-      localStorage.setItem("accessToken", data.accessToken);
+      // // 로그인 성공 시 accessToken 저장
+      // localStorage.setItem("accessToken", data.accessToken);
+
+      const { data: me } = await api.get("/v1/users/me/");
+      setUser({ ...me, displayName: (u => {
+        const bad = v => !v || v === "string";
+        const cand = [u.nickname, u.name, u.username, (u.email && u.email.split("@")[0])];
+        return (cand.find(v => !bad(v))) || "사용자";
+        })(me) });
 
       showModal({ type: "success", message: "로그인에 성공했습니다!" });
       navigate("/"); // 홈으로 이동
