@@ -1,20 +1,52 @@
 import React, { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, User, ShoppingCart, Heart, ChevronRight, LogOut, User2 } from "lucide-react";
+import {
+  Search,
+  User,
+  ShoppingCart,
+  Heart,
+  ChevronRight,
+  LogOut,
+  User2,
+  Shield,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { logoutLocal } from "../../../../../lib/axios";
 import { useAuth } from "../../../../../context/AuthContext";
 
+function MenuItem({ icon: Icon, label, onClick, firstRef, danger = false }) {
+  const base =
+    "w-full px-4 py-3 text-left text-sm flex items-center justify-between rounded-lg focus:outline-none transition";
+  const normal =
+    "hover:bg-gray-50 focus:bg-gray-50 text-black";
+  const dangerCls =
+    "text-red-600 hover:bg-red-50 focus:bg-red-50";
+  return (
+    <button
+      ref={firstRef}
+      className={`${base} ${danger ? dangerCls : normal}`}
+      onClick={onClick}
+      role="menuitem"
+    >
+      <span className="flex items-center gap-2">
+        <Icon className={`w-4 h-4 ${danger ? "text-red-600" : "text-black"}`} />
+        {label}
+      </span>
+      {!danger && <ChevronRight className="w-4 h-4 text-gray-400" />}
+    </button>
+  );
+}
+
 export default function RightIcons({ isLight, onOpenSearch }) {
   const navigate = useNavigate();
-  const { isLoggedIn, user, setUser } = useAuth();
+  const { isLoggedIn, user, setUser, isAdmin } = useAuth();
   const base = isLight ? "hover:opacity-80 text-black" : "hover:opacity-80 text-white";
 
   const [openMenu, setOpenMenu] = useState(false);
   const menuRef = useRef(null);
   const firstItemRef = useRef(null);
 
-  // 외부 클릭 혹은 ESC로 드롭다운 메뉴 닫기
+  // 외부 클릭/ESC 닫기
   useEffect(() => {
     function onClickOutside(e) {
       if (!menuRef.current) return;
@@ -123,7 +155,9 @@ export default function RightIcons({ isLight, onOpenSearch }) {
                       {initials || <User2 className="w-5 h-5" />}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-semibold leading-5 truncate text-black">{displayName} 님</p>
+                      <p className="font-semibold leading-5 truncate text-black">
+                        {displayName} 님
+                      </p>
                       {emailText ? (
                         <p className="text-xs text-gray-500 truncate">{emailText}</p>
                       ) : null}
@@ -134,31 +168,42 @@ export default function RightIcons({ isLight, onOpenSearch }) {
                 <div className="h-px bg-gray-100" />
 
                 {/* 메뉴 섹션 */}
-                <div className="py-1">
-                  <button
-                    ref={firstItemRef}
-                    className="w-full px-4 py-3 text-left text-sm flex items-center justify-between hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+                <div className="p-2" role="menu" aria-label="user-menu">
+                  <MenuItem
+                    icon={User2}
+                    label="마이페이지"
+                    firstRef={firstItemRef}
                     onClick={() => {
                       setOpenMenu(false);
                       navigate("/mypage");
                     }}
-                  >
-                    <span className="flex items-center gap-2 text-black">
-                      <User2 className="w-4 h-4 text-black" />
-                      마이페이지
-                    </span>
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
-                  </button>
+                  />
 
-                  <button
-                    className="w-full px-4 py-3 text-left text-sm flex items-center justify-between text-red-600 hover:bg-red-50 focus:bg-red-50 focus:outline-none"
+                  {/* 구분선 */}
+                  <div className="my-2 h-px bg-gray-100" />
+
+                  {/* 관리자  */}
+                  {isAdmin && (
+                    <div className="rounded-lg border border-amber-200 bg-amber-50 p-1">
+                      <MenuItem
+                        icon={Shield}
+                        label="관리자 센터"
+                        onClick={() => {
+                          setOpenMenu(false);
+                          navigate("/admin");
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {/* 로그아웃 */}
+                  <div className="my-2 h-px bg-gray-100" />
+                  <MenuItem
+                    icon={LogOut}
+                    label="로그아웃"
                     onClick={handleLogout}
-                  >
-                    <span className="flex items-center gap-2">
-                      <LogOut className="w-4 h-4" />
-                      로그아웃
-                    </span>
-                  </button>
+                    danger
+                  />
                 </div>
               </div>
             </motion.div>

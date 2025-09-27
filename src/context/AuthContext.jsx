@@ -4,17 +4,12 @@ import api from "../lib/axios";
 
 const AuthContext = createContext(undefined);
 
- function deriveDisplayName(me = {}) {
-   const isBad = (v) => !v || v === "string";
-   const tryOrder = [
-     me.nickname,
-     me.name,
-     me.username,
-     (me.email && me.email.split("@")[0]) || null,
-   ];
-   const picked = tryOrder.find((v) => !isBad(v));
-   return picked || "사용자";
- }
+function deriveDisplayName(me = {}) {
+  const isBad = (v) => !v || v === "string";
+  const tryOrder = [me.nickname, me.name, me.username, (me.email && me.email.split("@")[0]) || null];
+  const picked = tryOrder.find((v) => !isBad(v));
+  return picked || "사용자";
+}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -29,7 +24,8 @@ export function AuthProvider({ children }) {
     (async () => {
       try {
         const { data } = await api.get("/v1/users/me/");
-        setUser({ ...data, displayName: deriveDisplayName(data) });
+        const displayName = deriveDisplayName(data);
+        setUser({ ...data, displayName });
       } catch (_) {
         Cookies.remove("accessToken");
         Cookies.remove("refreshToken");
@@ -41,7 +37,13 @@ export function AuthProvider({ children }) {
   }, []);
 
   const isLoggedIn = !!user;
-  const value = useMemo(() => ({ user, isLoggedIn, setUser, bootstrapping }), [user, isLoggedIn, bootstrapping]);
+  const role = String(user?.role || "").toLowerCase();
+  const isAdmin = role === "admin" || role === "superadmin"; // 필요 시 확장
+
+  const value = useMemo(
+    () => ({ user, isLoggedIn, isAdmin, role, setUser, bootstrapping }),
+    [user, isLoggedIn, isAdmin, role, bootstrapping]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
