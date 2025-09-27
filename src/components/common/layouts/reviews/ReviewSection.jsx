@@ -20,8 +20,8 @@ export default function ReviewSection({
   pageSize = 20,
   onToast,
 }) {
-  const { user, isAdmin: adminFromContext } = useAuth(); 
-  const effectiveIsAdmin = isAdmin || adminFromContext; 
+  const { user, isAdmin: adminFromContext } = useAuth();
+  const effectiveIsAdmin = isAdmin || adminFromContext;
 
   const authedUserId = useMemo(
     () => currentUserId ?? user?.user_id ?? user?.id ?? null,
@@ -32,11 +32,14 @@ export default function ReviewSection({
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState(null);
 
-  const toast = useCallback((type, msg) => {
-    if (onToast) onToast(type, msg);
-    else if (type === "error") console.error(msg);
-    else console.log(msg);
-  }, [onToast]);
+  const toast = useCallback(
+    (type, msg) => {
+      if (onToast) onToast(type, msg);
+      else if (type === "error") console.error(msg);
+      else console.log(msg);
+    },
+    [onToast]
+  );
 
   const load = useCallback(async () => {
     if (!productId) return;
@@ -55,8 +58,12 @@ export default function ReviewSection({
 
   useEffect(() => {
     let alive = true;
-    (async () => { if (alive) await load(); })();
-    return () => { alive = false; };
+    (async () => {
+      if (alive) await load();
+    })();
+    return () => {
+      alive = false;
+    };
   }, [load]);
 
   // 작성 폼 상태
@@ -68,14 +75,20 @@ export default function ReviewSection({
 
   const handleCreate = useCallback(async () => {
     if (!productId) return;
-    if (!authedUserId) return toast("error", "리뷰를 작성하려면 로그인하세요.");
-    if (!rating || !content.trim()) return toast("error", "별점과 내용을 입력해주세요.");
+    if (!authedUserId) {
+      toast("error", "리뷰를 작성하려면 로그인하세요.");
+      return;
+    }
+    if (!rating || !content.trim()) {
+      toast("error", "별점과 내용을 입력해주세요.");
+      return;
+    }
 
     setSubmitting(true);
     try {
       const payload = { product_id: productId, rating, content };
       const created = onCreate ? await onCreate(payload) : await createReview(payload);
-      setRows(prev => [{ ...created, user_id: authedUserId }, ...prev]);
+      setRows((prev) => [{ ...created, user_id: authedUserId }, ...prev]);
       setRating(0);
       setContent("");
       toast("success", "리뷰가 등록되었습니다.");
@@ -158,8 +171,11 @@ export default function ReviewSection({
         <ul className="divide-y divide-gray-100">
           {rows.map((r) => {
             const mine = isMine(r);
+            const uuid = r.review_id ?? r.uuid ?? null;
+            const reactKey = uuid ?? r.id ?? Math.random(); 
+
             return (
-              <li key={r.review_id ?? r.id} className="py-4">
+              <li key={reactKey} className="py-4">
                 {mine && (
                   <span className="mb-2 inline-block rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-medium text-emerald-700">
                     내 리뷰
@@ -167,17 +183,25 @@ export default function ReviewSection({
                 )}
                 <ReviewCard
                   review={r}
-                  canEdit={effectiveIsAdmin || mine} 
-                  onSave={async (id, patch) => {
-                    const res = await patchReview(id, patch);
-                    setRows(prev =>
-                      prev.map(x => (x.review_id ?? x.id) === id ? { ...x, ...res } : x)
+                  canEdit={effectiveIsAdmin || mine}
+                  onSave={async (_ignored, patch) => {
+                    if (!uuid) {
+                      toast("error", "이 리뷰는 UUID가 없어 수정할 수 없습니다.");
+                      return;
+                    }
+                    const res = await patchReview(uuid, patch);
+                    setRows((prev) =>
+                      prev.map((x) => (x.review_id === uuid ? { ...x, ...res } : x))
                     );
                     toast("success", "리뷰가 수정되었습니다.");
                   }}
-                  onDelete={async (id) => {
-                    await deleteReview(id);
-                    setRows(prev => prev.filter(x => (x.review_id ?? x.id) !== id));
+                  onDelete={async () => {
+                    if (!uuid) {
+                      toast("error", "이 리뷰는 UUID가 없어 삭제할 수 없습니다.");
+                      return;
+                    }
+                    await deleteReview(uuid);
+                    setRows((prev) => prev.filter((x) => x.review_id !== uuid));
                     toast("success", "리뷰가 삭제되었습니다.");
                   }}
                   className="!border-0 !shadow-none !p-0"

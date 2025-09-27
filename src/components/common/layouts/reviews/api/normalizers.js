@@ -41,14 +41,14 @@ export const normalizeReview = (r = {}) => {
     null;
 
   return {
-    review_id: r.review_id ?? r.id ?? null,
+    review_id: r.review_id ?? r.uuid ?? r.id ?? null,
     user_id: owner_id,
-    product_id:
-      r.product_id ?? r?.product?.product_id ?? r?.product?.id ?? null,
+    product_id: r.product_id ?? r?.product?.product_id ?? r?.product?.id ?? null,
     rating: Number(r.rating ?? 0),
     content: r.content ?? "",
     created_at: r.created_at ?? r.createdAt ?? null,
-    user_name: r.user_name ?? r.userName ?? r.username ?? r?.user?.name ?? r?.author?.name ?? null,
+    user_name:
+      r.user_name ?? r.userName ?? r.username ?? r?.user?.name ?? r?.author?.name ?? null,
     images: Array.isArray(r.images) ? r.images : [],
     raw_user: r.user ?? r.author ?? null,
   };
