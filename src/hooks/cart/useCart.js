@@ -14,7 +14,7 @@ async function getCartData() {
   try {
     console.log(BASE_URL);
 
-    const response = await userApi.get(`/carts/me`);
+    const response = await userApi.get(`/carts/me/`);
     // const response = await axios.get(`${BASE_URL}/me`);
     console.log(response.data);
     return response.data;
