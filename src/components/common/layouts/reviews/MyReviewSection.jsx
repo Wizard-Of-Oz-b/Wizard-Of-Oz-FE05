@@ -1,26 +1,26 @@
+// features/reviews/MyReviewSection.jsx
 import { useEffect, useState } from "react";
 import { listReviewsByUser, deleteReview, patchReview } from "./api";
-import ReviewCard from "./ui/ReviewCard";
+import ReviewCard from "../Mypage/ui/ReviewCard";
 
 /**
- * 마이페이지에서 내가 작성한 리뷰 보여주는 섹션
- *
- * 사용 예시:
- * <MyReviewSection userId={me.id} isAdmin={me.role === "admin"} />
+ * 마이페이지 - 내가 작성한 리뷰 섹션
+ * 사용: <MyReviewSection userId={me.user_id} onToast={(type,msg)=>...} />
  */
 export default function MyReviewSection({ userId, isAdmin = false, onToast }) {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 리뷰 불러오기
   const fetchReviews = async () => {
     try {
       setLoading(true);
       const data = await listReviewsByUser(userId, { page: 1, size: 20 });
-      setReviews(data);
+      const results = Array.isArray(data) ? data : data?.results;
+      setReviews(Array.isArray(results) ? results : []);
     } catch (e) {
-      onToast?.("error", "리뷰 불러오기 실패");
       console.error(e);
+      onToast?.("error", "리뷰 불러오기 실패");
+      setReviews([]);
     } finally {
       setLoading(false);
     }
@@ -51,21 +51,27 @@ export default function MyReviewSection({ userId, isAdmin = false, onToast }) {
     }
   };
 
+  const hasReviews = Array.isArray(reviews) && reviews.length > 0;
+
   return (
-    <section className="mt-12">
-      <h2 className="text-xl font-semibold mb-4">내가 작성한 리뷰</h2>
+    <section className="space-y-6">
+      <h2 className="text-2xl font-semibold">내가 작성한 리뷰</h2>
 
       {loading ? (
-        <p className="text-gray-500 text-sm">불러오는 중...</p>
-      ) : reviews.length === 0 ? (
-        <p className="text-gray-500 text-sm">작성한 리뷰가 없습니다.</p>
+        <div className="text-center py-10 text-gray-500">
+          리뷰를 불러오는 중입니다...
+        </div>
+      ) : !hasReviews ? (
+        <div className="text-center py-10 text-gray-500">
+          아직 작성한 리뷰가 없습니다.
+        </div>
       ) : (
         <div className="space-y-4">
           {reviews.map((r) => (
             <ReviewCard
               key={r.review_id}
               review={r}
-              canEdit={true}
+              canEdit={!isAdmin || true}
               onSave={handleSave}
               onDelete={handleDelete}
             />
