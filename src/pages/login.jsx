@@ -84,7 +84,7 @@ export default function Login() {
    const SITE = (import.meta.env.VITE_SITE_URL || window.location.origin).replace(/\/+$/,"");
    const CB = import.meta.env.VITE_OAUTH_CALLBACK_PATH || "/auth/callback";
    const redirectUri = `${SITE}${CB}/${provider}`;
-   window.location.href = `${API}/v1/auth/social/${provider}/login/?redirect_uri=${encodeURIComponent(redirectUri)}`;
+   window.location.href = `${API}/v1/auth/social/${provider}/authorize/?redirect_uri=${encodeURIComponent(redirectUri)}`;
   };
 
 
