@@ -10,6 +10,8 @@ import { filterOrders } from "../../utils/filterOrders";
 import tempTotalPrice from "../../utils/tempTotalPrice";
 import { useUpdateShippingAddress } from "../../hooks/cart/useOrder";
 import CartLoadingSpin from "../../components/features/cart/CartLoadingSpin";
+import EmptyPayment from "../../components/features/payment/EmptyPayment";
+import PaymentSkeleton from "../../components/skeletons/PaymentSkeleton";
 
 const SECTION_STYLE =
   "w-full border border-gray-200 rounded-2xl px-4 py-5 shadow-sm mb-2";
@@ -22,8 +24,7 @@ export default function UserPayment() {
     data: userOrder,
     isLoading: orderLoading,
     isError: orderIsError,
-    error,
-    isFetching,
+    error: orderError
   } = useGetMyOrders(); // 주문서
   const purchaseId = userOrder?.results[0]?.purchase_id
   console.log(userOrder?.results.length, '길이')
@@ -31,6 +32,7 @@ export default function UserPayment() {
     data: items,
     isLoading: areItemsLoading,
     isError: areItemError,
+    error: itemError
   } = useGetPurchaseItems(purchaseId);  // 주문 내용
   console.log(items)
   const { mutateAsync: updateAddress, isPending: isAddressUpdate } =
@@ -191,6 +193,33 @@ export default function UserPayment() {
 
   // 결제 버튼 눌렀을 때 로딩창출력
   const isPaymentProcessing = isAddressUpdate || false;
+
+  // 주문서 에러
+  const isLoadFail = orderIsError || areItemError
+
+
+  console.log(orderError, itemError, '에러 테스트')
+  if(isLoadingData){
+    return(
+      <PaymentSkeleton />
+    )
+  }
+  
+  //에러 출력
+  if(isLoadFail){
+    return(
+      <EmptyPayment script={orderError?.message || areItemError?.message} />
+    )
+  }
+
+  // 불러올 정보가 없다면 빈페이지 출력
+  if(userOrder?.results.length === 0){
+    return(
+      <EmptyPayment />
+    )
+  }
+
+
 
   return (
     <div className="flex w-full items-center justify-center">
