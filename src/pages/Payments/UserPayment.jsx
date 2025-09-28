@@ -7,7 +7,6 @@ import TossModal from "../../components/features/payment/TossModal";
 import { useGetMyOrders, useGetPurchaseItems } from "../../hooks/payments/useOrderPayment";
 import Ordercard from "../../components/features/payment/OrderCard";
 import { filterOrders } from "../../utils/filterOrders";
-import tempTotalPrice from "../../utils/tempTotalPrice";
 import { useUpdateShippingAddress } from "../../hooks/cart/useOrder";
 import CartLoadingSpin from "../../components/features/cart/CartLoadingSpin";
 import EmptyPayment from "../../components/features/payment/EmptyPayment";
@@ -51,7 +50,7 @@ export default function UserPayment() {
   const [shippingAddress, setShippingAddress] = useState({
     recipient: "", //주문자
     phone: "", //번호
-    postCode: "", //우편 번호
+    postcode: "", //우편 번호
     address1: "", //기본주소면 여기만 출력
     address2: "", //상세 주소
   });
@@ -94,7 +93,7 @@ export default function UserPayment() {
       const orderId = userOrder.results[0]?.purchase_id;
 
       const customerKey = filterOrder[0]?.user;
-      const orderName = `${filterOrder[1].product_name} ${
+      const orderName = `${filterOrder[0].product_name} ${
         filterOrder.length >= 2 && "외 " + (filterOrder.length - 1) + "건"
       }`;
       console.log(orderName);
@@ -138,7 +137,7 @@ export default function UserPayment() {
     console.log(addressData, "주소");
     setShippingAddress((prev) => ({
       ...prev,
-      postCode: addressData.zoneCode,
+      postcode: addressData.zoneCode,
       address1: addressData.address,
     }));
     // 기본주소 아님, 모달창 닫기
@@ -155,7 +154,7 @@ export default function UserPayment() {
         ...prev,
         recipient: userProfile.recipient || userProfile.nickname || "",
         phone: userProfile.phone_number || "",
-        postCode: "",
+        postcode: "",
         address1: userProfile.address || "",
         address2: "",
       }));
@@ -189,7 +188,7 @@ export default function UserPayment() {
   console.log(shippingAddress);
 
   // 초기 기본값 로딩시 스켈레톤 출력
-  const isLoadingData = userLoading || orderLoading;
+  const isLoadingData = userLoading || orderLoading || areItemsLoading;
 
   // 결제 버튼 눌렀을 때 로딩창출력
   const isPaymentProcessing = isAddressUpdate || false;
@@ -302,9 +301,9 @@ export default function UserPayment() {
                 <div className="flex mt-3">
                   <label className="w-20">우편번호</label>
                   <input
-                    name="postCode"
+                    name="postcode"
                     className="w-full border border-gray-400 rounded-sm px-2 py-1"
-                    value={shippingAddress.postCode}
+                    value={shippingAddress.postcode}
                     onChange={handleInputChange}
                     readOnly
                     required

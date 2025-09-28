@@ -34,7 +34,8 @@ export default function PaySuccess() {
 
     console.log(requestData);
   }, []);
-
+  
+  // 로딩
   if (confirmPaymentMutation.isPending) {
     return (
       <div>
@@ -52,8 +53,8 @@ export default function PaySuccess() {
       <div className="flex flex-col items-center justify-center">
         <h1>결제 승인 실패</h1>
         <p>
-          결제 처리 중 오류가 발생했습니다. 문제가 지속될 경우 고객센터로
-          문의해주세요.
+          결제 처리 중 오류가 발생했습니다. 지속적으로 문제가 발생하면 
+          고객센터로 문의 주세요.
         </p>
         <button onClick={() => navigate("/")}>홈으로 돌아가기</button>
       </div>
