@@ -47,6 +47,7 @@ export default function PaySuccess() {
   }
 
   if (confirmPaymentMutation.isError) {
+    console.log(confirmPaymentMutation.error)
     return (
       <div className="flex flex-col items-center justify-center">
         <h1>결제 승인 실패</h1>

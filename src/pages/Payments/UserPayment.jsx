@@ -25,7 +25,8 @@ export default function UserPayment() {
     error,
     isFetching,
   } = useGetMyOrders(); // 주문서
-  const purchaseId = userOrder?.results[0].purchase_id
+  const purchaseId = userOrder?.results[0]?.purchase_id
+  console.log(userOrder?.results.length, '길이')
   const {
     data: items,
     isLoading: areItemsLoading,

@@ -9,8 +9,18 @@ import userApi from "../../lib/api/userAxios";
  * @param {string | number} paymentData.amount - 검증할 결제 금액
  */
 const confirmTossPaymentAPI = async (paymentData) => {
-  const response = await userApi.post("/payments/toss/confirm/", paymentData);
-  return response.data;
+  try {
+    const response = await userApi.post("/payments/toss/confirm/", paymentData);
+    return response.data;
+  } catch (error) {
+    //중복 요청시(사용자가 새로고침등 다양한 원인에의해 두번 요청된 경우
+    if (error?.response?.data?.detail === "already confirmed") {
+      console.log("이미 처리된 요청이므로, 에러 메시지를 무시합니다.");
+      return { status: "ALREADY_CONFIRMED" };   // 차후 status를 이용해서 모달창 출력할 수 있으면 할것
+    }
+
+    throw error;
+  }
 };
 
 export const useConfirmTossPayment = () => {

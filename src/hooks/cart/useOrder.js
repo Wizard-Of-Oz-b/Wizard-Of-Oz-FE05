@@ -65,7 +65,6 @@ export const useUpdateShippingAddress = () => {
         errorData?.message ||
         errorData?.detail ||
         "배송지 변경 중 오류가 발생했습니다.";
-
       console.error("배송지 수정 실패:", errorData);
       alert(errorMessage);
     },
