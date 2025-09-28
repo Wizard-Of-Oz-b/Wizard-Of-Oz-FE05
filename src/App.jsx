@@ -11,7 +11,7 @@ import ResultTestPage from "./pages/ResultTestPage";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/login.jsx";
 import Mypage from "./pages/Mypage.jsx";
-import OAuthCallback from "./pages/OauthCallback.jsx";
+import OAuthCallback from "./pages/OAuthCallback.jsx";
 
 // 에러 컴포넌트
 import Error401 from "./pages/errors/Error401";

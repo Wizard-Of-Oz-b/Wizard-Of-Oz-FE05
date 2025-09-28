@@ -19,7 +19,7 @@ export default function OAuthCallback() {
       try {
         const code = sp.get("code");
         const state = sp.get("state");
-        if (!code) throw new Error("Missing authorization code");
+        if (!code) throw new Error(err || "Missing authorization code");
 
         const SITE = (import.meta.env.VITE_SITE_URL || window.location.origin).replace(/\/+$/,"");
         const CB = import.meta.env.VITE_OAUTH_CALLBACK_PATH || "/auth/callback";
