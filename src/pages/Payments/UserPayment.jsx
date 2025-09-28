@@ -4,13 +4,17 @@ import TossEx from "../../components/features/payment/TossEX";
 import AddressModal from "../../components/features/payment/AddressModal";
 import { useMyProfile } from "../../hooks/useUser";
 import TossModal from "../../components/features/payment/TossModal";
-import { useGetMyOrders, useGetPurchaseItems } from "../../hooks/payments/useOrderPayment";
+import {
+  useGetMyOrders,
+  useGetPurchaseItems,
+} from "../../hooks/payments/useOrderPayment";
 import Ordercard from "../../components/features/payment/OrderCard";
 import { filterOrders } from "../../utils/filterOrders";
 import { useUpdateShippingAddress } from "../../hooks/cart/useOrder";
 import CartLoadingSpin from "../../components/features/cart/CartLoadingSpin";
 import EmptyPayment from "../../components/features/payment/EmptyPayment";
 import PaymentSkeleton from "../../components/skeletons/PaymentSkeleton";
+import TelNumber from "../../components/features/payment/TelNumber";
 
 const SECTION_STYLE =
   "w-full border border-gray-200 rounded-2xl px-4 py-5 shadow-sm mb-2";
@@ -23,17 +27,17 @@ export default function UserPayment() {
     data: userOrder,
     isLoading: orderLoading,
     isError: orderIsError,
-    error: orderError
+    error: orderError,
   } = useGetMyOrders(); // 주문서
-  const purchaseId = userOrder?.results[0]?.purchase_id
-  console.log(userOrder?.results.length, '길이')
+  const purchaseId = userOrder?.results[0]?.purchase_id;
+  console.log(userOrder?.results.length, "길이");
   const {
     data: items,
     isLoading: areItemsLoading,
     isError: areItemError,
-    error: itemError
-  } = useGetPurchaseItems(purchaseId);  // 주문 내용
-  console.log(items)
+    error: itemError,
+  } = useGetPurchaseItems(purchaseId); // 주문 내용
+  console.log(items);
   const { mutateAsync: updateAddress, isPending: isAddressUpdate } =
     useUpdateShippingAddress();
 
@@ -79,7 +83,9 @@ export default function UserPayment() {
     if (userProfile?.phone_number) {
       setShippingAddress((prev) => ({
         ...prev,
-        phone: userProfile.phone_number,
+        phone: userProfile.phone_number
+          .replace(/[^0-9]/g, "")
+          .replace(/(^02.{0}|^01.{1}|[0-9]{3})([0-9]+)([0-9]{4})/, "$1-$2-$3"),
       }));
     }
   }, [userProfile]);
@@ -111,7 +117,17 @@ export default function UserPayment() {
   // 배송지 변경사항 저장
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setShippingAddress((prev) => ({ ...prev, [name]: value }));
+
+    // name이 'phone'일 경우에만 포맷팅 로직을 적용
+    if (name === "phone") {
+      const formattedValue = value
+        .replace(/[^0-9]/g, "")
+        .replace(/(^02.{0}|^01.{1}|[0-9]{3})([0-9]+)([0-9]{4})/, "$1-$2-$3");
+      setShippingAddress((prev) => ({ ...prev, [name]: formattedValue }));
+    } else {
+      setShippingAddress((prev) => ({ ...prev, [name]: value }));
+    }
+
     if (isDefaultAddress) {
       setIsDefaultAddress(false);
     }
@@ -195,31 +211,24 @@ export default function UserPayment() {
   const isPaymentProcessing = isAddressUpdate || false;
 
   // 주문서 에러
-  const isLoadFail = orderIsError || areItemError
+  const isLoadFail = orderIsError || areItemError;
 
-
-  console.log(orderError, itemError, '에러 테스트')
-  if(isLoadingData){
-    return(
-      <PaymentSkeleton />
-    )
+  console.log(orderError, itemError, "에러 테스트");
+  if (isLoadingData) {
+    return <PaymentSkeleton />;
   }
-  
+
   //에러 출력
-  if(isLoadFail){
-    return(
+  if (isLoadFail) {
+    return (
       <EmptyPayment script={orderError?.message || areItemError?.message} />
-    )
+    );
   }
 
   // 불러올 정보가 없다면 빈페이지 출력
-  if(userOrder?.results.length === 0){
-    return(
-      <EmptyPayment />
-    )
+  if (userOrder?.results.length === 0) {
+    return <EmptyPayment />;
   }
-
-
 
   return (
     <div className="flex w-full items-center justify-center">
@@ -271,11 +280,16 @@ export default function UserPayment() {
                 className="w-full border border-gray-400 rounded-sm px-2 py-1"
                 value={shippingAddress.phone}
                 onChange={handleInputChange}
+                maxLength={13}
                 readOnly={isDefaultAddress}
                 required
               />
             </div>
-
+            {/* <TelNumber
+              value={shippingAddress.phone}
+              onChange={handleInputChange}
+              isDefaultAddress={isDefaultAddress}
+            /> */}
             <div className="flex mt-3">
               <label className="w-20">주소</label>
               <input
