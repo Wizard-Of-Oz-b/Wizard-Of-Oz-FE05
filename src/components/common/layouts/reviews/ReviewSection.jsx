@@ -88,7 +88,11 @@ export default function ReviewSection({
     try {
       const payload = { product_id: productId, rating, content };
       const created = onCreate ? await onCreate(payload) : await createReview(payload);
-      setRows((prev) => [{ ...created, user_id: authedUserId }, ...prev]);
+      const cid = created.review_id ?? created.id ?? null;
+      setRows((prev) => [
+        { ...created, review_id: cid, id: cid, user_id: authedUserId, is_mine: true },
+        ...prev,
+      ]);
       setRating(0);
       setContent("");
       toast("success", "리뷰가 등록되었습니다.");
@@ -108,6 +112,7 @@ export default function ReviewSection({
     null;
 
   const isMine = (r) => {
+    if (typeof r?.is_mine === "boolean") return r.is_mine;
     const owner = getOwnerId(r);
     if (!owner || !authedUserId) return false;
     return String(owner) === String(authedUserId);
@@ -171,8 +176,8 @@ export default function ReviewSection({
         <ul className="divide-y divide-gray-100">
           {rows.map((r) => {
             const mine = isMine(r);
-            const uuid = r.review_id ?? r.uuid ?? null;
-            const reactKey = uuid ?? r.id ?? Math.random(); 
+            const uuid = r.review_id ?? r.id ?? r.uuid ?? null;
+            const reactKey = uuid ?? Math.random();
 
             return (
               <li key={reactKey} className="py-4">
@@ -190,8 +195,13 @@ export default function ReviewSection({
                       return;
                     }
                     const res = await patchReview(uuid, patch);
+                    const rid = res?.review_id ?? res?.id ?? uuid;
                     setRows((prev) =>
-                      prev.map((x) => (x.review_id === uuid ? { ...x, ...res } : x))
+                      prev.map((x) =>
+                        ((x.review_id ?? x.id) === uuid)
+                          ? { ...x, ...res, review_id: rid, id: rid }
+                          : x
+                      )
                     );
                     toast("success", "리뷰가 수정되었습니다.");
                   }}
@@ -201,7 +211,7 @@ export default function ReviewSection({
                       return;
                     }
                     await deleteReview(uuid);
-                    setRows((prev) => prev.filter((x) => x.review_id !== uuid));
+                    setRows((prev) => prev.filter((x) => (x.review_id ?? x.id) !== uuid));
                     toast("success", "리뷰가 삭제되었습니다.");
                   }}
                   className="!border-0 !shadow-none !p-0"
