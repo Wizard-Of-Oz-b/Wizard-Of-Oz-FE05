@@ -47,7 +47,7 @@ export default function UserCart() {
 
   return (
     <div className="flex w-full  justify-center">
-      <div className="flex flex-col w-full items-center justify-center border-x-gray-600 mt-30 pb-20">
+      <div className="flex flex-col w-full items-center justify-center border-x-gray-600 pb-20">
         <p className="text-4xl mb-3">장바구니</p>
         <div>
           <CartToolbar />
