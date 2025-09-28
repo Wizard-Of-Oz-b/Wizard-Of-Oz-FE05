@@ -95,8 +95,8 @@ export default function PaymentModal({ isOpen, onClose, paymentData }) {
       await widgets.requestPayment({
         orderId: paymentData.orderId,
         orderName: paymentData.orderName,
-        successUrl: `${window.location.origin}/success`,
-        failUrl: `${window.location.origin}/fail`,
+        successUrl: `${window.location.origin}/payment/success`,
+        failUrl: `${window.location.origin}/payment/fail`,
         customerEmail: paymentData.customerEmail,
         customerName: paymentData.customerName,
       });

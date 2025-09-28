@@ -24,13 +24,13 @@ export default function PaySuccess() {
       alert("잘못된 접근입니다. 홈으로 이동합니다.");
       navigate("/");
     }
-    // else{
-    //   confirmPaymentMutation.mutate({
-    //     paymentKey: requestData.paymentKey,
-    //     orderId : requestData.orderId,
-    //     amount: requestData.amount
-    //   })
-    // }
+    else{
+      confirmPaymentMutation.mutate({
+        paymentKey: requestData.paymentKey,
+        orderId : requestData.orderId,
+        amount: requestData.amount
+      })
+    }
 
     console.log(requestData);
   }, []);

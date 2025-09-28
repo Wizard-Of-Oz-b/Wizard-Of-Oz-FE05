@@ -9,7 +9,7 @@ import userApi from "../../lib/api/userAxios";
  */
 const getMyOrdersAPI = async ({ page, size }) => {
   // axios의 params 옵션을 사용하면 자동으로 쿼리 스트링을 만들어줍니다.
-  const response = await userApi.get("/orders/purchases/me/", {
+  const response = await userApi.get("/orders/purchases/me/ready/", {
     params: { page, size },
   });
   return response.data; // { count, next, previous, results } 객체를 반환

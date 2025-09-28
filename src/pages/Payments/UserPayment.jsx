@@ -25,18 +25,18 @@ export default function UserPayment() {
     error,
     isFetching,
   } = useGetMyOrders(1, 50); //임시
-  const {mutateAsync: updateAddress, isPending: isAddressUpdate} = useUpdateShippingAddress();
-
+  const { mutateAsync: updateAddress, isPending: isAddressUpdate } =
+    useUpdateShippingAddress();
 
   console.log(userOrder, "주문");
   console.log(userProfile);
   const filterOrder = filterOrders(userOrder?.results, "ready"); //ready 상태만 가져옴
   const [testPaymentInfo, setTestPaymentInfo] = useState({
-    method: "CARD",
+    // method: "CARD",
     amount: 0,
     customerKey: TEST_CUSTOMER_KEY,
-    orderId: `order_${new Date().getTime()}`,
-    orderName: "베이직 티셔츠 외 1건",
+    orderId: "",
+    orderName: "",
   });
 
   const [shippingAddress, setShippingAddress] = useState({
@@ -75,13 +75,29 @@ export default function UserPayment() {
       }));
     }
   }, [userProfile]);
-
+  // 토스 전달 정보 삽입
   useEffect(() => {
-    if (userOrder) {
-      const totalPrice = tempTotalPrice(filterOrder); // 임시 값 추후 제거
-      setTestPaymentInfo((prev) => ({ ...prev, amount: totalPrice }));
+    if (userOrder && filterOrder.length >= 2) {
+      // const totalPrice = tempTotalPrice(filterOrder); // 임시 값 추후 제거
+      console.log(userOrder ,'토탈')
+      const totalPrice= parseInt(userOrder.results[0].items_total)
+      console.log(totalPrice);
+      const orderId = userOrder.results[0]?.purchase_id;
+      console.log(userOrder.results[0]?.purchase_id ,'토스')
+      const customerKey = filterOrder[0]?.user;
+      const orderName = `${filterOrder[1].product_name} ${
+        filterOrder.length >= 2 && ("외 " + (filterOrder.length - 1) + "건")
+      }`;
+      console.log(orderName)
+      setTestPaymentInfo((prev) => ({
+        ...prev,
+        amount: totalPrice,
+        orderId: orderId,
+        customerKey: customerKey,
+        orderName: orderName,
+      }));
     }
-  }, []);
+  }, [userOrder]);
 
   // 배송지 변경사항 저장
   const handleInputChange = (e) => {
@@ -92,6 +108,7 @@ export default function UserPayment() {
     }
   };
 
+  // 테스트용 구매 버튼 차후 제거
   const handlePurchase = () => {
     setIsPaymentModalOpen(true);
   };
@@ -100,23 +117,25 @@ export default function UserPayment() {
     console.log(payment);
     setPayment(payment);
   };
+  // 주소 모달창
   const handleModalOpen = () => {
     setIsModalOpen(true);
   };
   const handleModalClose = () => {
     setIsModalOpen(false);
   };
+  // 주소 변경
   const handleCompleteAddress = (addressData) => {
-    setShippingAddress(prev =>({
+    console.log(addressData, '주소')
+    setShippingAddress((prev) => ({
       ...prev,
-      postCode: addressData.zonecode,
+      postCode: addressData.zoneCode,
       address1: addressData.address,
-    })
-  );
+    }));
     // 기본주소 아님, 모달창 닫기
     setIsDefaultAddress(false);
     setIsModalOpen(false);
-    // detailAddressRef.current?.focus(); 이후에 상세 주소에 포커싱 하기 
+    // detailAddressRef.current?.focus(); 이후에 상세 주소에 포커싱 하기
   };
 
   // '원본' 데이터인 userProfile에서 값을 가져와 '현재' 상태를 덮어씁니다.
@@ -143,14 +162,19 @@ export default function UserPayment() {
       // 기본 주소가 아니면,
       if (!isDefaultAddress) {
         // 주소추가
-        await updateAddress({ shippingAddress });
+        await updateAddress({ address: shippingAddress });
         console.log("새로운 배송지로 진행");
         // 주소 추가 경고창 보내고, 바로 중단할것
       }
+
       // 현재 어떤 결제 방식 선택하는지 Toss선택하면 Toss 모달 화면 출력....
-      setIsPaymentModalOpen(true);
+      if (payment === "toss") {
+        setIsPaymentModalOpen(true);
+      } else if (payment === "account") {
+        console.log("무통장 입금"); // 현재 구현이 안되어 있어서 임시로 체크
+      }
     } catch (error) {
-      console.error(error, '결제 시도중 에러')    //나중에 모달 창으로 변경 할것
+      console.error(error, "결제 시도중 에러"); //나중에 모달 창으로 변경 할것
     }
   };
   console.log(shippingAddress);
@@ -165,9 +189,9 @@ export default function UserPayment() {
     <div className="flex w-full items-center justify-center">
       {isPaymentProcessing && <CartLoadingSpin />}
       <form
-        // onSubmit={handleSubmitPay} 
+        onSubmit={handleSubmitPay}
         className="w-2/4 flex flex-col justify-center items-center"
-        >
+      >
         {/* 배송지 섹션 */}
         <section className={SECTION_STYLE}>
           <div className="flex justify-between">
@@ -189,54 +213,64 @@ export default function UserPayment() {
             >
               기본 배송지
             </span>
-            <div>
-              <label>받는 분</label>
+            <div className="flex mt-5">
+              <label className="w-20">받는 분</label>
               <input
-                className="font-semibold"
+                className="w-full border border-gray-400 rounded-sm px-2 py-1"
                 name="recipient"
                 value={shippingAddress.recipient}
                 onChange={handleInputChange}
+                readOnly
                 required
               />
             </div>
 
-            <div>
-              <label htmlFor="phone">연락처</label>
+            <div className="flex mt-3">
+              <label htmlFor="phone" className="w-20">
+                연락처
+              </label>
               <input
                 name="phone"
+                className="w-full border border-gray-400 rounded-sm px-2 py-1"
                 value={shippingAddress.phone}
                 onChange={handleInputChange}
+                readOnly
                 required
               />
             </div>
 
-            <div>
-              <label>주소</label>
+            <div className="flex mt-3">
+              <label className="w-20">주소</label>
               <input
                 name="address1"
+                className="w-full border border-gray-400 rounded-sm px-2 py-1"
                 value={shippingAddress.address1}
                 onChange={handleInputChange}
+                readOnly
                 required
               />
             </div>
             {/* 기본 주소에서는 상세 주소, 우편번호를 출력하지 않는다. */}
             {!isDefaultAddress && (
               <>
-                <div>
-                  <label>상세 주소</label>
+                <div className="flex mt-3">
+                  <label className="w-20">상세 주소</label>
                   <input
                     name="address2"
+                    className="w-full border border-gray-400 rounded-sm px-2 py-1"
                     value={shippingAddress.address2}
                     onChange={handleInputChange}
                     required
                   />
                 </div>
-                <div>
-                  <label>우편번호</label>
+                <div className="flex mt-3">
+                  <label className="w-20">우편번호</label>
                   <input
                     name="postCode"
+                    className="w-full border border-gray-400 rounded-sm px-2 py-1"
                     value={shippingAddress.postCode}
                     onChange={handleInputChange}
+                    readOnly
                     required
                   />
                 </div>
@@ -313,11 +347,11 @@ export default function UserPayment() {
 
         {/* 결제 버튼 == 결제폼 submit 버튼 */}
         <button
-          // type="submit" //실 적용시
-          type="button" //테스트
+          type="submit" //실 적용시
+          // type="button" //테스트
           className="w-100 border rounded-sm bg-black text-white py-1"
-          onClick={handlePurchase}
-          disabled={isPaymentProcessing}  // 결제 진행중에는 두번 요청 X
+          // onClick={handlePurchase}
+          disabled={isPaymentProcessing} // 결제 진행중에는 두번 요청 X
         >
           {testPaymentInfo.amount.toLocaleString()}원 결제
         </button>
