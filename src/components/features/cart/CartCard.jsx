@@ -56,23 +56,12 @@ export default function CartCard({ data }) {
     });
   };
   console.log(productsImg.result);
-  return (
-    //사진 크기 키우기
-    <div
-      className="w-[1100px] py-4 border-b border-gray-200
-    grid grid-cols-[1fr_100px_120px_120px_100px] gap-x-4 items-center"
-    >
-      {/* <input type="checkbox" name="selectAll" id="selectAll" 
-      onChange={(e) => onChangeSelect(e.target.checked, data.product)}
-      checked={checkItems.includes(data.product) ? true : false} 
-      className="appearance-none box-borderbg-clip-content p-[0.25em] w-[1.5em] h-[1.5em] border border-gray-700 cursor-pointer
-      checked:bg-black
-      
-      " /> */}
-      {(isPending || patchPending) && <CartLoadingSpin />}
 
-      <div className="flex justify-center items-center">
-        <div className="w-[140px h-[190px]">
+  return (
+    <tr>
+      {/* 상품 정보 */}
+      <td>
+        <div className="flex items-center">
           {isLoading ? (
             <div className="w-[140px] h-[190px] bg-gray-300"></div>
           ) : (
@@ -85,33 +74,107 @@ export default function CartCard({ data }) {
               className="w-[140px] h-[190px]"
             />
           )}
-        </div>
-        <div className="flex flex-col  w-[400px] ml-4">
-          <p className="text-lg">{data.product_name}</p>
-          <p className="text-gray-400">{option}</p>
-        </div>
-      </div>
+          <div className="flex flex-col  w-[400px] ml-4">
+            <p className="text-lg">{data.product_name}</p>
+            <p className="text-gray-400">{option}</p>
+          </div>
 
-      <CartStepper
-        value={data.quantity}
-        itemId={data.id}
-        option={data.option_key}
-        onChageValue={onClickPatch}
-      />
-      <p className="text-center">택배 배송</p>
-      <p className="text-center">
-        {(data.unit_price * data.quantity).toLocaleString()}원
-      </p>
-      <div className="flex flex-col">
-        {/* <button className="border border-gray-300 mb-2 py-0.5">주문하기</button> */}
+        </div>
+      </td>
+
+      {/* 수량 */}
+      <td>
+        <CartStepper
+          value={data.quantity}
+          itemId={data.id}
+          option={data.option_key}
+          onChageValue={onClickPatch}
+        />
+      </td>
+
+      {/* 배송구분 */}
+      <td>
+        <p className="text-center">택배 배송</p>
+      </td>
+
+      {/* 합계 액수 */}
+      <td>
+        <p className="text-center">
+          {(data.unit_price * data.quantity).toLocaleString()}원
+        </p>
+      </td>
+
+      {/* 삭제 */}
+      <td>
         <button
-          className="border border-gray-300 py-0.5"
+          className="border border-gray-300 py-0.5 w-30"
           // onClick={()=> setItemCount(data.product, data.option_key, 0)}
           onClick={handleOnClickDelete}
         >
           삭제
         </button>
-      </div>
-    </div>
+      </td>
+      {(isPending || patchPending) && <CartLoadingSpin />}
+
+    </tr>
   );
+
+  // return (
+  //   //사진 크기 키우기
+  //   <div
+  //     className="w-[1100px] py-4 border-b border-gray-200
+  //   grid grid-cols-[1fr_100px_120px_120px_100px] gap-x-4 items-center"
+  //   >
+  //     {/* <input type="checkbox" name="selectAll" id="selectAll" 
+  //     onChange={(e) => onChangeSelect(e.target.checked, data.product)}
+  //     checked={checkItems.includes(data.product) ? true : false} 
+  //     className="appearance-none box-borderbg-clip-content p-[0.25em] w-[1.5em] h-[1.5em] border border-gray-700 cursor-pointer
+  //     checked:bg-black
+      
+  //     " /> */}
+  //     {(isPending || patchPending) && <CartLoadingSpin />}
+
+  //     <div className="flex justify-center items-center">
+  //       <div className="w-[140px h-[190px]">
+  //         {isLoading ? (
+  //           <div className="w-[140px] h-[190px] bg-gray-300"></div>
+  //         ) : (
+  //           <img
+  //             src={imageUrl}
+  //             onError={(e) => {
+  //               e.target.src = "https://picsum.photos/id/1/160/225"; //이미지 없으면
+  //             }}
+  //             alt="상품 이미지"
+  //             className="w-[140px] h-[190px]"
+  //           />
+  //         )}
+  //       </div>
+  //       <div className="flex flex-col  w-[400px] ml-4">
+  //         <p className="text-lg">{data.product_name}</p>
+  //         <p className="text-gray-400">{option}</p>
+  //       </div>
+  //     </div>
+
+  //     <CartStepper
+  //       value={data.quantity}
+  //       itemId={data.id}
+  //       option={data.option_key}
+  //       onChageValue={onClickPatch}
+  //     />
+  //     <p className="text-center">택배 배송</p>
+  //     <p className="text-center">
+  //       {(data.unit_price * data.quantity).toLocaleString()}원
+  //     </p>
+  //     <div className="flex flex-col">
+  //       {/* <button className="border border-gray-300 mb-2 py-0.5">주문하기</button> */}
+  //       <button
+  //         className="border border-gray-300 py-0.5"
+  //         // onClick={()=> setItemCount(data.product, data.option_key, 0)}
+  //         onClick={handleOnClickDelete}
+  //       >
+  //         삭제
+  //       </button>
+  //     </div>
+  //   </div>
+  // );
 }

@@ -14,7 +14,6 @@ import { useUpdateShippingAddress } from "../../hooks/cart/useOrder";
 import CartLoadingSpin from "../../components/features/cart/CartLoadingSpin";
 import EmptyPayment from "../../components/features/payment/EmptyPayment";
 import PaymentSkeleton from "../../components/skeletons/PaymentSkeleton";
-import TelNumber from "../../components/features/payment/TelNumber";
 
 const SECTION_STYLE =
   "w-full border border-gray-200 rounded-2xl px-4 py-5 shadow-sm mb-2";
@@ -285,11 +284,7 @@ export default function UserPayment() {
                 required
               />
             </div>
-            {/* <TelNumber
-              value={shippingAddress.phone}
-              onChange={handleInputChange}
-              isDefaultAddress={isDefaultAddress}
-            /> */}
+
             <div className="flex mt-3">
               <label className="w-20">주소</label>
               <input
