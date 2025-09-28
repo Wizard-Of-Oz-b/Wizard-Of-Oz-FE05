@@ -10,9 +10,10 @@ import CartLoadingSpin from "../components/features/cart/CartLoadingSpin";
 import { useCreatePurchase } from "../hooks/cart/useOrder";
 import { useNavigate } from "react-router-dom";
 import CartEmpty from "../components/features/cart/CartEmpty";
+import CartError from "../components/features/cart/CartError";
 
 export default function UserCart() {
-  const { data: cart, isLoading, isError, error } = useCart();
+  const { data: cart, isLoading, isError, error, refetch } = useCart();
   const purchaseMutation = useCreatePurchase();
   const clearCartMutation = useClearCart();
   const nagivate = useNavigate();
@@ -39,8 +40,14 @@ export default function UserCart() {
     }
   };
 
+  //로딩중에는 장바구니 스켈레톤 출력
   if (isLoading) {
     return <CartSkeleton />;
+  }
+
+  // 장바구니 데이터 가져오다가 에러 발생시
+  if(isError){
+    return <CartError onRetry={refetch} error={error} />
   }
 
   return (
