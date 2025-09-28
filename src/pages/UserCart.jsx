@@ -79,7 +79,7 @@ export default function UserCart() {
           <span className="text-sm mt-1">
             ※ {(50000).toLocaleString()}원 이상 구매시 배송비 무료{" "}
           </span>
-          <OrderSummary sumPrice={cart.items_total} />
+          <OrderSummary sumPrice={cart?.items_total} />
           <CartDays />
         </div>
         <div className="flex items-center justify-center mt-3">

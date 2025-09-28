@@ -1,27 +1,51 @@
+import { useEffect, useState } from "react";
 import { useDeleteCartItem, usePatchCart } from "../../../hooks/cart/useCart";
 import formatOptionKey from "../../../utils/optionKey";
 import { fetchPublicMainImageUrl } from "../../common/api/admin/productImagesPublic";
 import CartLoadingSpin from "./CartLoadingSpin";
 import CartStepper from "./CartStepper";
 
-
-
 //각 주문 카트 onChangeSelect, checkItems제거
 export default function CartCard({ data }) {
   // 최대 수량인지 확인
-  console.log(data.count, data.product);
-  
-  const {mutate: deleteMutaition, isPending } = useDeleteCartItem();
-  const {mutate: updateCartQuantity, isPending: patchPending} = usePatchCart();
-  const productsImg = fetchPublicMainImageUrl(data.product)
-  const option = formatOptionKey(data.option_key)
+  // console.log(data.count, data.product);
+  const [imageUrl, setImageUrl] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const { mutate: deleteMutaition, isPending } = useDeleteCartItem();
+  const { mutate: updateCartQuantity, isPending: patchPending } =
+    usePatchCart();
+  const productsImg = fetchPublicMainImageUrl(data.product);
+  const option = formatOptionKey(data.option_key);
+
+  useEffect(() => {
+    const loadImage = async () => {
+      setIsLoading(true);
+      try {
+        const url = await fetchPublicMainImageUrl(data?.product);
+        setImageUrl(url);
+      } catch (error) {
+        console.error("이미지 URL을 가져오는 데 실패했습니다:", error);
+        setImageUrl("https://picsum.photos/id/1/160/225");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (data?.product) {
+      loadImage();
+    } else {
+      setIsLoading(false);
+    }
+  }, []);
+
   const handleOnClickDelete = () => {
     deleteMutaition({
       productId: data.product,
       optionKey: data.option_key,
     });
   };
-    const onClickPatch = (itemId, option, newQuantity) => {
+  const onClickPatch = (itemId, option, newQuantity) => {
     console.log(updateCartQuantity);
     updateCartQuantity({
       id: itemId,
@@ -31,6 +55,7 @@ export default function CartCard({ data }) {
       },
     });
   };
+  console.log(productsImg.result);
   return (
     //사진 크기 키우기
     <div
@@ -48,14 +73,18 @@ export default function CartCard({ data }) {
 
       <div className="flex justify-center items-center">
         <div className="w-[140px h-[190px]">
-          <img
-            src={productsImg}
-            onError={(e) => {
-              e.target.src ='https://picsum.photos/id/1/160/225' //이미지 없으면
-            }}
-            alt="상품 이미지"
-            className="w-[140px] h-[190px]"
-          />
+          {isLoading ? (
+            <div className="w-[140px] h-[190px] bg-gray-300"></div>
+          ) : (
+            <img
+              src={imageUrl}
+              onError={(e) => {
+                e.target.src = "https://picsum.photos/id/1/160/225"; //이미지 없으면
+              }}
+              alt="상품 이미지"
+              className="w-[140px] h-[190px]"
+            />
+          )}
         </div>
         <div className="flex flex-col  w-[400px] ml-4">
           <p className="text-lg">{data.product_name}</p>

@@ -59,7 +59,7 @@ export default function UserPayment() {
   const [payment, setPayment] = useState("");
   const [isDefaultAddress, setIsDefaultAddress] = useState(true);
 
-  // 기본 유저 데이터 세팅
+  // useEffect #1: 기본 유저 데이터 세팅
   useEffect(() => {
     // userProfile 데이터가 있고, 그 안에 주소 정보가 있다면
     if (userProfile?.address) {
@@ -83,7 +83,8 @@ export default function UserPayment() {
       }));
     }
   }, [userProfile]);
-  // 토스 전달 정보 삽입
+
+  // useEffect #2: 토스 전달 정보 삽입
   useEffect(() => {
     if (userOrder && items && filterOrder.length >= 1) {
       // const totalPrice = tempTotalPrice(filterOrder); // 임시 값 추후 제거
@@ -116,10 +117,10 @@ export default function UserPayment() {
     }
   };
 
-  // 테스트용 구매 버튼 차후 제거
-  const handlePurchase = () => {
-    setIsPaymentModalOpen(true);
-  };
+  // // 테스트용 구매 버튼 차후 제거
+  // const handlePurchase = () => {
+  //   setIsPaymentModalOpen(true);
+  // };
 
   const handlePaymentBtn = (payment) => {
     console.log(payment);
@@ -255,7 +256,7 @@ export default function UserPayment() {
                 name="recipient"
                 value={shippingAddress.recipient}
                 onChange={handleInputChange}
-                readOnly
+                readOnly={isDefaultAddress}
                 required
               />
             </div>
@@ -266,10 +267,11 @@ export default function UserPayment() {
               </label>
               <input
                 name="phone"
+                id="phone"
                 className="w-full border border-gray-400 rounded-sm px-2 py-1"
                 value={shippingAddress.phone}
                 onChange={handleInputChange}
-                readOnly
+                readOnly={isDefaultAddress}
                 required
               />
             </div>

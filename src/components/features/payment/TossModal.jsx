@@ -6,7 +6,7 @@ export default function PaymentModal({ isOpen, onClose, paymentData }) {
   const [widgets, setWidgets] = useState(null);
   const [amount, setAmount] = useState({
     currency: "KRW",
-    value: 30000,
+    value: 0,
   });
   const [ready, setReady] = useState(false);
 
@@ -126,7 +126,6 @@ export default function PaymentModal({ isOpen, onClose, paymentData }) {
           disabled={!ready}
           className="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded mt-8 disabled:bg-gray-400"
         >
-          {console.log(amount, '테스트')}
           {ready
             ? `${paymentData.amount.toLocaleString()}원 결제하기`
             : "결제 정보 로딩 중..."}
