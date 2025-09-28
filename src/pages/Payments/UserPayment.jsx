@@ -4,7 +4,7 @@ import TossEx from "../../components/features/payment/TossEX";
 import AddressModal from "../../components/features/payment/AddressModal";
 import { useMyProfile } from "../../hooks/useUser";
 import TossModal from "../../components/features/payment/TossModal";
-import { useGetMyOrders } from "../../hooks/payments/useOrderPayment";
+import { useGetMyOrders, useGetPurchaseItems } from "../../hooks/payments/useOrderPayment";
 import Ordercard from "../../components/features/payment/OrderCard";
 import { filterOrders } from "../../utils/filterOrders";
 import tempTotalPrice from "../../utils/tempTotalPrice";
@@ -21,18 +21,24 @@ export default function UserPayment() {
   const {
     data: userOrder,
     isLoading: orderLoading,
-    isError,
+    isError: orderIsError,
     error,
     isFetching,
-  } = useGetMyOrders(1, 50); //임시
+  } = useGetMyOrders(); // 주문서
+  const purchaseId = userOrder?.results[0].purchase_id
+  const {
+    data: items,
+    isLoading: areItemsLoading,
+    isError: areItemError,
+  } = useGetPurchaseItems(purchaseId);  // 주문 내용
+  console.log(items)
   const { mutateAsync: updateAddress, isPending: isAddressUpdate } =
     useUpdateShippingAddress();
 
   console.log(userOrder, "주문");
   console.log(userProfile);
-  const filterOrder = filterOrders(userOrder?.results, "ready"); //ready 상태만 가져옴
+  const filterOrder = filterOrders(items?.results); //ready 상태만 가져옴
   const [testPaymentInfo, setTestPaymentInfo] = useState({
-    // method: "CARD",
     amount: 0,
     customerKey: TEST_CUSTOMER_KEY,
     orderId: "",
@@ -77,18 +83,18 @@ export default function UserPayment() {
   }, [userProfile]);
   // 토스 전달 정보 삽입
   useEffect(() => {
-    if (userOrder && filterOrder.length >= 2) {
+    if (userOrder && items && filterOrder.length >= 1) {
       // const totalPrice = tempTotalPrice(filterOrder); // 임시 값 추후 제거
-      console.log(userOrder ,'토탈')
-      const totalPrice= parseInt(userOrder.results[0].items_total)
-      console.log(totalPrice);
+
+      const totalPrice = parseInt(userOrder.results[0].items_total);
+
       const orderId = userOrder.results[0]?.purchase_id;
-      console.log(userOrder.results[0]?.purchase_id ,'토스')
+
       const customerKey = filterOrder[0]?.user;
       const orderName = `${filterOrder[1].product_name} ${
-        filterOrder.length >= 2 && ("외 " + (filterOrder.length - 1) + "건")
+        filterOrder.length >= 2 && "외 " + (filterOrder.length - 1) + "건"
       }`;
-      console.log(orderName)
+      console.log(orderName);
       setTestPaymentInfo((prev) => ({
         ...prev,
         amount: totalPrice,
@@ -97,7 +103,7 @@ export default function UserPayment() {
         orderName: orderName,
       }));
     }
-  }, [userOrder]);
+  }, [items]);
 
   // 배송지 변경사항 저장
   const handleInputChange = (e) => {
@@ -126,7 +132,7 @@ export default function UserPayment() {
   };
   // 주소 변경
   const handleCompleteAddress = (addressData) => {
-    console.log(addressData, '주소')
+    console.log(addressData, "주소");
     setShippingAddress((prev) => ({
       ...prev,
       postCode: addressData.zoneCode,
@@ -289,7 +295,7 @@ export default function UserPayment() {
         <section className={SECTION_STYLE}>
           <h2 className={SECTION_TITLE_STYLE}>주문 상품</h2>
           {filterOrder.map((el) => (
-            <Ordercard key={el.product} data={el} />
+            <Ordercard key={el.item_id} data={el} />
           ))}
         </section>
 

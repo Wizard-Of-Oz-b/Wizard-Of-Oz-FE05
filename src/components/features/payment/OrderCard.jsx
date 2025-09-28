@@ -7,7 +7,7 @@ export default function Ordercard({data}) {
   }
   const productsImg = fetchPublicMainImageUrl(data?.product)
   const optionString = formatOptionKey(data?.option_key)
-  const sumPrice = data?.unit_price * data?.amount
+  const sumPrice = data?.unit_price * data?.quantity
   const unitPrice = Math.floor(data?.unit_price)
 
   return (
@@ -23,7 +23,7 @@ export default function Ordercard({data}) {
         <span>{data?.product_name}</span>
         <span className="text-gray-500">[옵션] {optionString}</span>
         <span>개당 가격: {unitPrice.toLocaleString()}원</span>
-        <span>구매 개수: {data?.amount}</span>
+        <span>구매 개수: {data?.quantity}</span>
         <span className="mt-3">합계: {sumPrice.toLocaleString()}원</span>
       </div>
     </div>
