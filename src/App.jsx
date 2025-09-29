@@ -112,16 +112,7 @@ export default function App() {
             <Route path="/errors/504" element={<Error504 />} />
 
             {/* 404 */}
-            <Route
-              path="*"
-              element={
-                <Error404
-                  onSearch={(q) =>
-                    (window.location.href = `/search?q=${encodeURIComponent(q)}`)
-                  }
-                />
-              }
-            />
+            <Route path="*" element={<Error404 />} />
           </Routes>
         </Suspense>
       </ErrorBoundary>

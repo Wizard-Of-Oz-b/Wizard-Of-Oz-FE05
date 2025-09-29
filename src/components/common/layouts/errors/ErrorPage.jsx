@@ -12,7 +12,10 @@ import {
 import ActionLink from "./component/ActionLink";
 import ActionButton from "./component/ActionButton";
 import { pickIcon } from "./component/pickIcon";
-import StatusPill from "./component/StatusPill"; // ⬅️ 추가
+import StatusPill from "./component/StatusPill";
+import { useNavigate } from "react-router-dom";
+import { buildSearchURL } from "../../../../utils/searchUrl";
+import { useState } from "react";
 
 export default function ErrorPage({
   status = 500,
@@ -22,12 +25,34 @@ export default function ErrorPage({
   onSearch,
   hint,
 }) {
+  const [q, setQ] = useState("");
+  const navigate =  useNavigate();
+
   const preset = STATUS_PRESETS[status] || STATUS_PRESETS[500];
   const theTitle = title || preset.title;
   const theMsg = message || preset.message;
   const theActions = actions || preset.actions || ["home"];
 
   const Icon = pickIcon(status);
+
+  const goSearch = (query) => {
+    const keyword = String(query || "").trim();
+    if (!keyword) return;
+
+    if (onSearch) {
+      onSearch(keyword);
+    } else {
+      const qs = new URLSearchParams({ q: keyword, page: "1", sort: "created_at"});
+      navigate(`/results/test?${qs.toString()}`);
+    }
+  };
+
+  const handlekeydown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      goSearch(q);
+    }
+  };
 
   return (
     <div className="min-h-screen grid place-items-center bg-gradient-to-br from-gray-900 via-gray-800 to-violet-600 p-6">
@@ -74,18 +99,14 @@ export default function ErrorPage({
                       type="search"
                       placeholder="상품 검색: 모던 셔츠, 데님, 기본티 …"
                       className="w-full rounded-xl bg-gray-50 pl-9 pr-3 h-11 text-sm outline-none focus:ring-2 focus:ring-violet-400 border-0 shadow-sm"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && onSearch)
-                          onSearch(e.currentTarget.value);
-                      }}
+                      value={q}
+                      onChange={(e) => setQ(e.target.value)}
+                      onKeyDown={handlekeydown}
                     />
                   </div>
                   <button
                     className="h-11 rounded-xl bg-violet-600 px-4 text-sm font-medium text-white hover:bg-violet-700"
-                    onClick={() => {
-                      const el = document.getElementById("error-search");
-                      if (onSearch && el) onSearch(el.value);
-                    }}
+                    onClick={() => goSearch(q)}
                   >
                     검색
                   </button>
