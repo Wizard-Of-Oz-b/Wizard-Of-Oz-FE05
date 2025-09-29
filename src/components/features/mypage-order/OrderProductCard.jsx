@@ -7,7 +7,6 @@ export default function OrderProductCard({ data }) {
   const [imageUrl, setImageUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  console.log(imageUrl, "이미지");
   const option =  formatOptionKey(data.option_key)
   useEffect(() => {
     const loadImage = async () => {
@@ -36,7 +35,7 @@ export default function OrderProductCard({ data }) {
   if (!data) {
     return;
   }
-  console.log(imageUrl, "데이타 가져오기 성공!");
+
   return (
     <tr className="border-b last:border-b-0">
       <td className="p-4">
@@ -53,6 +52,7 @@ export default function OrderProductCard({ data }) {
           <div className="flex flex-col">
             <span>{data?.product_name}</span>
             <span className="text-sm text-gray-400">{option}</span>
+            <span className="">개당{Number(data?.unit_price).toLocaleString()} 원</span>
           </div>
         </div>
       </td>

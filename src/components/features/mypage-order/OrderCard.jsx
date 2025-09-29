@@ -1,6 +1,11 @@
 import { useState } from "react";
-import { useGetPurchaseDetail } from "../../../hooks/mypage/useUserOrder";
+import {
+  useCancelPurchase,
+  useGetPurchaseDetail,
+  useGetShipmentInfo,
+} from "../../../hooks/mypage/useUserOrder";
 import OrderProductCard from "./OrderProductCard";
+import CartLoadingSpin from "../cart/CartLoadingSpin";
 
 // 배송 상태가 존재 하면 배송 상태 우선!
 const getStatusStyle = (status) => {
@@ -16,6 +21,19 @@ const getStatusStyle = (status) => {
   }
 };
 
+const getStatusName = (status) => {
+  switch (status) {
+    case "delivered": // 배송완료
+      return "배송 완료";
+    case "in transit": // 배송 중
+      return "배송 중";
+    case "pending": // 배송 대기
+      return "배송 대기";
+    default:
+      return "text-gray-500";
+  }
+};
+
 // 주문 상태
 const getOrderStyle = (status) => {
   switch (status) {
@@ -23,6 +41,8 @@ const getOrderStyle = (status) => {
       return "text-yellow-600 font-semibold";
     case "paid":
       return "text-blue-500 font-semibold";
+    case "canceled":
+      return "text-red-500 font-semibold";
   }
 };
 
@@ -31,7 +51,9 @@ const getOrdername = (status) => {
     case "ready":
       return "결제 전";
     case "paid":
-      return "주문 완료";
+      return "결제 완료";
+    case "canceled":
+      return "결제 취소";
   }
 };
 
@@ -49,11 +71,44 @@ export default function OrderCard({ order }) {
     error,
   } = useGetPurchaseDetail(order.purchase_id);
 
-  const orderStatus = getOrdername(order?.status);
-  const orderStyle = getOrderStyle(order?.status);
-  console.log(orderData, "test");
+  const {
+    data: shipment,
+    isLoading: isShipLoading,
+    isError: isShipError,
+    error: shipError,
+  } = useGetShipmentInfo(order.purchase_id);
+  const cancelPurchaseMutation = useCancelPurchase();
+  // 로딩
+  const Loading = isLoading || isShipLoading;
+  // 에러
+  const pageError = isError || isShipError;
 
-  if (isLoading) {
+  console.log(order?.status, "스탯", order.purchase_id);
+  const orderStatus =
+    shipment?.total === 0
+      ? getOrdername(order?.status)
+      : getStatusName(shipment?.results[0].status);
+  const orderStyle =
+    shipment?.total === 0
+      ? getOrderStyle(order?.status)
+      : getStatusStyle(shipment?.results[0].status);
+
+  const [detail, setDetail] = useState(false);
+
+  const onClickDetail = () => {
+    setDetail((prev) => !prev);
+  };
+
+  const onClickcancled = () => {
+    if (window.confirm('정말로 이 주문을 취소하시겠습니까?')) {
+          cancelPurchaseMutation.mutate(order.purchase_id);
+        }
+    console.log("취소");
+  };
+
+  console.log(shipment?.results, "test");
+
+  if (Loading) {
     return (
       <>
         {/* 차후 스켈레톤 적용하자 */}
@@ -61,14 +116,15 @@ export default function OrderCard({ order }) {
       </>
     );
   }
-  console.log(orderData?.results.length, "길이");
-  if (isError) {
+  if (pageError) {
     return <>임시 에러</>;
   }
+  console.log(orderData?.results.length, "길이");
   console.log(orderStatus, "스테이터스");
 
   return (
-    <div className="w-3/4 border shadow-sm rounded-lg flex justify-center items-center">
+    <div className="w-full border shadow-sm rounded-lg flex justify-center items-center">
+      {cancelPurchaseMutation.isPending ? <CartLoadingSpin /> : null}
       <table className="w-[97%]  mb-4 ">
         {/*  주문 정보 헤더 부분 */}
         <thead className="border-b border-l-gray-200">
@@ -85,8 +141,11 @@ export default function OrderCard({ order }) {
 
             {/* 상세 버튼 추후 취소 버튼도 추가할것 */}
             <th className="p-4 text-right font-normal">
-              <button className="text-sm text-gray-600 hover:underline">
-                상세보기
+              <button
+                onClick={onClickDetail}
+                className="text-sm text-gray-600 hover:underline cursor-pointer"
+              >
+                운송 확인
               </button>
             </th>
           </tr>
@@ -95,15 +154,47 @@ export default function OrderCard({ order }) {
         {/*  상품 목록 바디 부분  */}
         <tbody>
           {orderData?.results.map((el) => (
-            <OrderProductCard key={el.product_id + el.order_id} data={el} />
+            <OrderProductCard
+              key={el.product_id + el.order_id + el.option_key}
+              data={el}
+            />
           ))}
         </tbody>
 
-        {/* 4 전체 합계 푸터 부분 */}
+        {/* 전체 합계 푸터 부분 */}
         <tfoot className="border-t border-gray-200">
           <tr>
-            <td className="p-4 text-right font-bold text-base" colSpan="3">
-              총 {parseInt(order?.items_total).toLocaleString()} 원
+            <td className="p-4" colSpan="3">
+              <div className="flex flex-col items-end">
+                <span className="font-bold">
+                  총 {parseInt(order?.items_total).toLocaleString()} 원
+                </span>
+                {(order?.status === "paid") && (shipment?.total === 0)? (
+                  <button
+                    onClick={onClickcancled}
+                    className="border border-gray-300 rounded-lg px-2 py-0.5 mt-1 bg-red-400 text-white"
+                  >
+                    결제 취소
+                  </button>
+                ) : null}
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              {/* 배송상세 설명 */}
+              {shipment?.results.length >= 1 && detail ? (
+                <div className="flex flex-col">
+                  <span className="text-gray-600">
+                    택배업체 : {shipment?.results[0].carrier}
+                  </span>
+                  <span className="text-gray-600">
+                    송장번호 : {shipment?.results[0].tracking_number}
+                  </span>
+                </div>
+              ) : (
+                ""
+              )}
             </td>
           </tr>
         </tfoot>

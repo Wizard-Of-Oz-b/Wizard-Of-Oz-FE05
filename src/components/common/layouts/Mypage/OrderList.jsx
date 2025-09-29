@@ -15,7 +15,7 @@ export default function OrderList() {
     isError: orderIsError,
     error: orderError,
   } = useGetMyAllOrders();
-  console.log(userOrderList, '리스트')
+  console.log(userOrderList, "리스트");
   if (orderLoading) {
     return (
       <div className="text-center py-8 text-gray-500">
@@ -23,16 +23,18 @@ export default function OrderList() {
       </div>
     );
   }
-  
+
   return (
     <div className="space-y-4">
       {/* 표시할 데이터가 없으면 빈화면 안내 출력*/}
       {userOrderList?.results.length === 0 ? (
         <OrderEmpty />
       ) : (
-        userOrderList.results.map((el) => (
-          <OrderCard key={el.purchase_id} order={el} />
-        ))
+        <div className="flex flex-col gap-2 justify-center items-center">
+          {userOrderList.results.map((el) => (
+            <OrderCard key={el.purchase_id} order={el} />
+          ))}
+        </div>
       )}
 
       {/* userOrderList를 map을 사용해서 id는 purchase_id 오더카드로 출력 */}
