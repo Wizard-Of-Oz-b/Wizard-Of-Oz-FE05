@@ -46,17 +46,15 @@ const updateAllReadyShippingAddressAPI = async (payload) => {
   return response.data;
 };
 
+// 기본 배송지 변경 아님
 export const useUpdateShippingAddress = () => {
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: updateAllReadyShippingAddressAPI,
 
     onSuccess: (data) => {
       console.log("배송지 일괄 수정 성공:", data);
-
-      // **핵심**: 배송지가 변경되었으므로, 주문 목록 데이터를 다시 불러와야 합니다.
-      // 이전에 만들었던 주문 목록 쿼리의 키를 무효화하여 자동 리프레시를 트리거합니다.
     },
 
     onError: (error) => {
