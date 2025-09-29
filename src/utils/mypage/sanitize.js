@@ -1,0 +1,1 @@
+export const clean = (v) => (v && v !== "string" ? v : "");

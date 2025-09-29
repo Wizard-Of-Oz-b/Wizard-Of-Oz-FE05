@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { updateMyProfile } from "../../api/Mypage/member";
 
 export default function PasswordChange() {
   const [isVerified, setIsVerified] = useState(false);
@@ -10,19 +11,17 @@ export default function PasswordChange() {
   const [passwordStrength, setPasswordStrength] = useState("");
   const [confirmPasswordMessage, setConfirmPasswordMessage] = useState("");
 
-  const defaultPassword = "12345678";
 
   const handlePasswordSubmit = () => {
-    if (currentPassword === defaultPassword) {
+    if (!currentPassword) {
+      setPasswordMessage("현재 비밀번호를 입력해주세요.");
+      return;
+    }
       setIsVerified(true);
       setPasswordMessage("");
-    } else {
-      setPasswordMessage("현재 비밀번호가 일치하지 않습니다. 다시 입력해주세요.");
-      setCurrentPassword("");
-    }
   };
 
-  const handlePasswordChange = () => {
+  const handlePasswordChange = async () => {
     if (!newPassword || !confirmNewPassword) {
       setChangeMessage("새 비밀번호와 확인 비밀번호를 모두 입력해주세요.");
       return;
@@ -38,16 +37,23 @@ export default function PasswordChange() {
       return;
     }
 
-    if (newPassword === defaultPassword) {
-      setChangeMessage("이전과 동일한 비밀번호는 사용할 수 없습니다.");
-      return;
-    }
-
+    try {
+      await updateMyProfile({
+        current_password: currentPassword,
+        new_password: newPassword,
+    });
     setChangeMessage("비밀번호가 성공적으로 변경되었습니다.");
     setNewPassword("");
     setConfirmNewPassword("");
     setPasswordStrength("");
     setConfirmPasswordMessage("");
+    } catch (e) {
+      const msg =
+        e?.response?.data?.detail ||
+        e?.response?.data?.message ||
+        "비밀번호 변경에 실패했습니다. 현재 비밀번호를 다시 확인해주세요.";
+      setChangeMessage(msg);
+    }
   };
   
   const checkPasswordStrength = (password) => {

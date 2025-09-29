@@ -42,6 +42,8 @@ import UserCart from "./pages/UserCart";
 import UserPayment from "./pages/Payments/UserPayment.jsx";
 import PaySuccess from "./pages/Payments/PaySuccess.jsx";
 import PayFail from "./pages/Payments/PayFail.jsx";
+import MemberInfo from "./components/common/layouts/Mypage/MemberInfo.jsx";
+import Password from "./components/common/layouts/Mypage/PasswordChange.jsx";
 
 
 const queryClient = new QueryClient();
@@ -66,6 +68,16 @@ export default function App() {
               <Route path="/payment" element={<UserPayment />} />
               <Route path='/payment/success' element={<PaySuccess />} />
               <Route path='/payment/fail' element={<PayFail />} />
+
+              {/* 마이페이지 (이중 중첩 라우팅) */}
+              <Route path="/mypage" element={<Mypage />}>
+                {/* <Route path="orderhistory" element={<OrderHistory />} /> */}
+                <Route path="memberinfo" element={<MemberInfo />} />
+                {/* <Route path="shipping" element={<Shipping />} /> */}
+                <Route path="password" element={<Password />} />
+                {/* <Route path="withdrawal" element={<Withdrawal />} />
+                <Route path="reviews" element={<Reviews />} /> */}
+              </Route>
             </Route>
             <Route path="/auth/callback/:provider" element={<OAuthCallback />} />
             <Route path="/oauth/callback" element={<OAuthCallback />} />
