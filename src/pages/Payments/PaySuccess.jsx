@@ -73,6 +73,7 @@ export default function PaySuccess() {
 
   const onClickMypage = () => {
     console.log("마이페이지 접속");
+    navigate("/Mypage")
   };
   const onClickHompage = () => {
     console.log("홈페이지 접속");
