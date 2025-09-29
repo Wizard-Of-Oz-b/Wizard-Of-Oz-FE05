@@ -13,6 +13,7 @@ export default defineConfig({
         // target: "http://localhost",
         target: "http://3.34.164.251",
         changeOrigin: true,
+        secure: false,
       },
     },
   },
