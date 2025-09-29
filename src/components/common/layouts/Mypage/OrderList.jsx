@@ -23,7 +23,7 @@ export default function OrderList() {
       </div>
     );
   }
-
+  
   return (
     <div className="space-y-4">
       {/* 표시할 데이터가 없으면 빈화면 안내 출력*/}
