@@ -1,17 +1,19 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import CartCard from "../components/features/cart/CartCard";
 import CartDays from "../components/features/cart/CartDays";
 import CartToolbar from "../components/features/cart/CartToolbar";
 import OrderSummary from "../components/features/cart/OrderSummary";
-import { productGroupCount } from "../utils/cart/productGroupCount";
+// import { productGroupCount } from "../utils/cart/productGroupCount";
 import { useCart, useClearCart } from "../hooks/cart/useCart";
 import CartSkeleton from "../components/skeletons/CartSkeleton";
 import CartLoadingSpin from "../components/features/cart/CartLoadingSpin";
 import { useCreatePurchase } from "../hooks/cart/useOrder";
 import { useNavigate } from "react-router-dom";
+import CartEmpty from "../components/features/cart/CartEmpty";
+import CartError from "../components/features/cart/CartError";
 
 export default function UserCart() {
-  const { data: cart, isLoading, isError, error } = useCart();
+  const { data: cart, isLoading, isError, error, refetch } = useCart();
   const purchaseMutation = useCreatePurchase();
   const clearCartMutation = useClearCart();
   const nagivate = useNavigate();
@@ -20,11 +22,9 @@ export default function UserCart() {
     if (!cart?.items) {
       return [];
     }
-    return cart.items.sort((a, b) =>
-      a.id.localeCompare(b.id)
-    )
+    return cart.items.sort((a, b) => a.id.localeCompare(b.id));
   }, [cart]);
-  console.log(cartList, '정렬')
+  console.log(cartList, "정렬");
   const handlePurchaseClick = () => {
     console.log("결제하기 버튼 클릭! API 요청을 보냅니다.");
     purchaseMutation.mutate();
@@ -34,72 +34,138 @@ export default function UserCart() {
   };
 
   const handleClearCart = () => {
-    
+    // 경고창 추후에 모달로 변경 하자..
     if (window.confirm("정말로 장바구니를 모두 비우시겠습니까?")) {
-      // 3. mutate 함수를 호출하여 API 요청을 실행합니다.
       clearCartMutation.mutate();
     }
   };
 
+  //로딩중에는 장바구니 스켈레톤 출력
   if (isLoading) {
     return <CartSkeleton />;
   }
 
+  // 장바구니 데이터 가져오다가 에러 발생시
+  if(isError){
+    return <CartError onRetry={refetch} error={error} />
+  }
+
   return (
-    <div className="flex w-full  justify-center">
-      <div className="flex flex-col w-full items-center justify-center border-x-gray-600 mt-30 pb-20">
-        <p className="text-4xl mb-3">장바구니</p>
-        <div>
+    <div className="flex flex-col items-center">
+      <table className="w-300">
+        <thead>
           <CartToolbar />
-        </div>
-        <div className="flex flex-col mt-3">
-          <div className="flex flex-col mr-4">
-            {/* 나중에 상품 없음 컴포넌트 추가 할것 중요! */}
-            {/* {cartList.length === 0 ? "상품없음" : null}
-            {cartList.map((el) => (
-              <CartCard
-                key={el.id}
-                data={el}
-              />
-            ))} */}
-            {cart?.items.lengnth === 0 ? "상품없음" : null}
-            {cartList.map((el) => (
-              <CartCard key={el.id} data={el} />
-            ))}
-          </div>
+        </thead>
+        <tbody>
+          {cart?.item_count === 0 ? <CartEmpty /> : null}
+          {cart ? null: <CartEmpty script="잘못된 접근" />}
+          {cartList.map((el) => (
+            <CartCard key={el.id} data={el} />
+          ))}
+          <tr>
+            <td colSpan={5}>
+              <div className="flex w-full justify-end mt-2">
+                {cart ? (
+                  <button
+                    onClick={handleClearCart}
+                    className="border border-gray-300 px-5 py-1 cursor-pointer"
+                  >
+                    장바구니 비우기
+                  </button>
+                ) : (
+                  ""
+                )}
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <OrderSummary sumPrice={cart?.items_total} />
+          </tr>
+          <tr>
+            <CartDays />
+          </tr>
+        </tbody>
+      </table>
 
-          <div className="flex w-full justify-end mt-2">
-            {/* <button className="border border-gray-300 px-5 py-1">선택상품 삭제</button> */}
-            <button 
-              onClick={handleClearCart}
-              className="border border-gray-300 px-5 py-1">
-              장바구니 비우기
-            </button>
-          </div>
-          <span className="text-sm mt-1">
-            ※ {(50000).toLocaleString()}원 이상 구매시 배송비 무료{" "}
-          </span>
-          <OrderSummary sumPrice={cart.items_total} />
-          <CartDays />
-        </div>
-        <div className="flex items-center justify-center mt-3">
-          {/* <button className="border border-gray-300 text-xl px-8 py-2 mx-2">선택 상품 주문</button> */}
+      <div className="flex items-center justify-center mt-3">
+        {/* <button className="border border-gray-300 text-xl px-8 py-2 mx-2">선택 상품 주문</button> */}
+        <button
+          className="border border-gray-300 text-xl px-8 py-2 mx-2 cursor-pointer"
+          onClick={OnClickShopping}
+        >
+          쇼핑 계속하기
+        </button>
+        {cart ? (
           <button
-            className="border border-gray-300 text-xl px-8 py-2 mx-2"
-            onClick={OnClickShopping}
-          >
-            쇼핑 계속하기
-          </button>
-
-          <button
-            className="border border-gray-300 text-xl px-8 py-2 mx-2 bg-black text-white"
+            className="border border-gray-300 text-xl px-8 py-2 mx-2 bg-black text-white cursor-pointer"
             onClick={handlePurchaseClick}
             disabled={purchaseMutation.isPending}
           >
             전체 상품 주문
           </button>
-        </div>
+        ) : (
+          ""
+        )}
       </div>
     </div>
   );
+
+  // return (
+  //   <div className="flex w-full  justify-center">
+  //     <div className="flex flex-col w-full items-center justify-center border-x-gray-600 pb-20">
+  //       <p className="text-4xl mb-3">장바구니</p>
+  //       <div>
+  //         <CartToolbar />
+  //       </div>
+  //       <div className="flex flex-col mt-3">
+  //         <div className="flex flex-col mr-4">
+  //           {/* 나중에 상품 없음 컴포넌트 추가 할것 중요! */}
+  //           {/* {cartList.length === 0 ? "상품없음" : null}
+  //           {cartList.map((el) => (
+  //             <CartCard
+  //               key={el.id}
+  //               data={el}
+  //             />
+  //           ))} */}
+  //           {cart?.items.lengnth === 0 ? "상품없음" : null}
+  //           {cartList.map((el) => (
+  //             <CartCard key={el.id} data={el} />
+  //           ))}
+  //         </div>
+
+  //         <div className="flex w-full justify-end mt-2">
+  //           {/* <button className="border border-gray-300 px-5 py-1">선택상품 삭제</button> */}
+  //           <button
+  //             onClick={handleClearCart}
+  //             className="border border-gray-300 px-5 py-1"
+  //           >
+  //             장바구니 비우기
+  //           </button>
+  //         </div>
+  //         <span className="text-sm mt-1">
+  //           ※ {(50000).toLocaleString()}원 이상 구매시 배송비 무료{" "}
+  //         </span>
+  //         <OrderSummary sumPrice={cart?.items_total} />
+  //         <CartDays />
+  //       </div>
+  //       <div className="flex items-center justify-center mt-3">
+  //         {/* <button className="border border-gray-300 text-xl px-8 py-2 mx-2">선택 상품 주문</button> */}
+  //         <button
+  //           className="border border-gray-300 text-xl px-8 py-2 mx-2"
+  //           onClick={OnClickShopping}
+  //         >
+  //           쇼핑 계속하기
+  //         </button>
+
+  //         <button
+  //           className="border border-gray-300 text-xl px-8 py-2 mx-2 bg-black text-white"
+  //           onClick={handlePurchaseClick}
+  //           disabled={purchaseMutation.isPending}
+  //         >
+  //           전체 상품 주문
+  //         </button>
+  //       </div>
+  //     </div>
+  //   </div>
+  // );
 }

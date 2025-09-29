@@ -1,153 +1,412 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import VirtualAccountEx from "../../components/features/payment/VirtualAccountEx";
 import TossEx from "../../components/features/payment/TossEX";
 import AddressModal from "../../components/features/payment/AddressModal";
+import { useMyProfile } from "../../hooks/useUser";
+import TossModal from "../../components/features/payment/TossModal";
+import {
+  useGetMyOrders,
+  useGetPurchaseItems,
+} from "../../hooks/payments/useOrderPayment";
+import Ordercard from "../../components/features/payment/OrderCard";
+import { filterOrders } from "../../utils/filterOrders";
+import { useUpdateShippingAddress } from "../../hooks/cart/useOrder";
+import CartLoadingSpin from "../../components/features/cart/CartLoadingSpin";
+import EmptyPayment from "../../components/features/payment/EmptyPayment";
+import PaymentSkeleton from "../../components/skeletons/PaymentSkeleton";
 
-const SECTION_STYLE = 'w-full border border-gray-200 rounded-2xl px-4 py-5 shadow-sm mb-2';
+const SECTION_STYLE =
+  "w-full border border-gray-200 rounded-2xl px-4 py-5 shadow-sm mb-2";
 const SECTION_TITLE_STYLE = "text-xl font-bold";
+const TEST_CUSTOMER_KEY = "YbX2HuSlsC9uVJW6NMRMj";
 
 export default function UserPayment() {
-  // 주문자, 배송지 선택시 사용자 기본 정보 가져와야한다. /api/v1/users/me
-  // 배송지 설정시, 주소 API 가져오기
-  // 상품 정보가져오기 (장바구니 가져오면됨)
-  // 최종 결제 금액 계산(이거 여기서 하는거 맞나)
-  // 결제 수단
-  // 약관 동의
-  // 결제 버튼
+  const { data: userProfile, isLoading: userLoading } = useMyProfile();
+  const {
+    data: userOrder,
+    isLoading: orderLoading,
+    isError: orderIsError,
+    error: orderError,
+  } = useGetMyOrders(); // 주문서
+  const purchaseId = userOrder?.results[0]?.purchase_id;
+  console.log(userOrder?.results.length, "길이");
+  const {
+    data: items,
+    isLoading: areItemsLoading,
+    isError: areItemError,
+    error: itemError,
+  } = useGetPurchaseItems(purchaseId); // 주문 내용
+  console.log(items);
+  const { mutateAsync: updateAddress, isPending: isAddressUpdate } =
+    useUpdateShippingAddress();
 
-  // 설명란 활성화
+  console.log(userOrder, "주문");
+  console.log(userProfile);
+  const filterOrder = filterOrders(items?.results); //ready 상태만 가져옴
+  const [testPaymentInfo, setTestPaymentInfo] = useState({
+    amount: 0,
+    customerKey: TEST_CUSTOMER_KEY,
+    orderId: "",
+    orderName: "",
+  });
+
+  const [shippingAddress, setShippingAddress] = useState({
+    recipient: "", //주문자
+    phone: "", //번호
+    postcode: "", //우편 번호
+    address1: "", //기본주소면 여기만 출력
+    address2: "", //상세 주소
+  });
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [payment, setPayment] = useState('')
-  const [isDefaultAddress, setIsDefaultAddress] = useState(true)
-  const [address, setAddress] = useState('')
-  const [zoneCode, setZoneCode] = useState('')
+  const [payment, setPayment] = useState("");
+  const [isDefaultAddress, setIsDefaultAddress] = useState(true);
 
-  const handlePaymentBtn = (payment) =>{
-    console.log(payment)
-    setPayment(payment)
-  }
-  const handleModalOpen = () =>{
-    setIsModalOpen(true)
-  }
-  const handleModalClose = () =>{
-    setIsModalOpen(false)
-  }
-  const handleCompleteAddress = (addressData) =>{
-    setAddress(addressData.address)
-    setZoneCode(addressData.zoneCode)
-    setIsDefaultAddress(false)
+  // useEffect #1: 기본 유저 데이터 세팅
+  useEffect(() => {
+    // userProfile 데이터가 있고, 그 안에 주소 정보가 있다면
+    if (userProfile?.address) {
+      setShippingAddress({
+        // postalCode: userProfile.address.postalCode || "",
+        address1: userProfile.address || "",
+        // address2: userProfile.address.address2 || "",
+      });
+    }
+    if (userProfile?.name || userProfile?.nickname) {
+      setShippingAddress((prev) => ({
+        ...prev,
+        recipient: userProfile.name || userProfile.nickname,
+      }));
+    }
+
+    if (userProfile?.phone_number) {
+      setShippingAddress((prev) => ({
+        ...prev,
+        phone: userProfile.phone_number
+          .replace(/[^0-9]/g, "")
+          .replace(/(^02.{0}|^01.{1}|[0-9]{3})([0-9]+)([0-9]{4})/, "$1-$2-$3"),
+      }));
+    }
+  }, [userProfile]);
+
+  // useEffect #2: 토스 전달 정보 삽입
+  useEffect(() => {
+    if (userOrder && items && filterOrder.length >= 1) {
+      // const totalPrice = tempTotalPrice(filterOrder); // 임시 값 추후 제거
+
+      const totalPrice = parseInt(userOrder.results[0].items_total);
+
+      const orderId = userOrder.results[0]?.purchase_id;
+
+      const customerKey = filterOrder[0]?.user;
+      const orderName = `${filterOrder[0].product_name} ${
+        filterOrder.length >= 2 && "외 " + (filterOrder.length - 1) + "건"
+      }`;
+      console.log(orderName);
+      setTestPaymentInfo((prev) => ({
+        ...prev,
+        amount: totalPrice,
+        orderId: orderId,
+        customerKey: customerKey,
+        orderName: orderName,
+      }));
+    }
+  }, [items]);
+
+  // 배송지 변경사항 저장
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+
+    // name이 'phone'일 경우에만 포맷팅 로직을 적용
+    if (name === "phone") {
+      const formattedValue = value
+        .replace(/[^0-9]/g, "")
+        .replace(/(^02.{0}|^01.{1}|[0-9]{3})([0-9]+)([0-9]{4})/, "$1-$2-$3");
+      setShippingAddress((prev) => ({ ...prev, [name]: formattedValue }));
+    } else {
+      setShippingAddress((prev) => ({ ...prev, [name]: value }));
+    }
+
+    if (isDefaultAddress) {
+      setIsDefaultAddress(false);
+    }
+  };
+
+  // // 테스트용 구매 버튼 차후 제거
+  // const handlePurchase = () => {
+  //   setIsPaymentModalOpen(true);
+  // };
+
+  const handlePaymentBtn = (payment) => {
+    console.log(payment);
+    setPayment(payment);
+  };
+  // 주소 모달창
+  const handleModalOpen = () => {
+    setIsModalOpen(true);
+  };
+  const handleModalClose = () => {
     setIsModalOpen(false);
-    // detailAddressRef.current?.focus(); 이후에 상세 주소에 포커싱
-  }
-  const handleDefaultAddress = (data) =>{
-    setAddress('기본 배송지')
-    setZoneCode('기본 우편번호')
-    setIsDefaultAddress(true)
+  };
+  // 주소 변경
+  const handleCompleteAddress = (addressData) => {
+    console.log(addressData, "주소");
+    setShippingAddress((prev) => ({
+      ...prev,
+      postcode: addressData.zoneCode,
+      address1: addressData.address,
+    }));
+    // 기본주소 아님, 모달창 닫기
+    setIsDefaultAddress(false);
+    setIsModalOpen(false);
+    // detailAddressRef.current?.focus(); 이후에 상세 주소에 포커싱 하기
+  };
 
+  // '원본' 데이터인 userProfile에서 값을 가져와 '현재' 상태를 덮어씁니다.
+  // IsDefaultAddress를 true로 변경 한다.
+  const handleResetToDefault = () => {
+    if (userProfile?.address) {
+      setShippingAddress((prev) => ({
+        ...prev,
+        recipient: userProfile.recipient || userProfile.nickname || "",
+        phone: userProfile.phone_number || "",
+        postcode: "",
+        address1: userProfile.address || "",
+        address2: "",
+      }));
+      setIsDefaultAddress(true);
+    }
+  };
+
+  const handleSubmitPay = async (e) => {
+    e.preventDefault(); // 결제중 새로고침 방지
+
+    try {
+      // 주소 추가 메소드 기본 주소면 안함
+      // 기본 주소가 아니면,
+      if (!isDefaultAddress) {
+        // 주소추가
+        await updateAddress({ address: shippingAddress });
+        console.log("새로운 배송지로 진행");
+        // 주소 추가 경고창 보내고, 바로 중단할것
+      }
+
+      // 현재 어떤 결제 방식 선택하는지 Toss선택하면 Toss 모달 화면 출력....
+      if (payment === "toss") {
+        setIsPaymentModalOpen(true);
+      } else if (payment === "account") {
+        console.log("무통장 입금"); // 현재 구현이 안되어 있어서 임시로 체크
+      }
+    } catch (error) {
+      console.error(error, "결제 시도중 에러"); //나중에 모달 창으로 변경 할것
+    }
+  };
+  console.log(shippingAddress);
+
+  // 초기 기본값 로딩시 스켈레톤 출력
+  const isLoadingData = userLoading || orderLoading || areItemsLoading;
+
+  // 결제 버튼 눌렀을 때 로딩창출력
+  const isPaymentProcessing = isAddressUpdate || false;
+
+  // 주문서 에러
+  const isLoadFail = orderIsError || areItemError;
+
+  console.log(orderError, itemError, "에러 테스트");
+  if (isLoadingData) {
+    return <PaymentSkeleton />;
   }
 
-  return(
-    <div className="mt-30 flex w-full items-center justify-center">
-      <form className="w-2/4 flex flex-col justify-center items-center">
+  //에러 출력
+  if (isLoadFail) {
+    return (
+      <EmptyPayment script={orderError?.message || areItemError?.message} />
+    );
+  }
+
+  // 불러올 정보가 없다면 빈페이지 출력
+  if (userOrder?.results.length === 0) {
+    return <EmptyPayment />;
+  }
+
+  return (
+    <div className="flex w-full items-center justify-center">
+      {isPaymentProcessing && <CartLoadingSpin />}
+      <form
+        onSubmit={handleSubmitPay}
+        className="w-2/4 flex flex-col justify-center items-center"
+      >
+        {/* 배송지 섹션 */}
         <section className={SECTION_STYLE}>
           <div className="flex justify-between">
             <h2 className={SECTION_TITLE_STYLE}>배송지</h2>
-            <button 
-            type="button"
-            onClick={handleModalOpen}
-            className="border border-gray-400 rounded-lg px-1">배송지 변경</button>
+            <button
+              type="button"
+              onClick={handleModalOpen}
+              className="border border-gray-400 rounded-lg px-1"
+            >
+              배송지 검색
+            </button>
           </div>
-          <div  className="flex flex-col mt-3">
-            <span className={`text-sm text-gray-500 text-center border rounded-sm border-gray-300 px-0.5 w-[75px]
-              ${isDefaultAddress && 'bg-black text-white'}
+          <div className="flex flex-col mt-3">
+            <span
+              className={`text-sm text-gray-500 text-center border rounded-sm border-gray-300 px-0.5 w-[75px]
+              ${isDefaultAddress && "bg-black text-white"}
               cursor-pointer select-none`}
-              onClick={handleDefaultAddress}
-              >
+              onClick={handleResetToDefault}
+            >
               기본 배송지
             </span>
-            <span className="font-semibold">홍길동</span>
-            <div className="flex flex-col">
-              <span>{address}</span>
-              <span>{zoneCode}</span>
-              <input type="text" placeholder="상세 주소 입력"/>
+            <div className="flex mt-5">
+              <label className="w-20">받는 분</label>
+              <input
+                className="w-full border border-gray-400 rounded-sm px-2 py-1"
+                name="recipient"
+                value={shippingAddress.recipient}
+                onChange={handleInputChange}
+                readOnly={isDefaultAddress}
+                required
+              />
             </div>
-            {/* <span>ㅇㅇㅇ도 ㅇㅇ시 ㅇㅇ구 ㅇㅇ로 00빌라 000호 (000)</span> */}
-            <span>전화번호: 000-0000-0000</span>
+
+            <div className="flex mt-3">
+              <label htmlFor="phone" className="w-20">
+                연락처
+              </label>
+              <input
+                name="phone"
+                id="phone"
+                className="w-full border border-gray-400 rounded-sm px-2 py-1"
+                value={shippingAddress.phone}
+                onChange={handleInputChange}
+                maxLength={13}
+                readOnly={isDefaultAddress}
+                required
+              />
+            </div>
+
+            <div className="flex mt-3">
+              <label className="w-20">주소</label>
+              <input
+                name="address1"
+                className="w-full border border-gray-400 rounded-sm px-2 py-1"
+                value={shippingAddress.address1}
+                onChange={handleInputChange}
+                readOnly
+                required
+              />
+            </div>
+            {/* 기본 주소에서는 상세 주소, 우편번호를 출력하지 않는다. */}
+            {!isDefaultAddress && (
+              <>
+                <div className="flex mt-3">
+                  <label className="w-20">상세 주소</label>
+                  <input
+                    name="address2"
+                    className="w-full border border-gray-400 rounded-sm px-2 py-1"
+                    value={shippingAddress.address2}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="flex mt-3">
+                  <label className="w-20">우편번호</label>
+                  <input
+                    name="postcode"
+                    className="w-full border border-gray-400 rounded-sm px-2 py-1"
+                    value={shippingAddress.postcode}
+                    onChange={handleInputChange}
+                    readOnly
+                    required
+                  />
+                </div>
+              </>
+            )}
           </div>
         </section>
-        {isModalOpen && <AddressModal onClose={handleModalClose} onSearch={handleCompleteAddress} />}
+        {isModalOpen && (
+          <AddressModal
+            onClose={handleModalClose}
+            onSearch={handleCompleteAddress}
+          />
+        )}
 
+        {/* 주문 상품 섹션 */}
         <section className={SECTION_STYLE}>
           <h2 className={SECTION_TITLE_STYLE}>주문 상품</h2>
-          <div className="flex mt-2">
-            <img src={`https://picsum.photos/id/1/50/70`} 
-            className="w-[70px] h-[90px]"/>
-            <div className="flex flex-col ml-3">
-              <span>[데일리지] 트윌 코튼 와이드 팬츠_SPTCF49G01</span>
-              <span className="text-gray-500">[옵션] 색상:BEIGE/사이즈:XL</span>
-              <span className="mt-3">{(30000).toLocaleString()}원</span>
-            </div>
-          </div>
-          <div className="flex mt-2">
-            <img src={`https://picsum.photos/id/2/50/70`} 
-            className="w-[70px] h-[90px]"/>
-            <div className="flex flex-col ml-3">
-              <span>[데일리지] 트윌 코튼 와이드 팬츠_SPTCF49G01</span>
-              <span className="text-gray-500">[옵션] 색상:BEIGE/사이즈:XL</span>
-              <span className="mt-3">{(30000).toLocaleString()}원</span>
-            </div>
-          </div>
+          {filterOrder.map((el) => (
+            <Ordercard key={el.item_id} data={el} />
+          ))}
         </section>
 
+        {/* 총 주문 금액 섹션 */}
         <section className={SECTION_STYLE}>
           <h2 className={SECTION_TITLE_STYLE}>총 주문 금액</h2>
-          <div>
-            60,000원
-          </div>
+          <div>{testPaymentInfo.amount.toLocaleString()}원</div>
         </section>
 
+        {/* 결제 수단 섹션 */}
         <section className={SECTION_STYLE}>
           <h2 className={SECTION_TITLE_STYLE}>결제 수단</h2>
           <div className="mt-2">
-            <button 
+            <button
               type="button"
-              value='account'
-              className={`border border-gray-400 rounded-md px-2 mr-2 transition delay-75 ${payment === 'account' && ('bg-black text-white')}`}
-              onClick={(e)=> handlePaymentBtn(e.target.value)}
-            >무통장 입금</button>
+              value="account"
+              className={`border border-gray-400 rounded-md px-2 mr-2 transition delay-75 ${
+                payment === "account" && "bg-black text-white"
+              }`}
+              onClick={(e) => handlePaymentBtn(e.target.value)}
+            >
+              무통장 입금
+            </button>
 
-            <button 
+            <button
               type="button"
-              value='toss'
-              className={`border border-gray-400 rounded-md px-2 mr-2 transition delay-75 ${payment === 'toss' && ('bg-black text-white')}`}
-              onClick={(e)=> handlePaymentBtn(e.target.value)}
-            >토스 페이</button>
+              value="toss"
+              className={`border border-gray-400 rounded-md px-2 mr-2 transition delay-75 ${
+                payment === "toss" && "bg-black text-white"
+              }`}
+              onClick={(e) => handlePaymentBtn(e.target.value)}
+            >
+              토스 페이
+            </button>
           </div>
-            {/* 무통장 입금 설명*/}
-            <div className={`${payment!=='account' && 'hidden'}`}>
-              <VirtualAccountEx />
-            </div>
+          {/* 무통장 입금 설명*/}
+          <div className={`${payment !== "account" && "hidden"}`}>
+            <VirtualAccountEx />
+          </div>
 
-            {/* 토스 페이 설명 */}
-            <div className={`${payment!=='toss' && 'hidden'}`}>
-              <TossEx />
-            </div>
-
+          {/* 토스 페이 설명 */}
+          <div className={`${payment !== "toss" && "hidden"}`}>
+            <TossEx />
+          </div>
         </section>
 
+        {/* 개인 정보 수집 동의서 섹션 */}
         <section className={SECTION_STYLE}>
           <h2 className={SECTION_TITLE_STYLE}>약관</h2>
           <div>
             <span>[필수] 개인정보 수집 및 이용 동의</span>
-            <input type="checkbox" name="" id="" className="ml-2" />
+            <input type="checkbox" name="" id="" className="ml-2" required />
           </div>
         </section>
 
-        <button type="submit" 
-        className="w-100 border rounded-sm bg-black text-white py-1">
-          60,000원 결제하기
+        {/* 결제 버튼 == 결제폼 submit 버튼 */}
+        <button
+          type="submit" //실 적용시
+          // type="button" //테스트
+          className="w-100 border rounded-sm bg-black text-white py-1"
+          // onClick={handlePurchase}
+          disabled={isPaymentProcessing} // 결제 진행중에는 두번 요청 X
+        >
+          {testPaymentInfo.amount.toLocaleString()}원 결제
         </button>
       </form>
+      <TossModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        paymentData={testPaymentInfo}
+      />
     </div>
-  )
+  );
 }

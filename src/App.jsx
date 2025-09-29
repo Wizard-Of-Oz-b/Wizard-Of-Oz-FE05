@@ -39,6 +39,10 @@ import AdminLogin from "./pages/Admin/AdminLogin.jsx";
 import AdminStockPage from "./pages/Admin/AdminStockPage.jsx";
 import AdminShipmentsPage from "./pages/Admin/AdminShipmentsPage.jsx";
 import UserCart from "./pages/UserCart";
+import UserPayment from "./pages/Payments/UserPayment.jsx";
+import PaySuccess from "./pages/Payments/PaySuccess.jsx";
+import PayFail from "./pages/Payments/PayFail.jsx";
+
 
 const queryClient = new QueryClient();
 
@@ -53,12 +57,15 @@ export default function App() {
               <Route path="/" element={<Home />} />
               <Route path="/products/:id" element={<ProductDetailPage />} />
               <Route path="/products/test" element={<ProductListTest />} />
+              <Route path="/cart" element={<UserCart />} />
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/results/test" element={<ResultTestPage />} />
               <Route path="/signup" element={<SignUp />} />
-              <Route path="/cart" element={<UserCart />} />
               <Route path="/Mypage" element={<Mypage />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/payment" element={<UserPayment />} />
+              <Route path='/payment/success' element={<PaySuccess />} />
+              <Route path='/payment/fail' element={<PayFail />} />
             </Route>
             <Route path="/auth/callback/:provider" element={<OAuthCallback />} />
             <Route path="/oauth/callback" element={<OAuthCallback />} />

@@ -50,6 +50,7 @@ userApi.interceptors.response.use(
         return userApi(originalRequest);
       } catch (refreshError) {
         // Refresh Token도 만료된 경우 (로그아웃 처리)
+        // 로그인 화면 또는 메인 화면으로 리다이렉션 추가하기
         console.error("토큰 재발급 실패:", refreshError);
         // 예: 로그아웃 처리 함수 호출
         // logout();

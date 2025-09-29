@@ -26,11 +26,49 @@ orderApi.interceptors.request.use(
     return Promise.reject(error);
   }
 );
-// ▲
+
 // 백엔드의 주문 생성 API를 호출하는 함수
 const createPurchaseAPI = async () => {
   const response = await orderApi.post("/orders/checkout/");
   return response.data;
+};
+
+/**
+ * '배송 준비중' 상태인 모든 주문의 배송지를 일괄 업데이트하는 API 함수
+ * @param {object} payload - 요청 본문에 담길 데이터
+ * @param {object} payload.address - 새로운 주소 정보 객체
+ */
+const updateAllReadyShippingAddressAPI = async (payload) => {
+  const response = await orderApi.patch(
+    "/orders/purchases/update-all-ready-shipping-address/",
+    payload
+  );
+  return response.data;
+};
+
+export const useUpdateShippingAddress = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateAllReadyShippingAddressAPI,
+
+    onSuccess: (data) => {
+      console.log("배송지 일괄 수정 성공:", data);
+
+      // **핵심**: 배송지가 변경되었으므로, 주문 목록 데이터를 다시 불러와야 합니다.
+      // 이전에 만들었던 주문 목록 쿼리의 키를 무효화하여 자동 리프레시를 트리거합니다.
+    },
+
+    onError: (error) => {
+      const errorData = error.response?.data;
+      const errorMessage =
+        errorData?.message ||
+        errorData?.detail ||
+        "배송지 변경 중 오류가 발생했습니다.";
+      console.error("배송지 수정 실패:", errorData);
+      alert(errorMessage);
+    },
+  });
 };
 
 export const useCreatePurchase = () => {
@@ -58,6 +96,7 @@ export const useCreatePurchase = () => {
       const errorMessage =
         errorData?.message || // { "message": "인증이 필요합니다." }
         errorData?.detail || // { "detail": "자격 증명이..." }
+        errorData?.stock || // { "detail": "재고 부족..." }
         "알 수 없는 오류가 발생했습니다."; // 그 외의 경우
 
       console.error("주문 실패:", errorData);
