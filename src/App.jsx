@@ -11,6 +11,7 @@ import ResultTestPage from "./pages/ResultTestPage";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/login.jsx";
 import Mypage from "./pages/Mypage.jsx";
+import OAuthCallback from "./pages/OauthCallback.jsx";
 
 // 에러 컴포넌트
 import Error401 from "./pages/errors/Error401";
@@ -59,6 +60,7 @@ export default function App() {
               <Route path="/Mypage" element={<Mypage />} />
               <Route path="/login" element={<Login />} />
             </Route>
+            <Route path="/auth/callback/:provider" element={<OAuthCallback />} />
 
             {/* 인증/접근제어 예외 페이지 */}
             <Route path="/admin/login" element={<AdminLogin />} />
