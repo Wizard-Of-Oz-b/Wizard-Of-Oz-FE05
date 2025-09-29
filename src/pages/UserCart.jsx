@@ -78,6 +78,12 @@ export default function UserCart() {
               </div>
             </td>
           </tr>
+          <tr>
+            <OrderSummary sumPrice={cart?.items_total} />
+          </tr>
+          <tr>
+            <CartDays />
+          </tr>
         </tbody>
       </table>
 
