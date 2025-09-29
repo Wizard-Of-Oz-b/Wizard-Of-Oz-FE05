@@ -1,271 +1,267 @@
 import React, { useState, useEffect } from "react";
+import { getMyPurchases, cancelPurchase } from "../../api/Mypage/orders.js";
 
+// 상태 텍스트 변환 (API 값 → 화면 표시)
+const getStatusLabel = (status) => {
+  switch (status) {
+    case "ready":
+      return "주문 처리 중";
+    case "shipping":
+    case "배송 중":
+      return "배송 중";
+    case "completed":
+    case "배송 완료":
+      return "배송 완료";
+    default:
+      return "알 수 없음";
+  }
+};
+
+// 상태별 스타일
 const getStatusStyles = (status) => {
-switch (status) {
-case '배송 완료':
-return 'text-green-600 font-semibold';
-case '배송 중':
-return 'text-blue-500 font-semibold';
-case '주문 처리 중':
-return 'text-yellow-600 font-semibold';
-default:
-return 'text-gray-500';
-}
+  switch (status) {
+    case "ready":
+    case "shipping":
+    case "주문 처리 중":
+      return "text-yellow-600 font-semibold";
+    case "배송 중":
+      return "text-blue-500 font-semibold";
+    case "completed":
+    case "배송 완료":
+      return "text-green-600 font-semibold";
+    default:
+      return "text-gray-500";
+  }
 };
 
 export default function OrderHistory() {
-const [orders, setOrders] = useState([]);
-const [loading, setLoading] = useState(true);
-const [expandedOrderId, setExpandedOrderId] = useState(null);
-const [message, setMessage] = useState("");
-const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-const [orderToCancelId, setOrderToCancelId] = useState(null);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [expandedOrderId, setExpandedOrderId] = useState(null);
+  const [message, setMessage] = useState("");
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [orderToCancelId, setOrderToCancelId] = useState(null);
 
-const fetchOrdersFromServer = async () => {
-return new Promise((resolve) => {
-setTimeout(() => {
-resolve([
-{
-id: 1,
-status: "주문 처리 중",
-details: {
-orderNumber: "20250916-123456",
-orderDate: "2025-09-16",
-paymentMethod: "신용카드",
-shippingAddress: "서울특별시 강남구 테헤란로 123",
-},
-products: [
-    {
-        id: 'p1',
-        name: "에어팟 프로 2세대",
-        quantity: 1,
-        price: 329000,
-        image: "/images/3.jpg",
-    },
-    {
-        id: 'p2',
-        name: "Apple Pencil 2세대",
-        quantity: 1,
-        price: 159000,
-        image: "/images/6.jpg",
+  // 주문 내역 불러오기
+  const loadOrders = async () => {
+    try {
+      const res = await getMyPurchases();
+      setOrders(res.data.results);
+    } catch (err) {
+      console.error("주문 불러오기 실패:", err);
+    } finally {
+      setLoading(false);
     }
-]
-},
-{
-id: 2,
-status: "배송 중",
-details: {
-orderNumber: "20250915-789012",
-orderDate: "2025-09-15",
-paymentMethod: "네이버페이",
-shippingAddress: "경기도 성남시 분당구 판교역로 1",
-trackingNumber: "1234-5678-9012"
-},
-products: [
-    {
-        id: 'p3',
-        name: "USB-C 케이블 (2m)",
-        quantity: 2,
-        price: 25000,
-        image: "/images/4.jpg",
+  };
+
+  useEffect(() => {
+    loadOrders();
+  }, []);
+
+  const handleDetailsClick = (orderId) => {
+    setExpandedOrderId(expandedOrderId === orderId ? null : orderId);
+  };
+
+  const handleCancelOrder = (orderId) => {
+    setMessage("");
+    setOrderToCancelId(orderId);
+    setShowCancelConfirm(true);
+  };
+
+  const handleConfirmCancellation = async () => {
+    try {
+      await cancelPurchase({
+        order_item_id: orderToCancelId,
+        reason: "사용자 요청",
+        cancel_amount: "-",
+        tax_free_amount: "0.00",
+      });
+      setMessage("주문이 취소되었습니다.");
+      await loadOrders();
+    } catch (err) {
+      console.error("주문 취소 실패:", err);
+      setMessage("주문 취소 중 오류가 발생했습니다.");
+    } finally {
+      setExpandedOrderId(null);
+      setShowCancelConfirm(false);
+      setOrderToCancelId(null);
     }
-]
-},
-{
-id: 3,
-status: "배송 완료",
-details: {
-orderNumber: "20250910-345678",
-orderDate: "2025-09-10",
-paymentMethod: "카카오페이",
-shippingAddress: "부산광역시 해운대구 APEC로 55",
-trackingNumber: "9876-5432-1098" 
-},
-products: [
-    {
-        id: 'p4',
-        name: "맥북 에어 M3 (스타라이트)",
-        quantity: 1,
-        price: 1590000,
-        image: "/images/5.jpg",
-    },
-    {
-        id: 'p5',
-        name: "매직 마우스",
-        quantity: 1,
-        price: 85000,
-        image: "/images/7.jpg",
-    }
-]
-},
-]);
-}, 1000);
-});
-};
+  };
 
-useEffect(() => {
-const loadOrders = async () => {
-const fetchedOrders = await fetchOrdersFromServer();
-setOrders(fetchedOrders);
-setLoading(false);
-};
-loadOrders();
-}, []);
+  const handleCancelConfirmation = () => {
+    setShowCancelConfirm(false);
+    setOrderToCancelId(null);
+  };
 
-const handleDetailsClick = (orderId) => {
-setExpandedOrderId(expandedOrderId === orderId ? null : orderId);
-};
-const handleCancelOrder = (orderId) => {
-setMessage("");
-setOrderToCancelId(orderId);
-setShowCancelConfirm(true);
-};
+  const CJ_EXPRESS_URL =
+    "https://www.cjlogistics.com/ko/tool/parcel/tracking-detail?parcelId=";
 
-const handleConfirmCancellation = () => {
-setOrders(orders.filter(order => order.id !== orderToCancelId));
-setExpandedOrderId(null);
-setShowCancelConfirm(false);
-setMessage("주문이 취소되었습니다.");
-setOrderToCancelId(null);
-};
-
-const handleCancelConfirmation = () => {
-setShowCancelConfirm(false);
-setOrderToCancelId(null);
-};
-
-const CJ_EXPRESS_URL = 'https://www.cjlogistics.com/ko/tool/parcel/tracking-detail?parcelId=';
-
-const getTrackingNumberOnly = (trackingNumberWithCarrier) => {
-    if (!trackingNumberWithCarrier) return null;
-    const parts = trackingNumberWithCarrier.split(' ');
+  const getTrackingNumberOnly = (trackingNumber) => {
+    if (!trackingNumber) return null;
+    const parts = trackingNumber.split(" ");
     return parts[parts.length - 1];
-}
+  };
 
-const handleTrackingClick = (trackingNumberWithCarrier) => {
-    const number = getTrackingNumberOnly(trackingNumberWithCarrier);
-
+  const handleTrackingClick = (trackingNumber) => {
+    const number = getTrackingNumberOnly(trackingNumber);
     if (number) {
-        window.open(`${CJ_EXPRESS_URL}${number}`, 'tracking_popup', 'width=800,height=600,scrollbars=yes');
+      window.open(
+        `${CJ_EXPRESS_URL}${number}`,
+        "tracking_popup",
+        "width=800,height=600,scrollbars=yes"
+      );
     } else {
-        alert("운송장 번호를 찾을 수 없습니다.");
+      alert("운송장 번호를 찾을 수 없습니다.");
     }
-};
+  };
 
-if (loading) {
-return (
-<div className="text-center py-8 text-gray-500">
-주문 내역을 불러오는 중입니다...
-</div>
-);
-}
-return (
-<div className="space-y-4">
-{message && (
-<div className="p-4 rounded-lg bg-green-100 text-green-700">
-{message}
-</div>
-)}
-{showCancelConfirm ? (
-<div className="flex flex-col items-center p-6 border border-red-300 bg-red-50 rounded-lg shadow-lg">
-<p className="font-semibold text-lg text-red-700 mb-4">정말 주문을 취소하시겠습니까?</p>
-<div className="flex space-x-4">
-<button
-className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-onClick={handleConfirmCancellation}
->
-확인
-</button>
-<button
-className="px-6 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition"
-onClick={handleCancelConfirmation}
->
-취소
-</button>
-</div>
-</div>
-) : (
-<>
-{orders.length > 0 ? (
-orders.map((order) => (
-<div key={order.id} className="border rounded-lg p-4 shadow-sm">
-    <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
-        <div className="flex items-baseline space-x-4">
-            <span className="text-xl font-bold text-gray-800">
-                {order.details.orderNumber}
-            </span>
-            <span className="text-sm text-gray-500">
-                {order.details.orderDate}
-            </span>
-            <span className={`text-sm ${getStatusStyles(order.status)}`}>
-                {order.status}
-            </span>
+  if (loading) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        주문 내역을 불러오는 중입니다...
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {message && (
+        <div className="p-4 rounded-lg bg-green-100 text-green-700">
+          {message}
         </div>
-        <div className="flex-shrink-0 flex items-center space-x-2">
-            {order.status === '주문 처리 중' && (
-                <button
-                    className="px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
-                    onClick={() => handleCancelOrder(order.id)}
-                >
-                    주문 취소
-                </button>
-            )}
+      )}
+      {showCancelConfirm ? (
+        <div className="flex flex-col items-center p-6 border border-red-300 bg-red-50 rounded-lg shadow-lg">
+          <p className="font-semibold text-lg text-red-700 mb-4">
+            정말 주문을 취소하시겠습니까?
+          </p>
+          <div className="flex space-x-4">
             <button
-                className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
-                onClick={() => handleDetailsClick(order.id)}
+              className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+              onClick={handleConfirmCancellation}
             >
-                {expandedOrderId === order.id ? '닫기' : '상세'}
+              확인
             </button>
+            <button
+              className="px-6 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition"
+              onClick={handleCancelConfirmation}
+            >
+              취소
+            </button>
+          </div>
         </div>
-    </div>
-
-    <div className="space-y-3">
-        {order.products.map((product) => (
-            <div key={product.id} className="flex items-center space-x-4 border-b last:border-b-0 pb-3 last:pb-0">
-                <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-12 h-12 object-cover rounded-lg"
-                />
-                <div className="flex-1">
-                    <span className="text-base font-medium text-gray-700 block">
-                        {product.name}
+      ) : (
+        <>
+          {orders.length > 0 ? (
+            orders.map((order) => (
+              <div
+                key={order.purchase_id}
+                className="border rounded-lg p-4 shadow-sm"
+              >
+                {/* 주문 기본 정보 */}
+                <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
+                  <div className="flex items-baseline space-x-4">
+                    <span className="text-xl font-bold text-gray-800">
+                      {order.order_number || order.purchase_id}
                     </span>
-                    <div className="text-sm text-gray-500 mt-0.5">
-                        <p>수량: {product.quantity}개</p>
-                        <p>개별 가격: {product.price.toLocaleString()}원</p>
-                    </div>
-                </div>
-            </div>
-        ))}
-    </div>
-
-    {expandedOrderId === order.id && (
-        <div className="mt-4 pt-4 border-t border-gray-200 space-y-2 text-sm text-gray-600">
-            <p><strong>주문번호:</strong> {order.details.orderNumber}</p>
-            <p><strong>주문일자:</strong> {order.details.orderDate}</p>
-            <p><strong>결제 방법:</strong> {order.details.paymentMethod}</p>
-            <p><strong>배송 주소:</strong> {order.details.shippingAddress}</p>
-            {order.details.trackingNumber && (
-                <div className="flex items-center space-x-2">
-                    <p><strong>(CJ대한통운)운송장 번호:</strong> {getTrackingNumberOnly(order.details.trackingNumber)}</p>
-                    <button
-                        className="px-2 py-1 text-xs bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
-                        onClick={() => handleTrackingClick(order.details.trackingNumber)}
+                    <span className="text-sm text-gray-500">
+                      {new Date(order.purchased_at).toLocaleDateString()}
+                    </span>
+                    <span
+                      className={`text-sm ${getStatusStyles(order.status)}`}
                     >
-                        배송조회
+                      {getStatusLabel(order.status)}
+                    </span>
+                  </div>
+                  <div className="flex-shrink-0 flex items-center space-x-2">
+                    {order.status === "ready" && (
+                      <button
+                        className="px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+                        onClick={() => handleCancelOrder(order.purchase_id)}
+                      >
+                        주문 취소
+                      </button>
+                    )}
+                    <button
+                      className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                      onClick={() => handleDetailsClick(order.purchase_id)}
+                    >
+                      {expandedOrderId === order.purchase_id
+                        ? "닫기"
+                        : "상세"}
                     </button>
+                  </div>
                 </div>
-            )}
-        </div>
-    )}
-</div>
-))
-) : (
-<p className="text-center text-gray-500">주문 내역이 없습니다.</p>
-)}
-</>
-)}
-</div>
-);
+
+                {/* 상품 목록 */}
+                <div className="space-y-3">
+                  {order.products?.map((product) => (
+                    <div
+                      key={product.id}
+                      className="flex items-center space-x-4 border-b last:border-b-0 pb-3 last:pb-0"
+                    >
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-12 h-12 object-cover rounded-lg"
+                      />
+                      <div className="flex-1">
+                        <span className="text-base font-medium text-gray-700 block">
+                          {product.name}
+                        </span>
+                        <div className="text-sm text-gray-500 mt-0.5">
+                          <p>수량: {product.quantity}개</p>
+                          <p>
+                            개별 가격: {product.price.toLocaleString()}원
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* 상세 정보 */}
+                {expandedOrderId === order.purchase_id && (
+                  <div className="mt-4 pt-4 border-t border-gray-200 space-y-2 text-sm text-gray-600">
+                    <p>
+                      <strong>주문번호:</strong> {order.order_number}
+                    </p>
+                    <p>
+                      <strong>주문일자:</strong>{" "}
+                      {new Date(order.purchased_at).toLocaleString()}
+                    </p>
+                    <p>
+                      <strong>결제 방법:</strong> {order.pg || "카드"}
+                    </p>
+                    <p>
+                      <strong>배송 주소:</strong>{" "}
+                      {order.shipping_address || "미등록"}
+                    </p>
+                    {order.tracking_number && (
+                      <div className="flex items-center space-x-2">
+                        <p>
+                          <strong>운송장 번호:</strong>{" "}
+                          {getTrackingNumberOnly(order.tracking_number)}
+                        </p>
+                        <button
+                          className="px-2 py-1 text-xs bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+                          onClick={() =>
+                            handleTrackingClick(order.tracking_number)
+                          }
+                        >
+                          배송조회
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            <p className="text-center text-gray-500">주문 내역이 없습니다.</p>
+          )}
+        </>
+      )}
+    </div>
+  );
 }

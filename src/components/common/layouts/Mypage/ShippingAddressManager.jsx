@@ -1,312 +1,226 @@
-import React, { useState } from "react";
-
-const initialAddresses = [
-  {
-    id: 1,
-    recipient: "김민지",
-    phoneNumber: "010-1234-5678",
-    zipCode: "12345",
-    address: "서울특별시 강남구 테헤란로 123",
-    detailedAddress: "ABC빌딩 10층",
-    isDefault: true,
-  },
-  {
-    id: 2,
-    recipient: "박서준",
-    phoneNumber: "010-9876-5432",
-    zipCode: "54321",
-    address: "경기도 성남시 분당구 판교역로 1",
-    detailedAddress: "판교테크노밸리",
-    isDefault: false,
-  },
-];
+import React, { useState, useEffect } from "react";
+import {
+  getAddresses,
+  addAddress,
+  deleteAddress,
+  setDefaultAddress,
+} from "../../api/Mypage/address";
 
 export default function ShippingAddressManager() {
-  const [shippingAddresses, setShippingAddresses] = useState(initialAddresses);
-  const [addMessage, setAddMessage] = useState("");
-  const [deletingId, setDeletingId] = useState(null);
-
+  const [shippingAddresses, setShippingAddresses] = useState([]);
   const [newRecipient, setNewRecipient] = useState("");
   const [newPhoneNumber, setNewPhoneNumber] = useState("");
   const [newZipCode, setNewZipCode] = useState("");
   const [newAddress, setNewAddress] = useState("");
   const [newDetailedAddress, setNewDetailedAddress] = useState("");
   const [isNewAddressDefault, setIsNewAddressDefault] = useState(false);
-  
+  const [message, setMessage] = useState("");
   const [showPostcodeModal, setShowPostcodeModal] = useState(false);
 
-  const handleEmbedPostcode = () => {
-    if (window.daum && window.daum.Postcode) {
-        setShowPostcodeModal(true);
+  useEffect(() => {
+    loadAddresses();
+  }, []);
 
-        setTimeout(() => {
-            new window.daum.Postcode({
-                oncomplete: function(data) {
-                    let fullAddress = data.roadAddress;
-                    let extraAddress = '';
-
-                    if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
-                        extraAddress += data.bname;
-                    }
-                    if (data.buildingName !== '' && data.apartment === 'Y') {
-                        extraAddress += (extraAddress !== '' ? ', ' + data.buildingName : data.buildingName);
-                    }
-                    if (extraAddress !== '') {
-                        fullAddress += ' (' + extraAddress + ')';
-                    }
-
-                    setNewZipCode(data.zonecode);
-                    setNewAddress(fullAddress);
-                    
-                    handleClosePostcode();
-                    document.getElementById('newDetailedAddress').focus();
-                },
-                width: '100%',
-                height: '100%',
-            }).embed(document.getElementById('postcode-container'));
-        }, 10);
-    } else {
-        alert("다음 우편번호 서비스가 로드되지 않았습니다. 외부 스크립트 로딩을 확인해주세요.");
+  const loadAddresses = async () => {
+    try {
+      const res = await getAddresses();
+      setShippingAddresses(res.data || []);
+    } catch (err) {
+      console.error("주소 불러오기 실패", err);
+      setMessage("주소 불러오기 실패");
     }
   };
 
-  const handleClosePostcode = () => {
-      setShowPostcodeModal(false);
-  };
-
-  const handleAddAddress = () => {
-    if (!newRecipient || !newAddress || !newZipCode) {
-      setAddMessage("받는 사람, 주소, 우편번호는 필수 입력 항목입니다.");
+  const handleAddAddress = async () => {
+    if (!newRecipient || !newZipCode || !newAddress) {
+      setMessage("받는 사람, 주소, 우편번호는 필수 입력 항목입니다.");
       return;
     }
-
-    setAddMessage("");
-
-    if (isNewAddressDefault) {
-      const updatedAddresses = shippingAddresses.map(addr => ({ ...addr, isDefault: false }));
-      setShippingAddresses(updatedAddresses);
-    } else if (shippingAddresses.length === 0) {
-      setIsNewAddressDefault(true);
+    try {
+      await addAddress({
+        recipient: newRecipient,
+        phone: newPhoneNumber,
+        postcode: newZipCode,
+        address1: newAddress,
+        address2: newDetailedAddress,
+        is_default: isNewAddressDefault,
+        is_active: true,
+      });
+      await loadAddresses();
+      setMessage("새로운 배송지가 추가되었습니다.");
+      setNewRecipient("");
+      setNewPhoneNumber("");
+      setNewZipCode("");
+      setNewAddress("");
+      setNewDetailedAddress("");
+      setIsNewAddressDefault(false);
+    } catch (err) {
+      console.error("배송지 추가 실패", err);
+      setMessage("배송지 추가 실패");
     }
-
-    const newAddressItem = {
-      id: Date.now(),
-      recipient: newRecipient,
-      phoneNumber: newPhoneNumber,
-      zipCode: newZipCode,
-      address: newAddress,
-      detailedAddress: newDetailedAddress,
-      isDefault: isNewAddressDefault || shippingAddresses.length === 0,
-    };
-
-    setShippingAddresses(prevAddresses => [...prevAddresses, newAddressItem]);
-
-    setNewRecipient("");
-    setNewPhoneNumber("");
-    setNewZipCode("");
-    setNewAddress("");
-    setNewDetailedAddress("");
-    setIsNewAddressDefault(false);
-    
-    setAddMessage("새로운 배송지가 추가되었습니다.");
   };
 
-  const handleDeleteAddress = (id) => {
-    const addressToDelete = shippingAddresses.find(addr => addr.id === id);
-    if (addressToDelete.isDefault && shippingAddresses.length > 1) {
-        setAddMessage("기본 배송지는 다른 주소를 기본으로 설정한 후 삭제할 수 있습니다.");
-        return;
+  const handleDelete = async (address_id) => {
+    try {
+      await deleteAddress(address_id);
+      await loadAddresses();
+      setMessage("배송지가 삭제되었습니다.");
+    } catch (err) {
+      console.error("배송지 삭제 실패", err);
+      setMessage("배송지 삭제 실패");
     }
-    setDeletingId(id);
   };
 
-  const handleConfirmDelete = () => {
-    let updatedAddresses = shippingAddresses.filter(addr => addr.id !== deletingId);
-    
-    if (shippingAddresses.find(addr => addr.id === deletingId)?.isDefault && updatedAddresses.length > 0) {
-      updatedAddresses = updatedAddresses.map((addr, index) => ({
-        ...addr,
-        isDefault: index === 0 ? true : false,
-      }));
+  const handleSetDefault = async (address_id) => {
+    try {
+      await setDefaultAddress(address_id);
+      await loadAddresses();
+      setMessage("기본 배송지가 변경되었습니다.");
+    } catch (err) {
+      console.error("기본 배송지 변경 실패", err);
+      setMessage("기본 배송지 변경 실패");
     }
-
-    setShippingAddresses(updatedAddresses);
-    setDeletingId(null);
-    setAddMessage("배송지가 삭제되었습니다.");
   };
 
-  const handleCancelDelete = () => {
-    setDeletingId(null);
-  };
+  const defaultAddress = shippingAddresses.find((a) => a.is_default);
+  const otherAddresses = shippingAddresses.filter((a) => !a.is_default);
 
-  const handleSetDefault = (id) => {
-    const updatedAddresses = shippingAddresses.map(addr => ({
-      ...addr,
-      isDefault: addr.id === id ? true : false,
-    }));
-    setShippingAddresses(updatedAddresses);
-    setAddMessage("기본 배송지가 변경되었습니다.");
-  };
+  // 주소검색 관련
+  const handleEmbedPostcode = () => {
+    if (window.daum && window.daum.Postcode) {
+      setShowPostcodeModal(true);
+      setTimeout(() => {
+        new window.daum.Postcode({
+          oncomplete: function (data) {
+            let fullAddress = data.roadAddress;
+            let extraAddress = "";
 
-  const defaultAddress = shippingAddresses.find(addr => addr.isDefault);
-  const otherAddresses = shippingAddresses.filter(addr => !addr.isDefault);
+            if (data.bname !== "" && /[동|로|가]$/g.test(data.bname)) {
+              extraAddress += data.bname;
+            }
+            if (data.buildingName !== "" && data.apartment === "Y") {
+              extraAddress +=
+                extraAddress !== "" ? ", " + data.buildingName : data.buildingName;
+            }
+            if (extraAddress !== "") {
+              fullAddress += " (" + extraAddress + ")";
+            }
+
+            setNewZipCode(data.zonecode);
+            setNewAddress(fullAddress);
+            setShowPostcodeModal(false);
+            document.getElementById("newDetailedAddress").focus();
+          },
+          width: "100%",
+          height: "100%",
+        }).embed(document.getElementById("postcode-container"));
+      }, 10);
+    } else {
+      alert("다음 우편번호 서비스가 로드되지 않았습니다.");
+    }
+  };
 
   return (
-    <div className="space-y-6 p-6 bg-white rounded-xl shadow">
+    <div className="p-6 bg-white rounded-xl shadow space-y-6">
       <h3 className="text-2xl font-semibold">배송지 관리</h3>
 
-      {addMessage && (
-        <div className={`p-3 rounded-lg ${addMessage.includes("추가되었습니다") || addMessage.includes("삭제되었습니다") || addMessage.includes("변경되었습니다") ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-          {addMessage}
-        </div>
+      {message && (
+        <p className="p-3 rounded bg-gray-100 text-gray-700">{message}</p>
       )}
-      
+
       {defaultAddress && (
-        <div className="p-6 border border-blue-500 bg-blue-50 rounded-lg shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-bold text-lg text-blue-700">기본 배송지</span>
-            <span className="text-xs text-blue-500 font-medium">기본 주소</span>
-          </div>
-          <p className="font-medium">{defaultAddress.recipient} ({defaultAddress.phoneNumber})</p>
-          <p className="text-gray-600">{defaultAddress.zipCode} {defaultAddress.address} {defaultAddress.detailedAddress}</p>
+        <div className="p-4 border border-blue-500 bg-blue-50 rounded">
+          <p className="font-bold text-blue-700">기본 배송지</p>
+          <p>
+            {defaultAddress.recipient} ({defaultAddress.phone})
+          </p>
+          <p>
+            {defaultAddress.postcode} {defaultAddress.address1}{" "}
+            {defaultAddress.address2}
+          </p>
         </div>
       )}
 
-      {otherAddresses.length > 0 && (
-        <div className="space-y-4">
-          {otherAddresses.map((addr) => (
-            <div key={addr.id} className="p-4 border rounded-lg relative">
-              <p className="font-medium">{addr.recipient} ({addr.phoneNumber})</p>
-              <p className="text-gray-600">{addr.zipCode} {addr.address} {addr.detailedAddress}</p>
-              
-              {deletingId === addr.id ? (
-                <div className="flex justify-end mt-2 space-x-2">
-                  <span className="text-sm text-red-600">정말로 삭제하시겠습니까?</span>
-                  <button
-                    className="px-3 py-1 text-sm rounded-lg text-red-500 border border-red-300 hover:bg-red-50 transition"
-                    onClick={handleConfirmDelete}
-                  >
-                    확인
-                  </button>
-                  <button
-                    className="px-3 py-1 text-sm rounded-lg text-gray-500 border border-gray-300 hover:bg-gray-100 transition"
-                    onClick={handleCancelDelete}
-                  >
-                    취소
-                  </button>
-                </div>
-              ) : (
-                <div className="flex justify-end mt-2 space-x-2">
-                  <button
-                    className="px-3 py-1 text-sm rounded-lg text-gray-500 border border-gray-300 hover:bg-gray-100 transition"
-                    onClick={() => handleSetDefault(addr.id)}
-                  >
-                    기본 배송지로 설정
-                  </button>
-                  <button
-                    className="px-3 py-1 text-sm rounded-lg text-red-500 border border-red-300 hover:bg-red-50 transition"
-                    onClick={() => handleDeleteAddress(addr.id)}
-                  >
-                    삭제
-                  </button>
-                </div>
-              )}
-            </div>
-          ))}
+      {otherAddresses.map((addr) => (
+        <div key={addr.address_id} className="p-4 border rounded">
+          <p>
+            {addr.recipient} ({addr.phone})
+          </p>
+          <p>
+            {addr.postcode} {addr.address1} {addr.address2}
+          </p>
+          <div className="flex space-x-2 mt-2">
+            <button
+              onClick={() => handleSetDefault(addr.address_id)}
+              className="px-3 py-1 border rounded text-sm"
+            >
+              기본으로 설정
+            </button>
+            <button
+              onClick={() => handleDelete(addr.address_id)}
+              className="px-3 py-1 border rounded text-sm text-red-600"
+            >
+              삭제
+            </button>
+          </div>
         </div>
-      )}
+      ))}
 
-      <div className="space-y-6 p-6 bg-gray-50 rounded-xl shadow-inner">
-        <h4 className="text-xl font-semibold">새로운 배송지 추가</h4>
-        
-        <div className="space-y-4">
-          <div className="flex flex-col space-y-2">
-            <label className="text-gray-600 font-medium">받는 사람</label>
-            <input
-              type="text"
-              className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={newRecipient}
-              onChange={(e) => setNewRecipient(e.target.value)}
-            />
-          </div>
-          <div className="flex flex-col space-y-2">
-            <label className="text-gray-600 font-medium">연락처</label>
-            <input
-              type="text"
-              className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={newPhoneNumber}
-              onChange={(e) => setNewPhoneNumber(e.target.value)}
-            />
-          </div>
-          <div className="flex flex-col space-y-2">
-            <label className="text-gray-600 font-medium">주소</label>
-            <div className="flex space-x-2">
-              <input
-                type="text"
-                className="px-4 py-2 w-28 border rounded-lg bg-gray-100 cursor-not-allowed"
-                placeholder="우편번호"
-                value={newZipCode}
-                readOnly
-              />
-              <button
-                className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
-                onClick={handleEmbedPostcode}
-              >
-                주소 검색
-              </button>
-            </div>
-          </div>
+      <div className="p-4 border rounded bg-gray-50 space-y-2">
+        <h4 className="font-semibold">새 배송지 추가</h4>
+        <input
+          placeholder="받는 사람"
+          value={newRecipient}
+          onChange={(e) => setNewRecipient(e.target.value)}
+          className="border p-2 rounded w-full"
+        />
+        <input
+          placeholder="연락처"
+          value={newPhoneNumber}
+          onChange={(e) => setNewPhoneNumber(e.target.value)}
+          className="border p-2 rounded w-full"
+        />
+        <div className="flex space-x-2">
           <input
-            type="text"
-            className="px-4 py-2 w-full border rounded-lg bg-gray-100 cursor-not-allowed"
-            placeholder="기본 주소"
-            value={newAddress}
+            placeholder="우편번호"
+            value={newZipCode}
             readOnly
+            className="border p-2 rounded w-28 bg-gray-100 cursor-not-allowed"
           />
-          <div className="flex flex-col space-y-2">
-            <label className="text-gray-600 font-medium">상세 주소</label>
-            <input
-              type="text"
-              id="newDetailedAddress"
-              className="px-4 py-2 w-full border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="상세 주소 (예: 101동 1004호)"
-              value={newDetailedAddress}
-              onChange={(e) => setNewDetailedAddress(e.target.value)}
-            />
-          </div>
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="isNewAddressDefault"
-              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              checked={isNewAddressDefault}
-              onChange={(e) => setIsNewAddressDefault(e.target.checked)}
-            />
-            <label htmlFor="isNewAddressDefault" className="text-gray-600 font-medium">기본 배송지로 설정</label>
-          </div>
-        </div>
-        <div className="flex justify-end space-x-4 pt-4">
           <button
-            className="px-6 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition"
-            onClick={() => {
-              setNewRecipient("");
-              setNewPhoneNumber("");
-              setNewZipCode("");
-              setNewAddress("");
-              setNewDetailedAddress("");
-              setIsNewAddressDefault(false);
-              setAddMessage("");
-            }}
+            onClick={handleEmbedPostcode}
+            className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
           >
-            취소
-          </button>
-          <button
-            className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
-            onClick={handleAddAddress}
-          >
-            추가
+            주소 검색
           </button>
         </div>
+        <input
+          placeholder="기본 주소"
+          value={newAddress}
+          readOnly
+          className="border p-2 rounded w-full bg-gray-100 cursor-not-allowed"
+        />
+        <input
+          placeholder="상세 주소"
+          value={newDetailedAddress}
+          onChange={(e) => setNewDetailedAddress(e.target.value)}
+          className="border p-2 rounded w-full"
+          id="newDetailedAddress"
+        />
+        <label className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            checked={isNewAddressDefault}
+            onChange={(e) => setIsNewAddressDefault(e.target.checked)}
+          />
+          <span>기본 배송지로 설정</span>
+        </label>
+        <button
+          onClick={handleAddAddress}
+          className="px-6 py-2 bg-black text-white rounded hover:bg-gray-800 transition"
+        >
+          추가
+        </button>
       </div>
 
       {showPostcodeModal && (
@@ -316,14 +230,12 @@ export default function ShippingAddressManager() {
               <h5 className="text-lg font-semibold">주소 검색</h5>
               <button
                 className="text-gray-500 hover:text-gray-700 text-2xl leading-none"
-                onClick={handleClosePostcode}
+                onClick={() => setShowPostcodeModal(false)}
               >
                 &times;
               </button>
             </div>
-            <div id="postcode-container" className="flex-grow min-h-0">
-              
-            </div>
+            <div id="postcode-container" className="flex-grow min-h-0"></div>
           </div>
         </div>
       )}

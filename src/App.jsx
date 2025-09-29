@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import "swiper/css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -10,7 +10,16 @@ import Wishlist from "./pages/Wishlist";
 import ResultTestPage from "./pages/ResultTestPage";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/login.jsx";
+import UserCart from "./pages/UserCart";
+
+// 마이페이지 관련
 import Mypage from "./pages/Mypage.jsx";
+import OrderHistory from "./components/common/layouts/Mypage/OrderHistory.jsx";
+import MemberInfo from "./components/common/layouts/Mypage/MemberInfo.jsx";
+import ShippingAddressManager from "./components/common/layouts/Mypage/ShippingAddressManager.jsx";
+import PasswordChange from "./components/common/layouts/Mypage/PasswordChange.jsx";
+import MemberWithdrawal from "./components/common/layouts/Mypage/MemberWithdrawal.jsx";
+import MyReviews from "./components/common/layouts/Mypage/MyReviews.jsx";
 
 // 에러 컴포넌트
 import Error401 from "./pages/errors/Error401";
@@ -37,7 +46,6 @@ import AdminProtectedRoute from "./routes/AdminProtectedRoute.jsx";
 import AdminLogin from "./pages/Admin/AdminLogin.jsx";
 import AdminStockPage from "./pages/Admin/AdminStockPage.jsx";
 import AdminShipmentsPage from "./pages/Admin/AdminShipmentsPage.jsx";
-import UserCart from "./pages/UserCart";
 
 const queryClient = new QueryClient();
 
@@ -56,16 +64,26 @@ export default function App() {
               <Route path="/results/test" element={<ResultTestPage />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/cart" element={<UserCart />} />
-              <Route path="/Mypage" element={<Mypage />} />
               <Route path="/login" element={<Login />} />
+
+              {/*ㅜ 마이페이지 (중첩 라우팅) */}
+              <Route path="/mypage" element={<Mypage />}>
+                <Route index element={<Navigate to="orderhistory" replace />} />
+                <Route path="orderhistory" element={<OrderHistory />} />
+                <Route path="memberinfo" element={<MemberInfo />} />
+                <Route path="shipping" element={<ShippingAddressManager />} />
+                <Route path="password" element={<PasswordChange />} />
+                <Route path="withdrawal" element={<MemberWithdrawal />} />
+                <Route path="reviews" element={<MyReviews />} />
+              </Route>
             </Route>
 
             {/* 인증/접근제어 예외 페이지 */}
             <Route path="/admin/login" element={<AdminLogin />} />
 
             {/* 어드민 보호 라우트 */}
-            <Route element={<AdminProtectedRoute allowRoles={["super", "manager", "cs"]} />}> 
-              <Route path="/admin" element={<AdminLayout />}> 
+            <Route element={<AdminProtectedRoute allowRoles={["super", "manager", "cs"]} />}>
+              <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />
                 <Route path="products" element={<ProductAdminPage />} />
                 <Route path="orders" element={<OrderAdminPage />} />
@@ -76,7 +94,7 @@ export default function App() {
                 <Route path="stock" element={<AdminStockPage />} />
                 <Route path="shipment" element={<AdminShipmentsPage />} />
               </Route>
-           </Route>
+            </Route>
 
             {/* 상태코드별 에러 라우트 */}
             <Route path="/errors/401" element={<Error401 />} />
