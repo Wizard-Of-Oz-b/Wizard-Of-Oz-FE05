@@ -80,8 +80,13 @@ export default function Login() {
 
   // ✅ 소셜 로그인 API 호출 → 백엔드에서 OAuth 리다이렉트 처리
   const handleSocialLogin = (provider) => {
-    window.location.href = `/v1/auth/social/${provider}/login`;
+   const API = (api.defaults.baseURL || "").replace(/\/+$/,"");
+   const SITE = (import.meta.env.VITE_SITE_URL || window.location.origin).replace(/\/+$/,"");
+   const CB = import.meta.env.VITE_OAUTH_CALLBACK_PATH || "/auth/callback";
+   const redirectUri = `${SITE}${CB}/${provider}`;
+   window.location.href = `${API}/v1/auth/social/${provider}/login/?redirect_uri=${encodeURIComponent(redirectUri)}`;
   };
+
 
   return (
     <div className="min-h-screen bg-white py-20 px-4 sm:px-6 lg:px-8 flex justify-center">
