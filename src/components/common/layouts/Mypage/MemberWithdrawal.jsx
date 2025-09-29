@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
+import { deleteMyAccount, verifyPassword } from "../../api/Mypage/member";
+import { useAuth } from "../../../../context/AuthContext";
 
 const withdrawalReasons = [
   "개인정보 유출 우려",
@@ -11,6 +13,7 @@ const withdrawalReasons = [
 ];
 
 export default function MemberWithdrawal() {
+  const { user } = useAuth();
   const [step, setStep] = useState(1); 
   const [currentPassword, setCurrentPassword] = useState("");
   const [selectedReason, setSelectedReason] = useState("");
@@ -22,14 +25,22 @@ export default function MemberWithdrawal() {
   const [isAgreed, setIsAgreed] = useState(false);
   const [agreementMessage, setAgreementMessage] = useState("");
 
-  const defaultPassword = "12345678";
   const navigate = useNavigate();
 
-  const handlePasswordSubmit = () => {
-    if (currentPassword === defaultPassword) {
-      setStep(2); 
+  useEffect(() => {
+    if (step === 4) {
+      const t = setTimeout(() => navigate("/", { replace: true }), 2000);
+      return () => clearTimeout(t);
+    }
+  }, [step, navigate]);
+
+  const handlePasswordSubmit = async () => {
+    if (!currentPassword) return setPasswordMessage("비밀번호를 입력해주세요");
+    try {
+      await verifyPassword({ email: user?.email, password: currentPassword });
+      setStep(2);
       setPasswordMessage("");
-    } else {
+    } catch {
       setPasswordMessage("비밀번호가 틀렸습니다. 다시 입력해주세요.");
       setCurrentPassword("");
     }
@@ -57,8 +68,22 @@ export default function MemberWithdrawal() {
     }
   };
 
-  const handleFinalWithdrawal = () => {
-    setStep(4);
+  const handleFinalWithdrawal = async () => {
+    try {
+      await deleteMyAccount({
+        current_password: currentPassword,
+        reason: selectedReason === "기타 (직접입력)" ? otherReason : selectedReason,
+      });
+      setWithdrawalMessage("회원 탈퇴가 완료되었습니다.");
+      setStep(4);
+    } catch (e) {
+      const msg =
+      e?.response?.data?.detail ||
+      e?.response?.data?.message ||
+      "회원 탈퇴에 실패했습니다. 비밀번호를 다시 확인해주세요.";
+    setWithdrawalMessage(msg);
+    setShowConfirm(false);
+    }
   };
 
   const handleCancelWithdrawal = () => {
@@ -239,10 +264,6 @@ export default function MemberWithdrawal() {
   }
   
   if (step === 4) {
-      setTimeout(() => {
-          navigate("/");
-      }, 2000); 
-
       return (
           <div className="flex flex-col items-center justify-center p-8 bg-white rounded-xl shadow h-64">
               <svg className="w-12 h-12 text-green-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>

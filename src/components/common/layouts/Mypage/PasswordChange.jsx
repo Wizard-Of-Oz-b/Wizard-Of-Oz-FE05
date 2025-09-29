@@ -1,7 +1,11 @@
 import { useState } from "react";
-import { updateMyProfile } from "../../api/Mypage/member";
+import { updateMyProfile, verifyPassword } from "../../api/Mypage/member";
+import { useAuth } from "../../../../context/AuthContext";
+
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,16}$/;
 
 export default function PasswordChange() {
+  const { user } = useAuth();
   const [isVerified, setIsVerified] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -12,13 +16,15 @@ export default function PasswordChange() {
   const [confirmPasswordMessage, setConfirmPasswordMessage] = useState("");
 
 
-  const handlePasswordSubmit = () => {
-    if (!currentPassword) {
-      setPasswordMessage("현재 비밀번호를 입력해주세요.");
-      return;
-    }
+  const handlePasswordSubmit = async () => {
+    if (!currentPassword) return setPasswordMessage("현재 비밀번호를 입력해주세요.");
+    try {
+      await verifyPassword({email: user?.email, password: currentPassword});
       setIsVerified(true);
       setPasswordMessage("");
+    } catch (e) {
+      setPasswordMessage("현재 비밀번호가 올바르지 않습니다.");
+    }
   };
 
   const handlePasswordChange = async () => {
@@ -32,7 +38,7 @@ export default function PasswordChange() {
       return;
     }
     
-    if (passwordStrength !== "안전") {
+    if (!PASSWORD_REGEX.test(newPassword)) {
       setChangeMessage("비밀번호는 대문자 또는 소문자, 그리고 특수문자를 포함한 8자 이상이어야 합니다.");
       return;
     }
@@ -57,22 +63,21 @@ export default function PasswordChange() {
   };
   
   const checkPasswordStrength = (password) => {
-    if (password.length === 0) {
+    if (!password) {
       setPasswordStrength("");
       return;
     }
-    
-    const hasLetter = /[a-zA-Z]/.test(password);
-    const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-    const hasBoth = hasLetter && hasSpecial;
+    let score = 0;
+    if (password.length >= 8) score++;
+    if (password.length >= 12) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[a-z]/.test(password)) score++;
+    if (/\d/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
 
-    if (password.length >= 8 && hasBoth) {
-      setPasswordStrength("안전");
-    } else if (password.length >= 8 && (hasLetter || hasSpecial)) {
-      setPasswordStrength("보통");
-    } else {
-      setPasswordStrength("미흡");
-    }
+    if (score >= 5) setPasswordStrength("안전");
+    else if (score >= 3) setPasswordStrength("보통");
+    else setPasswordStrength("미흡");
   };
   
   const handleNewPasswordChange = (e) => {
@@ -80,22 +85,21 @@ export default function PasswordChange() {
     setNewPassword(password);
     checkPasswordStrength(password);
     setChangeMessage("");
-    if (password === confirmNewPassword) {
-      setConfirmPasswordMessage("비밀번호가 일치합니다.");
-    } else {
-      setConfirmPasswordMessage("비밀번호가 일치하지 않습니다.");
-    }
+    setConfirmPasswordMessage(
+      password && password === confirmNewPassword
+        ? "비밀번호가 일치합니다."
+        : "비밀번호가 일치하지 않습니다."
+      );  
   };
   
   const checkConfirmPassword = (e) => {
     const confirmPassword = e.target.value;
     setConfirmNewPassword(confirmPassword);
-    
-    if (newPassword === confirmPassword) {
-      setConfirmPasswordMessage("비밀번호가 일치합니다.");
-    } else {
-      setConfirmPasswordMessage("비밀번호가 일치하지 않습니다.");
-    }
+    setConfirmPasswordMessage(
+      newPassword && newPassword === confirmPassword
+        ? "비밀번호가 일치합니다."
+        : "비밀번호가 일치하지 않습니다."
+    );
   };
 
   const handleCancel = () => {

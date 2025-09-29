@@ -44,6 +44,8 @@ import PaySuccess from "./pages/Payments/PaySuccess.jsx";
 import PayFail from "./pages/Payments/PayFail.jsx";
 import MemberInfo from "./components/common/layouts/Mypage/MemberInfo.jsx";
 import Password from "./components/common/layouts/Mypage/PasswordChange.jsx";
+import MemberWithdrawal from "./components/common/layouts/Mypage/MemberWithdrawal.jsx";
+import MyReviewsPage from "./components/common/layouts/Mypage/MyReviews.jsx";
 
 
 const queryClient = new QueryClient();
@@ -75,8 +77,8 @@ export default function App() {
                 <Route path="memberinfo" element={<MemberInfo />} />
                 {/* <Route path="shipping" element={<Shipping />} /> */}
                 <Route path="password" element={<Password />} />
-                {/* <Route path="withdrawal" element={<Withdrawal />} />
-                <Route path="reviews" element={<Reviews />} /> */}
+                <Route path="withdrawal" element={<MemberWithdrawal />} />
+                <Route path="reviews" element={<MyReviewsPage />} />
               </Route>
             </Route>
             <Route path="/auth/callback/:provider" element={<OAuthCallback />} />
