@@ -1,7 +1,7 @@
 import { Outlet, NavLink } from "react-router-dom";
 
 const menuItems = [
-  { name: "주문내역", path: "orderhistory" },
+  { name: "주문내역", path: "orderlist" },
   { name: "회원정보 관리", path: "memberinfo" },
   { name: "배송지 관리", path: "shipping" },
   { name: "비밀번호 변경", path: "password" },
