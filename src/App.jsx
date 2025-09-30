@@ -82,7 +82,7 @@ export default function App() {
               </Route>
             </Route>
             <Route path="/auth/callback/:provider" element={<OAuthCallback />} />
-            <Route path="/oauth/callback" element={<OAuthCallback />} />
+            <Route path="/oauth/callback/:provider" element={<OAuthCallback />} />
 
             {/* 인증/접근제어 예외 페이지 */}
             <Route path="/admin/login" element={<AdminLogin />} />

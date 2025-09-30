@@ -81,3 +81,14 @@ export function logoutLocal() {
 export function setAccessToken(access) {
   if (access) Cookies.set(ACCESS_KEY, access, { expires: 1 / 24 });
 }
+
+// ─────────────────────────────────────────────────────────────
+// 회원가입 로직
+export async function registerUser(payload, AUTH_BASE = "/v1/auth") {
+  const r = await api.post(
+    `${AUTH_BASE}/register/`,
+    payload,
+    { header: {"Content-Type": "application/json"}}
+  );
+  return r.data;
+}

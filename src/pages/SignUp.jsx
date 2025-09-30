@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useAlertModal } from "../components/common/layouts/common/modal/useAlertModal"; // AlertModal 훅
-import api from "../lib/axios";
-import { loginUser, registerUser } from "../components/common/api/signup/auth";
 import { useNavigate } from "react-router-dom";
+import { loginAndStore, registerUser } from "../lib/axios";
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -99,6 +98,7 @@ setNicknameMessage(isDuplicate ? "❌ 이미 사용 중인 닉네임입니다." 
     const address = f.detailAddress ? `${f.address} ${f.detailAddress}`.trim() : f.address;
     return {
       email: f.email,
+      username: f.name || f.nickname, // 내용 추가, 필수요소 빠져있었음 - 25.09.30 복
       password: f.password,
       nickname: f.nickname || f.name || "", 
       phone_number,
@@ -174,21 +174,33 @@ setNicknameMessage(isDuplicate ? "❌ 이미 사용 중인 닉네임입니다." 
       if (!formData.terms) {
         throw new Error("개인정보 수집 동의가 필요합니다.");
       }
-
+      // 회원가입 요청
       const payload = toRegisterPayload(formData);
       await registerUser(payload);
+      // 자동으로 로그인하기
+      await loginAndStore({
+        email: formData.email,
+        password: formData.password,
+      });
 
-      await loginUser({ email: formData.email, password: formData.password });
-
-      showModal({ type: "success", message: "회원가입이 성공했습니다! 자동으로 로그인되었습니다." });
+    showModal({ type: "success", message: "회원가입이 성공했습니다! 자동으로 로그인되었습니다." });
 
       setFormData({
-        name: "", nickname: "", email: "", password: "", confirmPassword: "",
-        phone: "", telecom: "", address: "", detailAddress: "",
-        terms: false, defaultAddress: false,
+        name: "",
+        nickname: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        phone: "",
+        telecom: "",
+        address: "",
+        detailAddress: "",
+        terms: false,
+        defaultAddress: false,
       });
-      setPasswordStrength(""); setNicknameMessage("");
-      navigate("/wishlist");
+      setPasswordStrength("");
+      setNicknameMessage("");
+      navigate("/mypage");    // 25.09.30 경복, 리다이렉트 위시리스트 -> 마이페이지로 이동
     } catch (err) {
       const msg =
         err?.response?.data?.detail ||
