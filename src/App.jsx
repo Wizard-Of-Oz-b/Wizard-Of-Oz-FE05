@@ -11,7 +11,6 @@ import ResultTestPage from "./pages/ResultTestPage";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/login.jsx";
 import Mypage from "./pages/Mypage.jsx";
-import OAuthCallback from "./pages/OAuthCallback.jsx";
 
 // 에러 컴포넌트
 import Error401 from "./pages/errors/Error401";
@@ -42,7 +41,12 @@ import UserCart from "./pages/UserCart";
 import UserPayment from "./pages/Payments/UserPayment.jsx";
 import PaySuccess from "./pages/Payments/PaySuccess.jsx";
 import PayFail from "./pages/Payments/PayFail.jsx";
-
+import MemberInfo from "./components/common/layouts/Mypage/MemberInfo.jsx";
+import Password from "./components/common/layouts/Mypage/PasswordChange.jsx";
+import MemberWithdrawal from "./components/common/layouts/Mypage/MemberWithdrawal.jsx";
+import MyReviewsPage from "./components/common/layouts/Mypage/MyReviews.jsx";
+import ShippingAddressManager from "./components/common/layouts/Mypage/ShippingAddressManager.jsx";
+import OAuthCallback from "./pages/OAuthCallback.jsx";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +70,16 @@ export default function App() {
               <Route path="/payment" element={<UserPayment />} />
               <Route path='/payment/success' element={<PaySuccess />} />
               <Route path='/payment/fail' element={<PayFail />} />
+
+              {/* 마이페이지 (이중 중첩 라우팅) */}
+              <Route path="/mypage" element={<Mypage />}>
+                {/* <Route path="orderhistory" element={<OrderHistory />} /> */}
+                <Route path="memberinfo" element={<MemberInfo />} />
+                <Route path="shipping" element={<ShippingAddressManager />} />
+                <Route path="password" element={<Password />} />
+                <Route path="withdrawal" element={<MemberWithdrawal />} />
+                <Route path="reviews" element={<MyReviewsPage />} />
+              </Route>
             </Route>
             <Route path="/auth/callback/:provider" element={<OAuthCallback />} />
             <Route path="/oauth/callback" element={<OAuthCallback />} />
@@ -98,16 +112,7 @@ export default function App() {
             <Route path="/errors/504" element={<Error504 />} />
 
             {/* 404 */}
-            <Route
-              path="*"
-              element={
-                <Error404
-                  onSearch={(q) =>
-                    (window.location.href = `/search?q=${encodeURIComponent(q)}`)
-                  }
-                />
-              }
-            />
+            <Route path="*" element={<Error404 />} />
           </Routes>
         </Suspense>
       </ErrorBoundary>
