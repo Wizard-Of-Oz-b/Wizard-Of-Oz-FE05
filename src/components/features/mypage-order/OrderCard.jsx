@@ -6,6 +6,7 @@ import {
 } from "../../../hooks/mypage/useUserOrder";
 import OrderProductCard from "./OrderProductCard";
 import CartLoadingSpin from "../cart/CartLoadingSpin";
+import DetailModal from "./DetailModal";
 
 // 배송 상태가 존재 하면 배송 상태 우선!
 const getStatusStyle = (status) => {
@@ -94,6 +95,7 @@ export default function OrderCard({ order }) {
       : getStatusStyle(shipment?.results[0].status);
 
   const [detail, setDetail] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const onClickDetail = () => {
     setDetail((prev) => !prev);
@@ -126,11 +128,19 @@ export default function OrderCard({ order }) {
     );
   }
   console.log(orderData?.results.length, "길이");
-  console.log(orderStatus, "스테이터스");
+  console.log(orderStatus,isModalOpen, "스테이터스");
 
   return (
     <div className="w-full border shadow-sm rounded-lg flex justify-center items-center">
       {cancelPurchaseMutation.isPending ? <CartLoadingSpin /> : null}
+      {isModalOpen ? (
+        <DetailModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          data={orderData?.results}
+        />
+      ) : null}
+
       <table className="w-[97%]  mb-4 ">
         {/*  주문 정보 헤더 부분 */}
         <thead className="border-b border-l-gray-200">
@@ -165,6 +175,11 @@ export default function OrderCard({ order }) {
               data={el}
             />
           ))}
+          <tr>
+            <td>
+              <button onClick={() => setIsModalOpen(prev => !prev)}>상세 보기</button>
+            </td>
+          </tr>
         </tbody>
 
         {/* 전체 합계 푸터 부분 */}
