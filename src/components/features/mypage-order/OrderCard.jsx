@@ -100,9 +100,9 @@ export default function OrderCard({ order }) {
   };
 
   const onClickcancled = () => {
-    if (window.confirm('정말로 이 주문을 취소하시겠습니까?')) {
-          cancelPurchaseMutation.mutate(order.purchase_id);
-        }
+    if (window.confirm("정말로 이 주문을 취소하시겠습니까?")) {
+      cancelPurchaseMutation.mutate(order.purchase_id);
+    }
     console.log("취소");
   };
 
@@ -117,7 +117,13 @@ export default function OrderCard({ order }) {
     );
   }
   if (pageError) {
-    return <>임시 에러</>;
+    return (
+      <div>
+        임시 에러
+        <span>{error}</span>
+        <span>{shipError}</span>
+      </div>
+    );
   }
   console.log(orderData?.results.length, "길이");
   console.log(orderStatus, "스테이터스");
@@ -169,7 +175,7 @@ export default function OrderCard({ order }) {
                 <span className="font-bold">
                   총 {parseInt(order?.items_total).toLocaleString()} 원
                 </span>
-                {(order?.status === "paid") && (shipment?.total === 0)? (
+                {order?.status === "paid" && shipment?.total === 0 ? (
                   <button
                     onClick={onClickcancled}
                     className="border border-gray-300 rounded-lg px-2 py-0.5 mt-1 bg-red-400 text-white"
