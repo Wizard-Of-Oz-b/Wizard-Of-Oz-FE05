@@ -46,7 +46,8 @@ import Password from "./components/common/layouts/Mypage/PasswordChange.jsx";
 import MemberWithdrawal from "./components/common/layouts/Mypage/MemberWithdrawal.jsx";
 import MyReviewsPage from "./components/common/layouts/Mypage/MyReviews.jsx";
 import ShippingAddressManager from "./components/common/layouts/Mypage/ShippingAddressManager.jsx";
-import OAuthCallback from "./pages/OAuthCallback.jsx";
+import OAuthCallback from "./pages/OAuthCallback.jsx";import OrderList from "./components/common/layouts/Mypage/OrderList.jsx";
+
 
 const queryClient = new QueryClient();
 
@@ -79,6 +80,7 @@ export default function App() {
                 <Route path="password" element={<Password />} />
                 <Route path="withdrawal" element={<MemberWithdrawal />} />
                 <Route path="reviews" element={<MyReviewsPage />} />
+                <Route path="orderlist" element={<OrderList />}/>
               </Route>
             </Route>
             <Route path="/auth/callback/:provider" element={<OAuthCallback />} />
