@@ -50,6 +50,7 @@ import ShippingAddressManager from "./components/common/layouts/Mypage/ShippingA
 import OrderList from "./components/common/layouts/Mypage/OrderList.jsx";
 import StoreIntro from "./pages/StoreInfo.jsx";
 
+
 const queryClient = new QueryClient();
 
 export default function App() {
