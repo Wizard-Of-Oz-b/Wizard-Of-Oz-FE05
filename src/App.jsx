@@ -82,6 +82,8 @@ export default function App() {
                 <Route path="password" element={<Password />} />
                 <Route path="withdrawal" element={<MemberWithdrawal />} />
                 <Route path="reviews" element={<MyReviewsPage />} />
+                <Route path="orderlist" element={<OrderList />} />
+
               </Route>
             </Route>
             <Route path="/auth/callback/:provider" element={<OAuthCallback />} />
