@@ -70,14 +70,14 @@ export default function OrderCard({ order }) {
     isLoading,
     isError,
     error,
-  } = useGetPurchaseDetail(order.purchase_id);
+  } = useGetPurchaseDetail(order?.purchase_id);
 
   const {
     data: shipment,
     isLoading: isShipLoading,
     isError: isShipError,
     error: shipError,
-  } = useGetShipmentInfo(order.purchase_id);
+  } = useGetShipmentInfo(order?.purchase_id);
   const cancelPurchaseMutation = useCancelPurchase();
   // 로딩
   const Loading = isLoading || isShipLoading;
@@ -110,6 +110,10 @@ export default function OrderCard({ order }) {
 
   console.log(shipment?.results, "test");
 
+  //order 없으면 얼리 리턴
+  if (!order) {
+    return;
+  }
   if (Loading) {
     return (
       <>
@@ -128,7 +132,7 @@ export default function OrderCard({ order }) {
     );
   }
   console.log(orderData?.results.length, "길이");
-  console.log(orderStatus,isModalOpen, "스테이터스");
+  console.log(orderStatus, isModalOpen, "스테이터스");
 
   return (
     <div className="w-full border shadow-sm rounded-lg flex justify-center items-center">
@@ -177,7 +181,9 @@ export default function OrderCard({ order }) {
           ))}
           <tr>
             <td>
-              <button onClick={() => setIsModalOpen(prev => !prev)}>상세 보기</button>
+              <button onClick={() => setIsModalOpen((prev) => !prev)}>
+                상세 보기
+              </button>
             </td>
           </tr>
         </tbody>
