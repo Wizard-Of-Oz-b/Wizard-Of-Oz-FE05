@@ -31,7 +31,7 @@ const getStatusName = (status) => {
     case "pending": // 배송 대기
       return "배송 대기";
     default:
-      return "text-gray-500";
+      return "알수 없음";
   }
 };
 
