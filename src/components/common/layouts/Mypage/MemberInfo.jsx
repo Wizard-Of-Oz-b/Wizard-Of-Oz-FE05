@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { getMyProfile, updateMyProfile } from "../../api/Mypage/member";
 import { useAuth } from "../../../../context/AuthContext";
 import { clean } from "../../../../utils/mypage/sanitize";
+import { UserRound, AtSign, Phone, Sparkles, ShieldCheck, Smartphone, ArrowLeft } from "lucide-react";
+import { FiCheckCircle } from "react-icons/fi"
 
 export default function MemberInfo() {
   const { user, setUser, bootstrapping} = useAuth();
@@ -87,101 +89,164 @@ export default function MemberInfo() {
   };
 
   return (
-    <div className="p-6 bg-white rounded-xl shadow">
-      <h3 className="text-2xl font-semibold mb-4">내 정보</h3>
-      <div className="space-y-4">
+<section className="space-y-7">
+  {/* 헤더 */}
+  <div className="flex items-center justify-between">
+    <div>
+      <h2 className="text-lg sm:text-xl font-extrabold tracking-tight text-neutral-900">
+        내 정보 관리
+      </h2>
+      <p className="mt-1 text-sm text-neutral-600">프로필 정보를 최신 상태로 유지하세요.</p>
+    </div>
+    <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-neutral-50 px-3 py-1 border border-neutral-200 text-[11px] text-neutral-600">
+      <ShieldCheck className="h-3.5 w-3.5" />
+      암호화 저장
+    </span>
+  </div>
 
-        {/* 이름 */}
-        <div>
-          <label className="block font-medium">이름</label>
+  {/* 얇은 구분선 */}
+  <hr className="border-neutral-200" />
+
+  {/* 안내 배지 */}
+  <div className="inline-flex items-center gap-2 rounded-full bg-violet-50 px-3 py-1 border border-violet-200 text-[11px] text-violet-700">
+    <Sparkles className="h-3.5 w-3.5" />
+    수정하면 바로 적용돼요
+  </div>
+
+  {/* 폼 패널 */}
+  <div className="rounded-xl border border-neutral-200 bg-white/80 backdrop-blur p-5 sm:p-6 shadow-sm">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      {/* 이름 */}
+      <div>
+        <label className="flex items-center gap-2 text-sm font-medium text-neutral-800 mb-1">
+          <UserRound className="h-4 w-4 text-neutral-400" />
+          이름
+        </label>
+        <div className="relative">
+          <UserRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-300" />
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="border p-2 rounded w-full"
+            placeholder="홍길동"
+            className="w-full h-11 pl-10 pr-3 rounded-lg border border-neutral-300 text-sm focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition"
           />
         </div>
+      </div>
 
-        {/* 닉네임 */}
-        <div>
-          <label className="block font-medium">닉네임</label>
-          <input
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-            className="border p-2 rounded w-full"
-          />
-        </div>
+      {/* 닉네임 */}
+      <div>
+        <label className="flex items-center gap-2 text-sm font-medium text-neutral-800 mb-1">
+          <Sparkles className="h-4 w-4 text-neutral-400" />
+          닉네임
+        </label>
+        <input
+          value={nickname}
+          onChange={(e) => setNickname(e.target.value)}
+          placeholder="코코볼"
+          className="w-full h-11 rounded-lg border border-neutral-300 px-3 text-sm focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition"
+        />
+      </div>
 
-        {/* 이메일 */}
-        <div>
-          <label className="block font-medium">이메일</label>
+      {/* 이메일 (읽기 전용) */}
+      <div className="md:col-span-2">
+        <label className="flex items-center gap-2 text-sm font-medium text-neutral-800 mb-1">
+          <AtSign className="h-4 w-4 text-neutral-400" />
+          이메일
+        </label>
+        <div className="relative">
+          <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-300" />
           <input
             value={email}
             readOnly
-            className="border p-2 rounded w-full bg-gray-100"
+            className="w-full h-11 pl-10 pr-3 rounded-lg border border-neutral-200 bg-neutral-50 text-sm text-neutral-500 cursor-not-allowed"
           />
         </div>
+      </div>
 
-        {/* 전화번호 */}
-        <div>
-          <label className="block font-medium">전화번호</label>
-          <div className="flex space-x-2 items-center">
-            {/* 통신사 드롭다운 (맨 처음) */}
+      {/* 전화번호 */}
+      <div className="md:col-span-2">
+        <label className="flex items-center gap-2 text-sm font-medium text-neutral-800 mb-1">
+          <Phone className="h-4 w-4 text-neutral-400" />
+          전화번호
+        </label>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative">
+            <Phone className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-300" />
             <select
               value={carrier}
               onChange={(e) => setCarrier(e.target.value)}
-              className="border p-2 rounded"
+              className="h-11 pl-7 pr-8 rounded-lg border border-neutral-300 text-sm focus:ring-2 focus:ring-violet-500"
             >
               {carrierOptions.map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
-
-            {/* 앞자리 010 고정 */}
-            <input
-              value="010"
-              readOnly
-              className="border p-2 rounded w-16 bg-gray-100 text-center"
-            />
-
-            {/* 중간 번호 */}
-            <input
-              value={phoneMiddle}
-              onChange={(e) => setPhoneMiddle(e.target.value)}
-              className="border p-2 rounded w-20"
-            />
-
-            {/* 마지막 번호 */}
-            <input
-              value={phoneLast}
-              onChange={(e) => setPhoneLast(e.target.value)}
-              className="border p-2 rounded w-20"
-            />
           </div>
-        </div>
 
-        {/* 주소 */}
-        <div>
-          <label className="block font-medium">주소</label>
           <input
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            className="border p-2 rounded w-full"
+            value="010"
+            readOnly
+            className="w-20 h-11 rounded-lg border border-neutral-200 px-3 text-center text-sm bg-neutral-50"
+          />
+          <input
+            value={phoneMiddle}
+            onChange={(e) => setPhoneMiddle(e.target.value)}
+            placeholder="1234"
+            className="w-24 h-11 rounded-lg border border-neutral-300 px-3 text-sm focus:ring-2 focus:ring-violet-500"
+          />
+          <input
+            value={phoneLast}
+            onChange={(e) => setPhoneLast(e.target.value)}
+            placeholder="5678"
+            className="w-24 h-11 rounded-lg border border-neutral-300 px-3 text-sm focus:ring-2 focus:ring-violet-500"
           />
         </div>
+        <p className="mt-1 text-xs text-neutral-500">숫자만 입력해주세요.</p>
+      </div>
+    </div>
 
-        {/* 수정 버튼 */}
+    {/* 하단 액션 바 */}
+    <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="inline-flex items-center gap-1.5 text-xs text-neutral-500">
+        <FiCheckCircle className="text-emerald-500" />
+        변경사항 저장 시 즉시 적용됩니다.
+      </div>
+
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => window.history.back()}
+          className="px-4 h-10 rounded-full border border-neutral-300 text-sm text-neutral-700 hover:bg-neutral-50 transition inline-flex items-center gap-1.5"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          돌아가기
+        </button>
+
+        {/* 메인 CTA: 은은한 그라데 + 살짝 양각 느낌 */}
         <button
           onClick={handleConfirm}
-          className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
+          className="px-6 h-10 rounded-full text-sm font-semibold text-white
+                     bg-[linear-gradient(90deg,#7c3aed_0%,#ec4899_100%)]
+                     shadow-[0_6px_16px_rgba(124,58,237,0.28)]
+                     hover:shadow-[0_8px_20px_rgba(124,58,237,0.35)]
+                     hover:-translate-y-0.5 active:translate-y-0
+                     transition"
         >
           수정하기
         </button>
-
-        {/* 확인 메시지 */}
-        {confirmationMessage && (
-          <p className="text-sm text-green-600 mt-2">{confirmationMessage}</p>
-        )}
       </div>
     </div>
+
+    {/* 저장 메시지 */}
+    {confirmationMessage && (
+      <div className="mt-3 flex items-center gap-2 text-sm text-green-700 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
+        <FiCheckCircle className="text-emerald-500" />
+        {confirmationMessage}
+      </div>
+    )}
+  </div>
+</section>
+
+
   );
 }

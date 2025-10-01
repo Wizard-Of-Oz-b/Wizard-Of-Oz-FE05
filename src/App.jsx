@@ -47,6 +47,7 @@ import Password from "./components/common/layouts/Mypage/PasswordChange.jsx";
 import MemberWithdrawal from "./components/common/layouts/Mypage/MemberWithdrawal.jsx";
 import MyReviewsPage from "./components/common/layouts/Mypage/MyReviews.jsx";
 import ShippingAddressManager from "./components/common/layouts/Mypage/ShippingAddressManager.jsx";
+import OrderList from "./components/common/layouts/Mypage/OrderList.jsx";
 
 const queryClient = new QueryClient();
 
@@ -73,7 +74,7 @@ export default function App() {
 
               {/* 마이페이지 (이중 중첩 라우팅) */}
               <Route path="/mypage" element={<Mypage />}>
-                {/* <Route path="orderhistory" element={<OrderHistory />} /> */}
+                <Route path="orderlist" element={<OrderList />} />
                 <Route path="memberinfo" element={<MemberInfo />} />
                 <Route path="shipping" element={<ShippingAddressManager />} />
                 <Route path="password" element={<Password />} />
