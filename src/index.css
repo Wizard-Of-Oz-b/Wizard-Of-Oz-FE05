@@ -135,3 +135,7 @@ body {
 .mypage-detail-modal::-webkit-scrollbar {
   display:none
 }
+
+.payment-address::-webkit-scrollbar{
+  display:none
+}

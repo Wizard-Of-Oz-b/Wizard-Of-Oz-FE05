@@ -23,7 +23,7 @@ const SECTION_TITLE_STYLE = "text-xl font-bold";
 const TEST_CUSTOMER_KEY = "YbX2HuSlsC9uVJW6NMRMj";
 
 export default function UserPayment() {
-  const { data: userProfile, isLoading: userLoading } = useMyProfile();
+  // const { data: userProfile, isLoading: userLoading } = useMyProfile();
   const {
     data: userOrder,
     isLoading: orderLoading,
@@ -133,7 +133,7 @@ export default function UserPayment() {
         myAddress.find((addr) => addr.is_default) || myAddress[0];
       setShippingAddress(() => ({
         recipient: defaultAddress?.recipient,
-        phone: userProfile?.phone,
+        phone: defaultAddress?.phone,
         postcode: defaultAddress?.postcode,
         address1: defaultAddress?.address1,
         address2: defaultAddress?.address2,
@@ -234,19 +234,19 @@ export default function UserPayment() {
 
   // '원본' 데이터인 userProfile에서 값을 가져와 '현재' 상태를 덮어씁니다.
   // IsDefaultAddress를 true로 변경 한다.
-  const handleResetToDefault = () => {
-    if (userProfile?.address) {
-      setShippingAddress((prev) => ({
-        ...prev,
-        recipient: userProfile.recipient || userProfile.nickname || "",
-        phone: userProfile.phone_number || "",
-        postcode: "",
-        address1: userProfile.address || "",
-        address2: "",
-      }));
-      setIsDefaultAddress(true);
-    }
-  };
+  // const handleResetToDefault = () => {
+  //   if (userProfile?.address) {
+  //     setShippingAddress((prev) => ({
+  //       ...prev,
+  //       recipient: userProfile.recipient || userProfile.nickname || "",
+  //       phone: userProfile.phone_number || "",
+  //       postcode: "",
+  //       address1: userProfile.address || "",
+  //       address2: "",
+  //     }));
+  //     setIsDefaultAddress(true);
+  //   }
+  // };
 
   const handleSubmitPay = async (e) => {
     e.preventDefault(); // 결제중 새로고침 방지
@@ -277,7 +277,7 @@ export default function UserPayment() {
   console.log(shippingAddress);
 
   // 초기 기본값 로딩시 스켈레톤 출력
-  const isLoadingData = userLoading || orderLoading || areItemsLoading;
+  const isLoadingData = areMyAddressLoading || orderLoading || areItemsLoading;
 
   // 결제 버튼 눌렀을 때 로딩창출력
   const isPaymentProcessing = isAddressUpdate || false;

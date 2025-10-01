@@ -13,7 +13,6 @@ export default function UserAddressModal({
   currentAddressId,
 }) {
   const [select, setSelect] = useState(currentAddressId || null); //address_id 저장
-  console.log(addressList, "주소오오옷");
   // Todo: is_active 인지 체크 할것
   // Todo: active인 주소리스트 출력
   const modalRef = useRef(null);
@@ -54,18 +53,18 @@ export default function UserAddressModal({
   }
 
   return (
-    <div className="flex flex-col justify-center items-center fixed inset-0 w-full h-full bg-black/50 z-50">
+    <div className="flex flex-col justify-center items-center fixed inset-0 w-full h-full backdrop-blur-xs z-50">
       <div
-        className="flex flex-col rounded-2xl py-3 items-center gap-3 w-full max-w-xl h-[550px] bg-white"
+        className="flex flex-col border shadow-2xl rounded-lg py-3 items-center  w-full max-w-xl h-[600px] bg-white"
         ref={modalRef}
       >
-        <div className="flex w-full justify-between items-center p-4 border-b border-gray-400">
+        <div className="flex w-full justify-between items-center px-4 py-2 border-b border-gray-200 shadow-md">
           <h2 className="text-xl font-bold">배송지 선택</h2>
           <button onClick={onClose} className="text-2xl">
             &times;
           </button>
         </div>
-        <div className="flex-grow overflow-y-auto p-4 space-y-3">
+        <div className="flex-grow overflow-y-auto p-4 space-y-3 payment-address">
           {filterList?.map((el) => (
             <UserAddressCard
               key={el.address_id}
@@ -76,7 +75,7 @@ export default function UserAddressModal({
           ))}
         </div>
 
-        <div className="flex justify-center w-full p-4 border-t border-gray-400">
+        <div className="flex justify-center w-full p-4 border-t border-gray-200">
           <button
             type="button"
             onClick={setShipAddress}
