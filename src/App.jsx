@@ -48,6 +48,8 @@ import MemberWithdrawal from "./components/common/layouts/Mypage/MemberWithdrawa
 import MyReviewsPage from "./components/common/layouts/Mypage/MyReviews.jsx";
 import ShippingAddressManager from "./components/common/layouts/Mypage/ShippingAddressManager.jsx";
 import OrderList from "./components/common/layouts/Mypage/OrderList.jsx";
+import StoreIntro from "./pages/StoreInfo.jsx";
+
 
 const queryClient = new QueryClient();
 
@@ -71,10 +73,11 @@ export default function App() {
               <Route path="/payment" element={<UserPayment />} />
               <Route path='/payment/success' element={<PaySuccess />} />
               <Route path='/payment/fail' element={<PayFail />} />
+              <Route path="info" element={<StoreIntro />} />
 
               {/* 마이페이지 (이중 중첩 라우팅) */}
               <Route path="/mypage" element={<Mypage />}>
-                {/* <Route path="orderhistory" element={<OrderHistory />} /> */}
+                <Route path="orderlist" element={<OrderList />} />
                 <Route path="memberinfo" element={<MemberInfo />} />
                 <Route path="shipping" element={<ShippingAddressManager />} />
                 <Route path="password" element={<Password />} />

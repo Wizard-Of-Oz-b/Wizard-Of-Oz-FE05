@@ -1,5 +1,5 @@
 import React from "react";
-import { useLocation } from "react-router-dom"; // useLocation 훅을 추가로 가져옵니다.
+import { useLocation, Link } from "react-router-dom";
 import {
   Mail, ChevronUp, Globe, Instagram, Facebook, Youtube, MessageCircle,
   ShieldCheck, Download
@@ -13,9 +13,20 @@ const CONFIG = {
     { label: "마케팅 협찬 문의", value: "oz_mkt@wizardofoz.co.kr" },
   ],
   linkColumns: [
-    ["브랜드소개", "오프라인 매장안내", "윤리경영"],
-    ["개인정보 처리방침", "약관안내", "채용정보 및 인사제도", "공지사항", "회원혜택", "자주묻는질문 FAQ"],
+  [
+    { label: "브랜드소개", href: "#" },
+    { label: "오프라인 매장안내", href: "/info" },
+    { label: "윤리경영", href: "#" },
   ],
+  [
+    { label: "개인정보 처리방침", href: "#" },
+    { label: "약관안내", href: "#" },
+    { label: "채용정보 및 인사제도", href: "#" },
+    { label: "공지사항", href: "#" },
+    { label: "회원혜택", href: "#" },
+    { label: "자주묻는질문 FAQ", href: "#" },
+  ],
+],
   familySites: [
     { label: "패밀리 사이트", value: "" },
     { label: "오즈식품", value: "https://www.oz-food.com" },
@@ -28,8 +39,7 @@ const CONFIG = {
     { label: "YouTube", href: "#", icon: Youtube },
     { label: "KakaoTalk", href: "#", icon: MessageCircle },
   ],
-  locale: { country: "대한민국", lang: "한국어" },
-  appDownload: { label: "오즈의 이상한 상점 APP 다운로드", href: "#" },
+  appDownload: { label: "오즈의 이상한 상점 APP 다운로드", href: "https://play.google.com/store/games?pli=1" },
   escrow: { label: "구매안전(에스크로)서비스", href: "#" },
 };
 
@@ -77,14 +87,27 @@ export default function Footer() {
             <div className="grid grid-cols-2 gap-x-10 gap-y-2 text-sm">
               {CONFIG.linkColumns.map((col, i) => (
                 <ul key={i} className="space-y-2">
-                  {col.map((txt) => (
-                    <li key={txt}>
-                      <a
-                        href="#"
-                        className={`text-gray-300 hover:text-white ${txt.includes("개인정보") ? "font-semibold text-white" : ""}`}
-                      >
-                        {txt}
-                      </a>
+                  {col.map(({ label, href }) => (
+                    <li key={label}>
+                      {href.startsWith("/") ? (
+                        <Link
+                          to={href}
+                          className={`text-gray-300 hover:text-white ${
+                            label.includes("개인정보") ? "font-semibold text-white" : ""
+                          }`}
+                          >
+                            {label}
+                          </Link>
+                      ) : (
+                        <a
+                          href={href}
+                          className={`text-gray-300 hover:text-white ${
+                            label.includes("개인정보") ? "font-semibold text-white" : ""
+                            }`}
+                            >
+                          {label}
+                        </a>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -142,13 +165,6 @@ export default function Footer() {
               <Download className="w-4 h-4" />
               {CONFIG.appDownload.label}
             </a>
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-lg border border-gray-700 bg-[#15181e] px-3 py-2 text-sm text-gray-200 hover:border-gray-500"
-            >
-              <Globe className="w-4 h-4" />
-              {CONFIG.locale.country} | {CONFIG.locale.lang}
-            </button>
           </div>
         </div>
       </div>

@@ -1,8 +1,11 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Menu } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function TopBar({ isLight, onOpenMobile }) {
+  const navigate = useNavigate("");
+
   return (
     <div className="flex items-center gap-3">
       <button
@@ -16,7 +19,8 @@ export default function TopBar({ isLight, onOpenMobile }) {
       <motion.div
         initial={{ opacity: 0, y: -6 }}
         animate={{ opacity: 1, y: 0, transition: { duration: 0.2 } }}
-        className="text-3xl font-bold whitespace-nowrap"
+        className="text-3xl font-bold whitespace-nowrap cursor-pointer"
+        onClick={() => navigate("/")}
       >
         오즈의 이상한 상점
       </motion.div>

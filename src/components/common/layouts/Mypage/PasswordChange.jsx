@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { updateMyProfile, verifyPassword } from "../../api/Mypage/member";
 import { useAuth } from "../../../../context/AuthContext";
+import { AnimatePresence, motion } from "framer-motion";
+import { Lock, CheckCircle2, ShieldCheck } from "lucide-react";
+
 
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,16}$/;
 
@@ -15,6 +18,11 @@ export default function PasswordChange() {
   const [passwordStrength, setPasswordStrength] = useState("");
   const [confirmPasswordMessage, setConfirmPasswordMessage] = useState("");
 
+  const variants = {
+    initial: { opacity: 0, y: 16 },
+    animate: { opacity: 1, y: 0, transition: { duration: 0.25, ease: "easeInOut" } },
+    exit: { opacity: 0, y: -16, transition: { duration: 0.2, ease: "easeInOut" } },
+  };
 
   const handlePasswordSubmit = async () => {
     if (!currentPassword) return setPasswordMessage("현재 비밀번호를 입력해주세요.");
@@ -118,91 +126,208 @@ export default function PasswordChange() {
       handlePasswordSubmit();
     }
   };
+return (
+  <div className="space-y-8">
+    {/* 상단 타이틀 & 진행바 */}
+    <div className="flex items-center justify-between">
+      <div>
+        <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight text-neutral-900">
+          비밀번호 변경
+        </h3>
+        <p className="mt-1 text-sm text-neutral-600">
+          계정 보안을 위해 안전한 비밀번호로 업데이트하세요.
+        </p>
+      </div>
+      <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-neutral-50 px-3 py-1 border border-neutral-200 text-[11px] text-neutral-600">
+        보안 절차 진행 중
+      </span>
+    </div>
 
-  if (!isVerified) {
-    return (
-      <div className="flex flex-col items-center justify-center p-8 bg-white rounded-xl shadow">
-        <h3 className="text-xl font-semibold mb-4">비밀번호를 입력해주세요</h3>
-        <input
-          type="password"
-          className="w-full max-w-sm px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
-          placeholder="현재 비밀번호"
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-          onKeyDown={handleKeyDown}
+    {/* 스텝퍼 */}
+    <div>
+      <div className="h-1 w-full rounded bg-neutral-100 overflow-hidden">
+        <div
+          className="h-full bg-[linear-gradient(90deg,#7c3aed_0%,#ec4899_100%)] transition-all"
+          style={{ width: isVerified ? "100%" : "50%" }}
         />
-        {passwordMessage && (
-          <p className="text-sm text-red-600 mb-4">{passwordMessage}</p>
-        )}
-        <button
-          className="w-full max-w-sm px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
-          onClick={handlePasswordSubmit}
-        >
-          입력
-        </button>
       </div>
-    );
-  }
-
-  return (
-    <div className="space-y-6 p-6 bg-white rounded-xl shadow">
-      <h3 className="text-2xl font-semibold"></h3>
-      
-      {changeMessage && (
-        <div className={`p-3 rounded-lg ${changeMessage.includes("성공적으로 변경") ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-          {changeMessage}
+      <div className="mt-2 grid grid-cols-2 gap-3 text-xs text-neutral-600">
+        <div className={`flex items-center gap-2 ${!isVerified ? "text-neutral-900" : ""}`}>
+          <span className={`h-5 w-5 flex items-center justify-center rounded-full text-white text-[11px] ${!isVerified ? "bg-violet-600" : "bg-neutral-300"}`}>1</span>
+          본인 확인
         </div>
-      )}
-
-      <div className="space-y-4">
-        <div className="flex flex-col space-y-2">
-          <label className="text-gray-600 font-medium">변경 비밀번호</label>
-          <input
-            type="password"
-            className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={newPassword}
-            onChange={handleNewPasswordChange}
-          />
-          {newPassword.length > 0 && (
-            <div className="flex items-center space-x-2">
-              <span className={`text-sm font-semibold ${passwordStrength === "안전" ? 'text-green-600' : passwordStrength === "보통" ? 'text-yellow-600' : 'text-red-600'}`}>
-                비밀번호 강도: {passwordStrength}
-              </span>
-            </div>
-          )}
-          <p className="text-xs text-gray-500 mt-1">
-            비밀번호는 영문(대문자 또는 소문자)과 특수문자를 포함한 8자 이상이어야 합니다.
-          </p>
+        <div className={`flex items-center gap-2 ${isVerified ? "text-neutral-900" : ""}`}>
+          <span className={`h-5 w-5 flex items-center justify-center rounded-full text-white text-[11px] ${isVerified ? "bg-violet-600" : "bg-neutral-300"}`}>2</span>
+          새 비밀번호 설정
         </div>
-        <div className="flex flex-col space-y-2">
-          <label className="text-gray-600 font-medium">변경 비밀번호 확인</label>
-          <input
-            type="password"
-            className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={confirmNewPassword}
-            onChange={checkConfirmPassword}
-          />
-          {confirmNewPassword.length > 0 && (
-            <p className={`text-sm ${newPassword === confirmNewPassword ? 'text-blue-600' : 'text-red-600'}`}>
-              {confirmPasswordMessage}
-            </p>
-          )}
-        </div>
-      </div>
-      <div className="flex justify-end space-x-4 pt-4">
-        <button
-          className="px-6 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition"
-          onClick={handleCancel}
-        >
-          취소
-        </button>
-        <button
-          className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
-          onClick={handlePasswordChange}
-        >
-          확인
-        </button>
       </div>
     </div>
-  );
+
+    <AnimatePresence mode="wait">
+      {/* STEP 1: 본인확인 */}
+      {!isVerified ? (
+        <motion.div
+          key="step1"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0, transition: { duration: 0.25 } }}
+          exit={{ opacity: 0, y: -12, transition: { duration: 0.2 } }}
+          className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm"
+        >
+          <div className="space-y-5 max-w-md mx-auto">
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-neutral-700">현재 비밀번호</label>
+              <div className="relative">
+                <input
+                  type="password"
+                  className="w-full h-11 rounded-lg border border-neutral-300 px-3 pr-10 text-sm focus:ring-2 focus:ring-violet-500 transition"
+                  placeholder="현재 비밀번호를 입력하세요"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                />
+                <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-neutral-400">•••</span>
+              </div>
+              {passwordMessage && (
+                <div className="mt-2 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+                  {passwordMessage}
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                className="px-5 h-10 rounded-full border border-neutral-300 text-sm text-neutral-700 hover:bg-neutral-50 transition"
+                onClick={handleCancel}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                className="px-6 h-10 rounded-full text-sm font-semibold text-white
+                           bg-[linear-gradient(90deg,#7c3aed_0%,#ec4899_100%)]
+                           shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition"
+                onClick={handlePasswordSubmit}
+              >
+                다음
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      ) : (
+        /* STEP 2: 새 비밀번호 */
+        <motion.div
+          key="step2"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0, transition: { duration: 0.25 } }}
+          exit={{ opacity: 0, y: -12, transition: { duration: 0.2 } }}
+          className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm"
+        >
+          <div className="space-y-6 max-w-xl">
+            {changeMessage && (
+              <div
+                className={`rounded-xl border px-4 py-3 text-sm ${
+                  changeMessage.includes("성공")
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                    : "border-rose-200 bg-rose-50 text-rose-700"
+                }`}
+              >
+                {changeMessage}
+              </div>
+            )}
+
+            {/* 새 비밀번호 */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-neutral-700">새 비밀번호</label>
+              <input
+                type="password"
+                className="w-full h-11 rounded-lg border border-neutral-300 px-3 text-sm focus:ring-2 focus:ring-violet-500 transition"
+                value={newPassword}
+                onChange={handleNewPasswordChange}
+                placeholder="영문/숫자/특수문자 8자 이상"
+              />
+
+              {/* 강도 게이지 */}
+              {newPassword?.length > 0 && (
+                <div className="mt-1 space-y-1.5">
+                  <div className="h-2 w-full bg-neutral-100 rounded">
+                    <div
+                      className={`h-2 rounded transition-all ${
+                        passwordStrength === "안전"
+                          ? "w-full bg-emerald-500"
+                          : passwordStrength === "보통"
+                          ? "w-2/3 bg-amber-400"
+                          : "w-1/3 bg-rose-500"
+                      }`}
+                    />
+                  </div>
+                  <div className="text-xs font-medium text-neutral-600">
+                    비밀번호 강도:{" "}
+                    <span
+                      className={
+                        passwordStrength === "안전"
+                          ? "text-emerald-600"
+                          : passwordStrength === "보통"
+                          ? "text-amber-600"
+                          : "text-rose-600"
+                      }
+                    >
+                      {passwordStrength || "측정 중"}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              <ul className="mt-2 text-xs text-neutral-500 space-y-1">
+                <li>대/소문자, 숫자, 특수문자를 조합해서 안전하게 변경해주세요.</li>
+                <li>다른 사이트와 동일한 비밀번호 사용은 자제해 주세요.</li>
+              </ul>
+            </div>
+
+            {/* 새 비밀번호 확인 */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-neutral-700">새 비밀번호 확인</label>
+              <input
+                type="password"
+                className="w-full h-11 rounded-lg border border-neutral-300 px-3 text-sm focus:ring-2 focus:ring-violet-500 transition"
+                value={confirmNewPassword}
+                onChange={checkConfirmPassword}
+                placeholder="다시 한 번 입력"
+              />
+              {confirmNewPassword?.length > 0 && (
+                <p
+                  className={`text-sm ${
+                    newPassword === confirmNewPassword ? "text-violet-600" : "text-rose-600"
+                  }`}
+                >
+                  {confirmPasswordMessage}
+                </p>
+              )}
+            </div>
+
+            {/* 액션 */}
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                className="px-6 h-10 rounded-full border border-neutral-300 text-sm text-neutral-700 hover:bg-neutral-50 transition"
+                onClick={handleCancel}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                className="px-6 h-10 rounded-full text-sm font-semibold text-white
+                           bg-[linear-gradient(90deg,#7c3aed_0%,#ec4899_100%)]
+                           shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition inline-flex items-center gap-1"
+                onClick={handlePasswordChange}
+              >
+                확인
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </div>
+);
 }

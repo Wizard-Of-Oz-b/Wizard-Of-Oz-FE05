@@ -45,9 +45,10 @@ export default function Login() {
       setUser({ ...me, displayName });
 
       showModal({ type: "success", message: "로그인에 성공했습니다!" });
-      navigate("/");
+      navigate("/mypage");
     } catch (err) {
       const msg =
+        err?.userMessage ||
         err?.response?.data?.detail ||
         err?.response?.data?.message ||
         err?.message ||
@@ -72,19 +73,19 @@ return (
     <div className="w-full max-w-5xl bg-white border border-neutral-200 shadow-xl rounded-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
       
      {/* 왼쪽: 브랜드/카피 */}
-<div className="flex flex-col justify-center p-10 md:p-12 bg-gradient-to-br from-violet-50 to-pink-50">
-  {/* 로고 */}
-  <div className="flex items-center gap-3">
-    <div className="h-12 w-12 flex items-center justify-center rounded-xl 
-                    bg-gradient-to-br from-violet-500 to-pink-500 
-                    shadow-[0_4px_14px_rgba(236,72,153,0.35)] 
-                    text-white font-bold text-lg">
-      OZ
-    </div>
-    <div>
-      <h2 className="text-xl font-extrabold tracking-tight text-neutral-900">
-        오즈의 이상한 상점
-      </h2>
+      <div className="flex flex-col justify-center p-10 md:p-12 bg-gradient-to-br from-violet-50 to-pink-50">
+        {/* 로고 */}
+        <div className="flex items-center gap-3">
+          <div className="h-12 w-12 flex items-center justify-center rounded-xl 
+                          bg-gradient-to-br from-violet-500 to-pink-500 
+                          shadow-[0_4px_14px_rgba(236,72,153,0.35)] 
+                        text-white font-bold text-lg">
+              OZ
+          </div>
+        <div>
+          <h2 className="text-xl font-extrabold tracking-tight text-neutral-900">
+            오즈의 이상한 상점
+          </h2>
       <p className="text-xs text-neutral-500">
         평범한 일상에 작은 마법을 더하다
       </p>
