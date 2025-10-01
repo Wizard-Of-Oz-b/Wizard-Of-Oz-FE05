@@ -14,6 +14,8 @@ import { useUpdateShippingAddress } from "../../hooks/cart/useOrder";
 import CartLoadingSpin from "../../components/features/cart/CartLoadingSpin";
 import EmptyPayment from "../../components/features/payment/EmptyPayment";
 import PaymentSkeleton from "../../components/skeletons/PaymentSkeleton";
+import { useGetMyAddresses } from "../../hooks/payments/useAddress";
+import UserAddressModal from "../../components/features/payment/UserAddressModal";
 
 const SECTION_STYLE =
   "w-full border border-gray-200 rounded-2xl px-4 py-5 shadow-sm mb-2";
@@ -40,8 +42,16 @@ export default function UserPayment() {
   const { mutateAsync: updateAddress, isPending: isAddressUpdate } =
     useUpdateShippingAddress();
 
+  // 주소 목록 가져오기
+  const {
+    data: myAddress,
+    isLoading: areMyAddressLoading,
+    isError: areMyAddressError,
+    error: MyAddressError,
+  } = useGetMyAddresses();
+
   console.log(userOrder, "주문");
-  console.log(userProfile);
+  console.log(myAddress);
   const filterOrder = filterOrders(items?.results); //ready 상태만 가져옴
   const [testPaymentInfo, setTestPaymentInfo] = useState({
     amount: 0,
@@ -50,6 +60,7 @@ export default function UserPayment() {
     orderName: "",
   });
 
+  // Todo : 현재 주소 지정 기본 주소 하나만 가져옴 => 기본 주소 리스트 가져와서 선택 할 수 있을것, 기본주소 선택해도 주소변경 전달 할것
   const [shippingAddress, setShippingAddress] = useState({
     recipient: "", //주문자
     phone: "", //번호
@@ -57,37 +68,39 @@ export default function UserPayment() {
     address1: "", //기본주소면 여기만 출력
     address2: "", //상세 주소
   });
+  const [addressId, setAddressId] = useState(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false); // 주소 검색 모달
+  const [isAddressListModalOpen, setIsAddressListModalOpen] = useState(false); // 사용자 주소 리스트 모달
   const [payment, setPayment] = useState("");
   const [isDefaultAddress, setIsDefaultAddress] = useState(true);
 
   // useEffect #1: 기본 유저 데이터 세팅
-  useEffect(() => {
-    // userProfile 데이터가 있고, 그 안에 주소 정보가 있다면
-    if (userProfile?.address) {
-      setShippingAddress({
-        // postalCode: userProfile.address.postalCode || "",
-        address1: userProfile.address || "",
-        // address2: userProfile.address.address2 || "",
-      });
-    }
-    if (userProfile?.name || userProfile?.nickname) {
-      setShippingAddress((prev) => ({
-        ...prev,
-        recipient: userProfile.name || userProfile.nickname,
-      }));
-    }
+  // useEffect(() => {
+  //   // userProfile 데이터가 있고, 그 안에 주소 정보가 있다면
+  //   if (userProfile?.address) {
+  //     setShippingAddress({
+  //       // postalCode: userProfile.address.postalCode || "",
+  //       address1: userProfile.address || "",
+  //       // address2: userProfile.address.address2 || "",
+  //     });
+  //   }
+  //   if (userProfile?.name || userProfile?.nickname) {
+  //     setShippingAddress((prev) => ({
+  //       ...prev,
+  //       recipient: userProfile.name || userProfile.nickname,
+  //     }));
+  //   }
 
-    if (userProfile?.phone_number) {
-      setShippingAddress((prev) => ({
-        ...prev,
-        phone: userProfile.phone_number
-          .replace(/[^0-9]/g, "")
-          .replace(/(^02.{0}|^01.{1}|[0-9]{3})([0-9]+)([0-9]{4})/, "$1-$2-$3"),
-      }));
-    }
-  }, [userProfile]);
+  //   if (userProfile?.phone_number) {
+  //     setShippingAddress((prev) => ({
+  //       ...prev,
+  //       phone: userProfile.phone_number
+  //         .replace(/[^0-9]/g, "")
+  //         .replace(/(^02.{0}|^01.{1}|[0-9]{3})([0-9]+)([0-9]{4})/, "$1-$2-$3"),
+  //     }));
+  //   }
+  // }, [userProfile]);
 
   // useEffect #2: 토스 전달 정보 삽입
   useEffect(() => {
@@ -112,6 +125,34 @@ export default function UserPayment() {
       }));
     }
   }, [items]);
+
+  // useEffect #3: 사용자 기본 배송지 가져오기
+  useEffect(() => {
+    if (myAddress && myAddress.length > 0) {
+      const defaultAddress =
+        myAddress.find((addr) => addr.is_default) || myAddress[0];
+      setShippingAddress(() => ({
+        recipient: defaultAddress?.recipient,
+        phone: userProfile?.phone,
+        postcode: defaultAddress?.postcode,
+        address1: defaultAddress?.address1,
+        address2: defaultAddress?.address2,
+      }));
+      setAddressId(defaultAddress?.address_id)
+      // 하이픈 추가,, 추후에 폼에서 입력 할때는 제거
+      if (defaultAddress?.phone) {
+        setShippingAddress((prev) => ({
+          ...prev,
+          phone: defaultAddress?.phone
+            .replace(/[^0-9]/g, "")
+            .replace(
+              /(^02.{0}|^01.{1}|[0-9]{3})([0-9]+)([0-9]{4})/,
+              "$1-$2-$3"
+            ),
+        }));
+      }
+    }
+  }, [myAddress]);
 
   // 배송지 변경사항 저장
   const handleInputChange = (e) => {
@@ -143,11 +184,21 @@ export default function UserPayment() {
   };
   // 주소 모달창
   const handleModalOpen = () => {
+    // Todo: 이후에 만약에 기본 주소가 없으면 모달을 출력 하도록 하자..
     setIsModalOpen(true);
   };
   const handleModalClose = () => {
     setIsModalOpen(false);
   };
+
+  // 사용자 주소 모달 리스트 창 열고 닫기
+  const handleAddressListModalOpen = () => {
+    setIsAddressListModalOpen(true);
+  };
+  const handleAddressListModalClose = () => {
+    setIsAddressListModalOpen(false);
+  };
+
   // 주소 변경
   const handleCompleteAddress = (addressData) => {
     console.log(addressData, "주소");
@@ -155,10 +206,29 @@ export default function UserPayment() {
       ...prev,
       postcode: addressData.zoneCode,
       address1: addressData.address,
+      address2: '',
     }));
-    // 기본주소 아님, 모달창 닫기
+    // 기본주소 아님, 모달창 닫기, 주소 id 제거 하기,
+    setAddressId(null);
     setIsDefaultAddress(false);
     setIsModalOpen(false);
+    // detailAddressRef.current?.focus(); 이후에 상세 주소에 포커싱 하기
+  };
+
+  // 기본 주소 리스트 선택값 상태에 할당
+  const handleSelectAddressList = (addressData) => {
+    console.log(addressData, "주소");
+    setShippingAddress(() => ({
+      recipient: addressData?.recipient || "",
+      phone: addressData?.phone || 0,
+      postcode: addressData?.postcode || "",
+      address1: addressData?.address1 || "",
+      address2: addressData?.address2 || "",
+    }));
+    setAddressId(addressData?.address_id)
+    // 사용자 기본주소
+    setIsDefaultAddress(true);
+    setIsAddressListModalOpen(false);
     // detailAddressRef.current?.focus(); 이후에 상세 주소에 포커싱 하기
   };
 
@@ -184,12 +254,15 @@ export default function UserPayment() {
     try {
       // 주소 추가 메소드 기본 주소면 안함
       // 기본 주소가 아니면,
-      if (!isDefaultAddress) {
-        // 주소추가
-        await updateAddress({ address: shippingAddress });
-        console.log("새로운 배송지로 진행");
-        // 주소 추가 경고창 보내고, 바로 중단할것
-      }
+      
+      // 하이픈 제거
+      setShippingAddress((prev) => ({
+        ...prev,
+        phone: prev?.phone.replaceAll("-", ""),
+      }));
+      await updateAddress({ address: shippingAddress });
+      console.log("새로운 배송지로 진행");
+      // 주소 추가 경고창 보내고, 바로 중단할것
 
       // 현재 어떤 결제 방식 선택하는지 Toss선택하면 Toss 모달 화면 출력....
       if (payment === "toss") {
@@ -245,18 +318,20 @@ export default function UserPayment() {
               onClick={handleModalOpen}
               className="border border-gray-400 rounded-lg px-1"
             >
-              배송지 검색
+              새로운 배송지 검색
             </button>
           </div>
           <div className="flex flex-col mt-3">
-            <span
+            <button
+              type="button"
               className={`text-sm text-gray-500 text-center border rounded-sm border-gray-300 px-0.5 w-[75px]
               ${isDefaultAddress && "bg-black text-white"}
               cursor-pointer select-none`}
-              onClick={handleResetToDefault}
+              onClick={handleAddressListModalOpen}
             >
-              기본 배송지
-            </span>
+              {/* 기본 배송지 */}
+              배송지 선택
+            </button>
             <div className="flex mt-5">
               <label className="w-20">받는 분</label>
               <input
@@ -296,38 +371,46 @@ export default function UserPayment() {
                 required
               />
             </div>
-            {/* 기본 주소에서는 상세 주소, 우편번호를 출력하지 않는다. */}
-            {!isDefaultAddress && (
-              <>
-                <div className="flex mt-3">
-                  <label className="w-20">상세 주소</label>
-                  <input
-                    name="address2"
-                    className="w-full border border-gray-400 rounded-sm px-2 py-1"
-                    value={shippingAddress.address2}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="flex mt-3">
-                  <label className="w-20">우편번호</label>
-                  <input
-                    name="postcode"
-                    className="w-full border border-gray-400 rounded-sm px-2 py-1"
-                    value={shippingAddress.postcode}
-                    onChange={handleInputChange}
-                    readOnly
-                    required
-                  />
-                </div>
-              </>
-            )}
+            <div className="flex mt-3">
+              <label className="w-20">상세 주소</label>
+              <input
+                name="address2"
+                className="w-full border border-gray-400 rounded-sm px-2 py-1"
+                value={shippingAddress.address2}
+                onChange={handleInputChange}
+                readOnly={isDefaultAddress}
+                required
+              />
+            </div>
+            <div className="flex mt-3">
+              <label className="w-20">우편번호</label>
+              <input
+                name="postcode"
+                className="w-full border border-gray-400 rounded-sm px-2 py-1"
+                value={shippingAddress.postcode}
+                onChange={handleInputChange}
+                readOnly
+                required
+              />
+            </div>
           </div>
         </section>
+        {/* 새로운 배송지 검색 */}
         {isModalOpen && (
           <AddressModal
             onClose={handleModalClose}
             onSearch={handleCompleteAddress}
+          />
+        )}
+
+        {/* 주문자 배송지 목록 출력 */}
+        {isAddressListModalOpen && (
+          <UserAddressModal
+            isOpen={isAddressListModalOpen}
+            addressList={myAddress}
+            checkAddress={handleSelectAddressList}
+            onClose={handleAddressListModalClose}
+            currentAddressId={addressId}
           />
         )}
 
