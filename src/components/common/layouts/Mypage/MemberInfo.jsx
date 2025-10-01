@@ -5,6 +5,7 @@ import { useAuth } from "../../../../context/AuthContext";
 import { clean } from "../../../../utils/mypage/sanitize";
 import { UserRound, AtSign, Phone, Sparkles, ShieldCheck, Smartphone, ArrowLeft } from "lucide-react";
 import { FiCheckCircle } from "react-icons/fi"
+import { useNavigate } from "react-router-dom";
 
 export default function MemberInfo() {
   const { user, setUser, bootstrapping} = useAuth();
@@ -17,8 +18,9 @@ export default function MemberInfo() {
   const [phoneLast, setPhoneLast] = useState(""); // 전화번호 끝
   const [address, setAddress] = useState(""); // 주소
   const [confirmationMessage, setConfirmationMessage] = useState(""); // 확인 메시지
+  const navigate = useNavigate(""); // 회원 탈퇴페이지로 이동 = 1001 복
 
-  const carrierOptions = ["SK", "KT", "LG", "알뜰폰"];
+  const carrierOptions = ["SK", "KT", "LG", "알뜰폰SK", "알뜰폰KT", "알뜰폰LG"];
 
   useEffect(() => {
     if (user) {
@@ -222,7 +224,7 @@ export default function MemberInfo() {
           돌아가기
         </button>
 
-        {/* 메인 CTA: 은은한 그라데 + 살짝 양각 느낌 */}
+        {/* 메인 CTA */}
         <button
           onClick={handleConfirm}
           className="px-6 h-10 rounded-full text-sm font-semibold text-white
@@ -236,6 +238,16 @@ export default function MemberInfo() {
         </button>
       </div>
     </div>
+    {/* 회원정보 관리 본문 끝부분 */}
+    <div className="mt-8 border-t border-neutral-200 pt-6">
+      <button
+        onClick={() => navigate("/mypage/withdrawal")}
+        className="text-xs text-neutral-400 hover:text-red-500 hover:underline transition"
+      >
+        회원 탈퇴
+      </button>
+    </div>
+
 
     {/* 저장 메시지 */}
     {confirmationMessage && (

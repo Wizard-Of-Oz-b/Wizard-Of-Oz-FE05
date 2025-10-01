@@ -6,12 +6,12 @@ import {
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
+// 조미현멘토님 피드백 반영, 회원탈퇴를 회원정보 관리 내 자그마하게 ...
 const menuItems = [
   { name: "주문내역", path: "orderlist", icon: Package },
   { name: "회원정보 관리", path: "memberinfo", icon: UserCog },
   { name: "배송지 관리", path: "shipping", icon: MapPin },
   { name: "비밀번호 변경", path: "password", icon: Lock },
-  { name: "회원 탈퇴", path: "withdrawal", icon: UserX },
   { name: "내가 작성한 리뷰", path: "reviews", icon: Star },
 ];
 

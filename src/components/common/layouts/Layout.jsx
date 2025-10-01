@@ -4,6 +4,7 @@ import Header from "./header/Header";
 import HeaderLight from "./header/HeaderLight";
 import Footer from "./footer/Footer";
 import { useAuth } from '../../../context/AuthContext';
+import ScrollToTop from './ScrollToTop';
 
 export default function Layout() {
   const { pathname } = useLocation();
@@ -24,6 +25,7 @@ export default function Layout() {
     <div className="flex flex-col min-h-screen">
       <HeaderLight isLoggedIn={isLoggedIn} user={user} />
       <main className="flex-1 pt-24">
+        <ScrollToTop />
         <Outlet />
       </main>
       <Footer isHomepage={isHomepage} />

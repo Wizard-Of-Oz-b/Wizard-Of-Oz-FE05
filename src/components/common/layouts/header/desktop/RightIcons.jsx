@@ -94,14 +94,16 @@ export default function RightIcons({ isLight, onOpenSearch }) {
       animate={{ opacity: 1, y: 0, transition: { duration: 0.2, delay: 0.06 } }}
     >
       {/* 검색 */}
-      <button aria-label="Search" className={base} onClick={onOpenSearch}>
+      <button aria-label="Search" 
+              className={`base cursor-pointer`} 
+              onClick={onOpenSearch}>
         <Search className="w-7 h-7" />
       </button>
 
       {/* 위시리스트 */}
       <button
         aria-label="Wishlist"
-        className={base}
+        className={`base cursor-pointer`}
         onClick={() => navigate("/wishlist")}
       >
         <Heart className="w-7 h-7" />
@@ -111,7 +113,7 @@ export default function RightIcons({ isLight, onOpenSearch }) {
       <div className="relative" ref={menuRef}>
         <button
           aria-label="Account"
-          className={`${base} relative`}
+          className={`${base} relative cursor-pointer`}
           onClick={handleUserClick}
         >
           <User className="w-7 h-7" />

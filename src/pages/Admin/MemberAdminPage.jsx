@@ -243,7 +243,7 @@ export default function MemberAdminPage() {
         user={editTarget}
         saving={editSaving}
         onSave={saveEditRole}
-        allowedRoles={["manager","cs","user"]}
+        allowedRoles={["admin","manager","cs","user"]}
       />
 
       {/* Toast */}
