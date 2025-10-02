@@ -138,7 +138,7 @@ export default function UserPayment() {
         address1: defaultAddress?.address1,
         address2: defaultAddress?.address2,
       }));
-      setAddressId(defaultAddress?.address_id)
+      setAddressId(defaultAddress?.address_id);
       // 하이픈 추가,, 추후에 폼에서 입력 할때는 제거
       if (defaultAddress?.phone) {
         setShippingAddress((prev) => ({
@@ -206,7 +206,7 @@ export default function UserPayment() {
       ...prev,
       postcode: addressData.zoneCode,
       address1: addressData.address,
-      address2: '',
+      address2: "",
     }));
     // 기본주소 아님, 모달창 닫기, 주소 id 제거 하기,
     setAddressId(null);
@@ -225,7 +225,7 @@ export default function UserPayment() {
       address1: addressData?.address1 || "",
       address2: addressData?.address2 || "",
     }));
-    setAddressId(addressData?.address_id)
+    setAddressId(addressData?.address_id);
     // 사용자 기본주소
     setIsDefaultAddress(true);
     setIsAddressListModalOpen(false);
@@ -254,7 +254,7 @@ export default function UserPayment() {
     try {
       // 주소 추가 메소드 기본 주소면 안함
       // 기본 주소가 아니면,
-      
+
       // 하이픈 제거
       setShippingAddress((prev) => ({
         ...prev,
@@ -325,74 +325,118 @@ export default function UserPayment() {
             <button
               type="button"
               className={`text-sm text-gray-500 text-center border rounded-sm border-gray-300 px-0.5 w-[75px]
-              ${isDefaultAddress && "bg-black text-white"}
               cursor-pointer select-none`}
               onClick={handleAddressListModalOpen}
             >
               {/* 기본 배송지 */}
               배송지 선택
             </button>
-            <div className="flex mt-5">
-              <label className="w-20">받는 분</label>
-              <input
-                className="w-full border border-gray-400 rounded-sm px-2 py-1"
-                name="recipient"
-                value={shippingAddress.recipient}
-                onChange={handleInputChange}
-                readOnly={isDefaultAddress}
-                required
-              />
-            </div>
+            <table className="w-full table-fixed border-spacing-y-3 border-separate">
+              <tbody>
+                {/* 받는 분 */}
+                <tr>
+                  <th className="w-20 p-2 text-left font-semibold">
+                    <label htmlFor="recipient">
+                      받는 분 <span className="text-xs text-violet-800">※</span>
+                    </label>
+                  </th>
+                  <td className="p-2">
+                    <input
+                      id="recipient"
+                      className="w-full border border-gray-400 rounded-sm px-2 py-1"
+                      name="recipient"
+                      value={shippingAddress.recipient}
+                      onChange={handleInputChange}
+                      readOnly={isDefaultAddress}
+                      required
+                    />
+                  </td>
+                </tr>
 
-            <div className="flex mt-3">
-              <label htmlFor="phone" className="w-20">
-                연락처
-              </label>
-              <input
-                name="phone"
-                id="phone"
-                className="w-full border border-gray-400 rounded-sm px-2 py-1"
-                value={shippingAddress.phone}
-                onChange={handleInputChange}
-                maxLength={13}
-                readOnly={isDefaultAddress}
-                required
-              />
-            </div>
+                {/* 연락처 */}
+                <tr>
+                  <th className="w-20 p-2 text-left font-semibold">
+                    <label htmlFor="phone">
+                      연락처 <span className="text-xs text-violet-800">※</span>
+                    </label>
+                  </th>
+                  <td className="p-2">
+                    <input
+                      name="phone"
+                      id="phone"
+                      className="w-full border border-gray-400 rounded-sm px-2 py-1"
+                      value={shippingAddress.phone}
+                      onChange={handleInputChange}
+                      maxLength={13}
+                      readOnly={isDefaultAddress}
+                      required
+                    />
+                  </td>
+                </tr>
 
-            <div className="flex mt-3">
-              <label className="w-20">주소</label>
-              <input
-                name="address1"
-                className="w-full border border-gray-400 rounded-sm px-2 py-1"
-                value={shippingAddress.address1}
-                onChange={handleInputChange}
-                readOnly
-                required
-              />
-            </div>
-            <div className="flex mt-3">
-              <label className="w-20">상세 주소</label>
-              <input
-                name="address2"
-                className="w-full border border-gray-400 rounded-sm px-2 py-1"
-                value={shippingAddress.address2}
-                onChange={handleInputChange}
-                readOnly={isDefaultAddress}
-                required
-              />
-            </div>
-            <div className="flex mt-3">
-              <label className="w-20">우편번호</label>
-              <input
-                name="postcode"
-                className="w-full border border-gray-400 rounded-sm px-2 py-1"
-                value={shippingAddress.postcode}
-                onChange={handleInputChange}
-                readOnly
-                required
-              />
-            </div>
+                {/* 주소 */}
+                <tr>
+                  <th className="w-20 p-2 text-left font-semibold">
+                    <label htmlFor="address1">
+                      주소 <span className="text-xs text-violet-800">※</span>
+                    </label>
+                  </th>
+                  <td className="p-2" colSpan={3}>
+                    <input
+                      id="address1"
+                      name="address1"
+                      className="w-full border border-gray-400 rounded-sm px-2 py-1"
+                      value={shippingAddress.address1}
+                      onChange={handleInputChange}
+                      readOnly
+                      required
+                    />
+                  </td>
+                </tr>
+
+                {/* 상세 주소 */}
+                <tr>
+                  <th className="w-20 p-2 text-left font-semibold">
+                    <label htmlFor="address2" className="whitespace-nowrap">
+                      상세 주소{" "}
+                      <span className="text-xs text-violet-800">※</span>
+                    </label>
+                  </th>
+                  <td className="p-2" colSpan={2}>
+                    <input
+                      id="address2"
+                      name="address2"
+                      className="w-full border border-gray-400 rounded-sm px-2 py-1"
+                      value={shippingAddress.address2}
+                      onChange={handleInputChange}
+                      readOnly={isDefaultAddress}
+                      required
+                    />
+                  </td>
+                </tr>
+
+                {/* 우편번호 */}
+                <tr>
+                  <th className="w-20 p-2 text-left font-semibold">
+                    <label htmlFor="postcode" className="whitespace-nowrap">
+                      우편 번호{" "}
+                      <span className="text-xs text-violet-800">※</span>
+                    </label>
+                  </th>
+                  <td className="p-2">
+                    <input
+                      id="postcode"
+                      name="postcode"
+                      className="w-full border border-gray-400 rounded-sm px-2 py-1"
+                      value={shippingAddress.postcode}
+                      onChange={handleInputChange}
+                      readOnly
+                      required
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </section>
         {/* 새로운 배송지 검색 */}
@@ -478,7 +522,7 @@ export default function UserPayment() {
         <button
           type="submit" //실 적용시
           // type="button" //테스트
-          className="w-100 border rounded-sm bg-black text-white py-1"
+          className="w-100 border rounded-sm bg-black text-white py-1 cursor-pointer transition delay-75 hover:text-black hover:bg-white"
           // onClick={handlePurchase}
           disabled={isPaymentProcessing} // 결제 진행중에는 두번 요청 X
         >
