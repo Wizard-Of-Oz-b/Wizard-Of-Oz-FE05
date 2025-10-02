@@ -1,7 +1,7 @@
 import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { dropPanel } from "../animations";
-import { SEARCH, SUGGEST } from "../constants";
+import { PRIMARY, SEARCH, SUGGEST } from "../constants";
 import SearchRow from "./SearchRow";
 import SuggestionsRow from "./SuggestionsRow";
 import CategoryGrid from "./CategoryGrid";
@@ -22,6 +22,8 @@ export default function DesktopDropdown({
     return SUGGEST[active] ?? SUGGEST.ALL;
   };
 
+  const primaryMeta = PRIMARY.find((p) => p.key === active);
+
   return (
     <AnimatePresence>
       {active && (
@@ -37,10 +39,15 @@ export default function DesktopDropdown({
         >
           <div className="w-full bg-white/95 text-black shadow-2xl backdrop-blur">
             <SearchRow active={active} keyword={keyword} setKeyword={setKeyword} inputRef={inputRef} onSubmit={onSubmitSearch} />
-            <SuggestionsRow tags={getSuggestions()} onClick={(tag) => onSelectSub(active === SEARCH ? null : active, tag)} />
+            <SuggestionsRow tags={getSuggestions() || []} onClick={(tag) => onSelectSub(active === SEARCH ? null : active, tag)} />
             <div className="h-px bg-gray-200 mx-auto max-w-[120rem] my-3" />
 
-            {active === SEARCH ? (
+            {primaryMeta && primaryMeta.ready === false? (
+              <div className="py-8 text-center text-gray-700 text-lg">
+                <div className="font-semibold mb-2">{primaryMeta.label}</div>
+                <div>현재 카테고리는 준비중입니다. 곧 찾아뵐게요.</div>
+              </div>
+            ) : active === SEARCH ? (
               <>
                 <div className="mx-auto max-w-[120rem] px-6 pb-6 grid grid-cols-2 lg:grid-cols-4 gap-4">
                   {["신상 모아보기", "아우터 전체", "니트 전체", "데님 전체"].map((txt) => (
