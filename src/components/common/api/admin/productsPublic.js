@@ -47,65 +47,69 @@ const normalizeProduct = (row = {}) => ({
 });
 
 /** 퍼블릭 제품 목록 */
-export async function fetchProductsPublic(params = {}) {
+export async function fetchProductsPublic(opts = {}) {
   const {
-    q,
-    category_id,
+    q = "",
+    category_id = null,
     is_active = true,
-    sort = "-created_at",
+    sort = "-created_at", // DRF라면 ordering 사용
     page = 1,
     size = 20,
     min_price,
     max_price,
-  } = params;
+  } = opts;
 
+  // 기본 쿼리스트링 (DRF 기준: ordering)
   const baseParams = {
     q: q || undefined,
-    category_id: category_id || undefined,
-    is_active,
-    ordering: sort, 
-    page,
-    size,
+    category_id: category_id || undefined, // ✅ 핵심
+    is_active: typeof is_active === "boolean" ? is_active : undefined,
+    ordering: sort || undefined,           // 서버가 sort를 쓰면 이 라인만 sort로 변경
+    page: Number(page) || 1,
+    size: Number(size) || 20,
     min_price: min_price ?? undefined,
     max_price: max_price ?? undefined,
   };
 
   const call = async (paramsToUse) => {
-    try {
-      const res = await publicApi.get("/v1/products/", { params: paramsToUse });
-      const data = res.data || {};
-      const list = Array.isArray(data.results) ? data.results : [];
-      return {
-        ok: true,
-        value: {
-          count: data.count ?? list.length,
-          results: list.map(normalizeProduct),
-        },
-      };
-    } catch (err) {
-      console.error("fetchProductsPublic ERROR", {
-        status: err?.response?.status,
-        data: err?.response?.data,
-        params: paramsToUse,
-      });
-      return { ok: false, err };
-    }
+    const res = await publicApi.get("/v1/products/", { params: paramsToUse });
+    const data = res.data ?? {};
+    const list = Array.isArray(data.results)
+      ? data.results
+      : Array.isArray(data)
+      ? data
+      : [];
+    return {
+      count: data.count ?? list.length,
+      results: list.map(normalizeProduct),
+    };
   };
 
-  let r = await call(baseParams);
-  if (r.ok) return r.value;
+  // 1) 기본 시도
+  try {
+    return await call(baseParams);
+  } catch (err) {
+    console.warn("fetchProductsPublic step1 failed", {
+      status: err?.response?.status,
+      data: err?.response?.data,
+    });
+  }
 
   const p2 = { ...baseParams };
   delete p2.ordering;
-  r = await call(p2);
-  if (r.ok) return r.value;
+  try {
+    return await call(p2);
+  } catch (err) {
+    console.warn("fetchProductsPublic step2 failed", {
+      status: err?.response?.status,
+      data: err?.response?.data,
+    });
+  }
 
+  // 3) 검색어 q도 제거 폴백
   const p3 = { ...p2 };
   delete p3.q;
-  r = await call(p3);
-  if (r.ok) return r.value;
-
-  throw r.err;
+  return await call(p3); // 실패 시 에러 throw
 }
 
 export { normalizeProduct, pickImageUrl };

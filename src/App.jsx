@@ -5,9 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import Home from "./pages/Home";
 import ProductDetailPage from "./pages/ProductDetailPage";
-import ProductListTest from "./pages/ProductListTest";
+import CategoryProductList from "./pages/CategoryProductList.jsx";
 import Wishlist from "./pages/Wishlist";
-import ResultTestPage from "./pages/ResultTestPage";
+import SearchResult from "./pages/SearchResult.jsx";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/login.jsx";
 import Mypage from "./pages/Mypage.jsx";
@@ -63,10 +63,10 @@ export default function App() {
             <Route element={<Layout />}>
               <Route path="/" element={<Home />} />
               <Route path="/products/:id" element={<ProductDetailPage />} />
-              <Route path="/products/test" element={<ProductListTest />} />
+              <Route path="/products/list" element={<CategoryProductList />} />
               <Route path="/cart" element={<UserCart />} />
               <Route path="/wishlist" element={<Wishlist />} />
-              <Route path="/results/test" element={<ResultTestPage />} />
+              <Route path="/results/list" element={<SearchResult />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/Mypage" element={<Mypage />} />
               <Route path="/login" element={<Login />} />

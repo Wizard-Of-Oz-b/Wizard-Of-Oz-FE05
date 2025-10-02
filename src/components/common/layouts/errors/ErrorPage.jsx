@@ -43,7 +43,7 @@ export default function ErrorPage({
       onSearch(keyword);
     } else {
       const qs = new URLSearchParams({ q: keyword, page: "1", sort: "created_at"});
-      navigate(`/results/test?${qs.toString()}`);
+      navigate(`/results/list?${qs.toString()}`);
     }
   };
 
