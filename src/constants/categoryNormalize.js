@@ -1,4 +1,4 @@
-import { PRIMARY, SUBS } from "./constants";
+import { PRIMARY, SUBS } from "../components/common/layouts/header/constants";
 
 export const norm = (s) =>
   String(s ?? "")
