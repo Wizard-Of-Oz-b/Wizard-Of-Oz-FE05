@@ -11,9 +11,22 @@ import { useCreatePurchase } from "../hooks/cart/useOrder";
 import { useNavigate } from "react-router-dom";
 import CartEmpty from "../components/features/cart/CartEmpty";
 import CartError from "../components/features/cart/CartError";
+import { useGetMyOrders } from "../hooks/payments/useOrderPayment";
 
 export default function UserCart() {
   const { data: cart, isLoading, isError, error, refetch } = useCart();
+
+  // Todo 만약 장바구니가 비어있고 ready 중인 상품이 있다면?? 장바구니에서 -> 결제 페이지로 리다이렉션
+  // Todo 만약 결제 중인(ready) 상품이 있는 상태에서 장바구니에 담은 상태면 장바구니 페이지에서 결제에 추가할건지 버튼으로 물어보기
+
+  const {
+      data: userOrder,
+      isLoading: orderLoading,
+      isError: orderIsError,
+      error: orderError,
+    } = useGetMyOrders(); 
+
+    
   const purchaseMutation = useCreatePurchase();
   const clearCartMutation = useClearCart();
   const nagivate = useNavigate();
@@ -46,8 +59,8 @@ export default function UserCart() {
   }
 
   // 장바구니 데이터 가져오다가 에러 발생시
-  if(isError){
-    return <CartError onRetry={refetch} error={error} />
+  if (isError) {
+    return <CartError onRetry={refetch} error={error} />;
   }
 
   return (
@@ -58,14 +71,14 @@ export default function UserCart() {
         </thead>
         <tbody>
           {cart?.item_count === 0 ? <CartEmpty /> : null}
-          {cart ? null: <CartEmpty script="잘못된 접근" />}
+          {cart ? null : <CartEmpty script="잘못된 접근" />}
           {cartList.map((el) => (
             <CartCard key={el.id} data={el} />
           ))}
           <tr>
             <td colSpan={5}>
               <div className="flex w-full justify-end mt-2">
-                {cart?.item_count >=1 ? (
+                {cart?.item_count >= 1 ? (
                   <button
                     onClick={handleClearCart}
                     className="border border-gray-300 px-5 py-1 cursor-pointer"
@@ -95,7 +108,7 @@ export default function UserCart() {
         >
           쇼핑 계속하기
         </button>
-        {cart?.item_count >=1 ? (
+        {cart?.item_count >= 1 ? (
           <button
             className="border border-gray-300 text-xl px-8 py-2 mx-2 bg-black text-white cursor-pointer"
             onClick={handlePurchaseClick}

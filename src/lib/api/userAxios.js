@@ -51,9 +51,15 @@ userApi.interceptors.response.use(
       } catch (refreshError) {
         // Refresh Token도 만료된 경우 (로그아웃 처리)
         // 로그인 화면 또는 메인 화면으로 리다이렉션 추가하기
-        console.error("토큰 재발급 실패:", refreshError);
-        // 예: 로그아웃 처리 함수 호출
-        // logout();
+         console.error("토큰 재발급 실패:", refreshError);
+    
+            //  클라이언트 측의 인증 정보를 모두 삭제합니다.
+            // logout();
+    
+            //  사용자에게 알리고, 로그인 페이지로 리다이렉트시킵니다.
+            alert('세션이 만료되었습니다. 다시 로그인해주세요.');
+            window.location.href = '/login'; // 페이지를 새로고침하며 이동
+
         return Promise.reject(refreshError);
       }
     }
