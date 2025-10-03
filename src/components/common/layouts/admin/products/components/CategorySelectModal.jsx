@@ -115,7 +115,7 @@ export default function CategorySelectModal({
         </div>
 
         {/* 리스트 */}
-        <div className="flex-1 overflow-y-auto p-3">
+        <div className="flex-1 overflow-y-auto scrollbar-hide p-3">
           {loading ? (
             <p className="text-sm text-slate-400">불러오는 중…</p>
           ) : (

@@ -7,8 +7,7 @@ import PrimaryNav from "./desktop/PrimaryNav";
 import RightIcons from "./desktop/RightIcons";
 import DesktopDropdown from "./desktop/DesktopDropdown";
 import MobileMenu from "./mobile/MobileMenu";
-import useCategoryIndex from "./desktop/useCategoryIndex";
-import { getCategoryId } from "./categoryIdMap";
+import { getCategoryId } from "../../../../utils/getCategoryId";
 
 export default function Header({ className = "", onSelectSub, onSearch }) {
   const [active, setActive] = useState(null);
@@ -21,8 +20,6 @@ export default function Header({ className = "", onSelectSub, onSearch }) {
   const navigate = useNavigate();
   const isHomepage = location.pathname === "/";
   const isLight = !!active || mobileOpen || !isHomepage;
-
-  const { ready, findCategoryIds } = useCategoryIndex();
 
   const open = (p) => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
@@ -55,11 +52,6 @@ export default function Header({ className = "", onSelectSub, onSearch }) {
 
     let cid = getCategoryId(p, qRaw);
 
-    if (!cid && ready) {
-      const cands = findCategoryIds(p, qRaw);
-      if (cands.length) cid = cands[0].id;
-    }
-
     const qs = new URLSearchParams({ page: "1", sort: "created_at" });
     if (p) qs.set("primary", String(p).toUpperCase());
     qs.set("item", qRaw);
@@ -88,6 +80,7 @@ export default function Header({ className = "", onSelectSub, onSearch }) {
       >
         <TopBar isLight={isLight} onOpenMobile={() => setMobileOpen(true)} />
         <PrimaryNav isLight={isLight} active={active} open={open} />
+        <div className="hidden md:flex">
         <RightIcons
           isLight={isLight}
           onOpenSearch={() => {
@@ -95,6 +88,7 @@ export default function Header({ className = "", onSelectSub, onSearch }) {
             open(SEARCH);
           }}
         />
+        </div>
       </div>
 
       {/* 데스크탑 드롭다운 */}
@@ -116,7 +110,7 @@ export default function Header({ className = "", onSelectSub, onSearch }) {
         setKeyword={setKeyword}
         onClose={() => setMobileOpen(false)}
         onSubmitSearch={submitSearch}
-        onSelectSub={(p, item) => onSelectSub?.(p, item)}
+        onSelectSub={handleSelectSub}
       />
     </header>
   );

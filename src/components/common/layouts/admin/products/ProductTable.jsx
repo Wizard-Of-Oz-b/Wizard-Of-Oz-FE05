@@ -26,7 +26,7 @@ const formatKST = (ts) =>
 const shortUuid = (val) => {
   if (!val) return '(신규)';
   const s = String(val);
-  return s.length > 8 ? `${s.slice(0, 4)}…${s.slice(-4)}` : s;
+  return s.length > 8 ? `${s.slice(0, 4)}` : s;
 };
 
 const safeId = (row) =>
@@ -77,9 +77,9 @@ export default function ProductTable({
   categoryMap = {},
 }) {
   const COLS = [
-    'w-[140px]',
+    'w-[90px]',
     'w-[100px]',
-    'w-[240px]',
+    'w-[200px]',
     '',
     'w-[120px]',
     'w-[90px]',

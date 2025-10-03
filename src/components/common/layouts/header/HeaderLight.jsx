@@ -7,8 +7,7 @@ import PrimaryNav from "./desktop/PrimaryNav";
 import RightIcons from "./desktop/RightIcons";
 import DesktopDropdown from "./desktop/DesktopDropdown";
 import MobileMenu from "./mobile/MobileMenu";
-import useCategoryIndex from "./desktop/useCategoryIndex";
-import { getCategoryId } from "./categoryIdMap";
+import { getCategoryId } from "../../../../utils/getCategoryId";
 
 export default function HeaderLight({ className = "", onSelectSub, onSearch }) {
   const [active, setActive] = useState(null);
@@ -17,8 +16,6 @@ export default function HeaderLight({ className = "", onSelectSub, onSearch }) {
   const closeTimer = useRef(null);
   const inputRef = useRef(null);
   const navigate = useNavigate();
-
-  const { ready, findCategoryIds } = useCategoryIndex();
 
   const open = (p) => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
@@ -56,11 +53,6 @@ export default function HeaderLight({ className = "", onSelectSub, onSearch }) {
 
     let cid = getCategoryId(p, qRaw);
 
-    if (!cid && ready) {
-      const cands = findCategoryIds(p, qRaw);
-      if (cands.length) cid = cands[0].id;
-    }
-
     const qs = new URLSearchParams({ page: "1", sort: "created_at" });
     if (p) qs.set("primary", String(p).toUpperCase());
     qs.set("item", qRaw);
@@ -92,6 +84,7 @@ export default function HeaderLight({ className = "", onSelectSub, onSearch }) {
       >
         <TopBar isLight={true} onOpenMobile={() => setMobileOpen(true)} />
         <PrimaryNav isLight={true} active={active} open={open} />
+        <div className="hidden md:flex">
         <RightIcons
           isLight={true}
           onOpenSearch={() => {
@@ -100,6 +93,7 @@ export default function HeaderLight({ className = "", onSelectSub, onSearch }) {
           }}
         />
       </div>
+    </div>
 
       {/* 데스크탑 드롭다운 */}
       <DesktopDropdown
