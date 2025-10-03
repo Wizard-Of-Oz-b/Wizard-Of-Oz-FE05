@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, Search, Sparkles } from "lucide-react";
+import { X, Search, Sparkles, Heart, ShoppingCart, User, LogIn, UserPlus } from "lucide-react";
 import { spring, staggerCols, colItem } from "../animations";
 import { PRIMARY, SUGGEST, SUBS } from "../constants";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../../../context/AuthContext";
 
 const noop = () => {};
 
@@ -21,6 +23,8 @@ export default function MobileMenu({
   onSubmitSearch = noop,
   onSelectSub = noop,
 }) {
+  const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
   const [openPrimary, setOpenPrimary] = useState(null);
   const scrollLockRef = useRef({ applied: false, top: 0, prev: {} });
 
@@ -252,6 +256,51 @@ export default function MobileMenu({
 
               {!PRIMARY_SAFE.length && (
                 <div className="py-6 text-sm text-gray-500">카테고리가 비어 있습니다.</div>
+              )}
+            </div>
+
+            <div className="mt-auto border-t bg-white/95 backdrop-blur px-5 py-3">
+              {!isLoggedIn ? (
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 py-2.5 hover:bg-gray-50 active:scale-[0.99] transition"
+                    onClick={() => { onClose(); navigate("/login"); }}
+                  >
+                    <LogIn className="w-5 h-5" />
+                    <span className="text-sm font-medium">로그인</span>
+                  </button>
+                  <button
+                    className="flex items-center justify-center gap-2 rounded-xl bg-black text-white py-2.5 hover:opacity-90 active:scale-[0.99] transition"
+                    onClick={() => { onClose(); navigate("/signup"); }}
+                  >
+                    <UserPlus className="w-5 h-5" />
+                    <span className="text-sm font-medium">회원가입</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 py-2.5 hover:bg-gray-50 active:scale-[0.99] transition"
+                    onClick={() => { onClose(); navigate("/mypage"); }}
+                  >
+                    <User className="w-5 h-5" />
+                    <span className="text-sm font-medium">마이페이지</span>
+                  </button>
+                  <button
+                    className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 py-2.5 hover:bg-gray-50 active:scale-[0.99] transition"
+                    onClick={() => { onClose(); navigate("/cart"); }}
+                  >
+                    <ShoppingCart className="w-5 h-5" />
+                    <span className="text-sm font-medium">장바구니</span>
+                  </button>
+                  <button
+                    className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 py-2.5 hover:bg-gray-50 active:scale-[0.99] transition"
+                    onClick={() => { onClose(); navigate("/wishlist"); }}
+                  >
+                    <Heart className="w-5 h-5" />
+                    <span className="text-sm font-medium">위시리스트</span>
+                  </button>
+                </div>
               )}
             </div>
           </motion.div>
