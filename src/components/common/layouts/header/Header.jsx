@@ -7,7 +7,7 @@ import PrimaryNav from "./desktop/PrimaryNav";
 import RightIcons from "./desktop/RightIcons";
 import DesktopDropdown from "./desktop/DesktopDropdown";
 import MobileMenu from "./mobile/MobileMenu";
-import { getCategoryId } from "./categoryIdMap";
+import { getCategoryId } from "../../../../utils/getCategoryId";
 
 export default function Header({ className = "", onSelectSub, onSearch }) {
   const [active, setActive] = useState(null);

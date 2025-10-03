@@ -165,7 +165,7 @@
 // src/components/common/layouts/header/useCategoryIndexFromConstants.jsx
 // 관리자 API 호출 없이, 하드코딩 CATEGORY_ID_MAP만 사용
 
-import { CATEGORY_ID_MAP } from "./categoryIdMap";
+import { CATEGORY_ID_MAP } from "../../../../constants/categoryIdMap";
 
 export default function useCategoryIndexFromConstants() {
   const ready = true;
