@@ -7,7 +7,6 @@ import PrimaryNav from "./desktop/PrimaryNav";
 import RightIcons from "./desktop/RightIcons";
 import DesktopDropdown from "./desktop/DesktopDropdown";
 import MobileMenu from "./mobile/MobileMenu";
-import useCategoryIndex from "./desktop/useCategoryIndex";
 import { getCategoryId } from "./categoryIdMap";
 
 export default function Header({ className = "", onSelectSub, onSearch }) {
@@ -21,8 +20,6 @@ export default function Header({ className = "", onSelectSub, onSearch }) {
   const navigate = useNavigate();
   const isHomepage = location.pathname === "/";
   const isLight = !!active || mobileOpen || !isHomepage;
-
-  const { ready, findCategoryIds } = useCategoryIndex();
 
   const open = (p) => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
@@ -54,11 +51,6 @@ export default function Header({ className = "", onSelectSub, onSearch }) {
     onSelectSub?.(p, item);
 
     let cid = getCategoryId(p, qRaw);
-
-    if (!cid && ready) {
-      const cands = findCategoryIds(p, qRaw);
-      if (cands.length) cid = cands[0].id;
-    }
 
     const qs = new URLSearchParams({ page: "1", sort: "created_at" });
     if (p) qs.set("primary", String(p).toUpperCase());
@@ -116,7 +108,7 @@ export default function Header({ className = "", onSelectSub, onSearch }) {
         setKeyword={setKeyword}
         onClose={() => setMobileOpen(false)}
         onSubmitSearch={submitSearch}
-        onSelectSub={(p, item) => onSelectSub?.(p, item)}
+        onSelectSub={handleSelectSub}
       />
     </header>
   );
