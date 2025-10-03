@@ -9,12 +9,10 @@ export default function OrderSummary({ sumPrice }) {
   const displayFinalPrice = Math.floor(sumPrice);
 
   return (
-    <td colSpan={5} className="bg-gray-200 border-y-8 border-transparent py-3">
       <div className="flex flex-col items-center mx-5">
         <span className="text-sm">결제 예정 금액</span>
         <span className="text-2xl">{displayFinalPrice.toLocaleString()} 원</span>
       </div>
-    </td>
   );
 
   // return (
