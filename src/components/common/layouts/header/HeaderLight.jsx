@@ -84,6 +84,7 @@ export default function HeaderLight({ className = "", onSelectSub, onSearch }) {
       >
         <TopBar isLight={true} onOpenMobile={() => setMobileOpen(true)} />
         <PrimaryNav isLight={true} active={active} open={open} />
+        <div className="hidden md:flex">
         <RightIcons
           isLight={true}
           onOpenSearch={() => {
@@ -92,6 +93,7 @@ export default function HeaderLight({ className = "", onSelectSub, onSearch }) {
           }}
         />
       </div>
+    </div>
 
       {/* 데스크탑 드롭다운 */}
       <DesktopDropdown

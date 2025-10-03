@@ -91,10 +91,10 @@ export default function MobileMenu({
           />
           <motion.div
             key="mobile-panel"
-            className="md:hidden fixed inset-y-0 left-0 z-[60] w-[88%] max-w-[420px] bg-white text-black shadow-2xl flex flex-col"
-            initial={{ x: "-100%" }}
+            className="md:hidden fixed inset-y-0 right-0 z-[60] w-[88%] max-w-[420px] bg-white text-black shadow-2xl flex flex-col"
+            initial={{ x: "100%" }}
             animate={{ x: 0, transition: spring }}
-            exit={{ x: "-100%", transition: { duration: 0.15 } }}
+            exit={{ x: "100%", transition: { duration: 0.15 } }}
           >
           <div className="sticky top-0 z-10">
             <div className="flex items-center justify-between px-5 h-16 border-b bg-gradient-to-r from-violet-50 to-pink-50">

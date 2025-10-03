@@ -80,6 +80,7 @@ export default function Header({ className = "", onSelectSub, onSearch }) {
       >
         <TopBar isLight={isLight} onOpenMobile={() => setMobileOpen(true)} />
         <PrimaryNav isLight={isLight} active={active} open={open} />
+        <div className="hidden md:flex">
         <RightIcons
           isLight={isLight}
           onOpenSearch={() => {
@@ -87,6 +88,7 @@ export default function Header({ className = "", onSelectSub, onSearch }) {
             open(SEARCH);
           }}
         />
+        </div>
       </div>
 
       {/* 데스크탑 드롭다운 */}
