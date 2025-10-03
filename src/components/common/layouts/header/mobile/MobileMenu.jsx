@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Search, Sparkles } from "lucide-react";
 import { spring, staggerCols, colItem } from "../animations";
@@ -21,7 +21,7 @@ export default function MobileMenu({
   onSubmitSearch = noop,
   onSelectSub = noop,
 }) {
-
+  const [openPrimary, setOpenPrimary] = useState(null);
   const scrollLockRef = useRef({ applied: false, top: 0, prev: {} });
 
   useEffect(() => {
@@ -178,53 +178,75 @@ export default function MobileMenu({
                     : String(p.label ?? p.key ?? "");
                 const meta = META[pKey] ?? { emoji: "🛍️", bar: "from-gray-200 to-gray-100" };
 
+                const isOpen = openPrimary === pKey;
                 return (
-                  <details 
+                  <div 
                     key={`primary-${pKey}`} 
-                    className="group rounded-2xl border border-gray-100 overflow-hidden bg-white shadow-sm"
+                    className="group rounded-2xl border border-gray-100 overflow-hidden bg-white shadow-sm mt-3"
                   >
-                    <summary className="list-none cursor-pointer">
+                    <button
+                      type="button"
+                      onClick={() => setOpenPrimary(isOpen ? null : pKey)}
+                      className="w-full"
+                    >
                       <div className="flex items-center justify-between px-4 py-3">
                         <div className="flex items-center gap-2">
                           <span className="text-xl">{meta.emoji}</span>
                           <span className="text-[15px] font-semibold">{pLabel}</span>
                         </div>
-                          <span className="text-xs text-gray-500 group-open:rotate-180 transition-transform">
+                          <motion.span 
+                            className="text-xs text-gray-500 group-open:rotate-180 transition-transform"
+                            animate={{ rotate: isOpen ? 180 : 0 }}
+                            transition={{ type: "tween", duration: 0.18 }}
+                          >
                             ▾
-                          </span>
-                      </div>
+                          </motion.span>
+                        </div>
                       <div className={`h-1 w-full bg-gradient-to-r ${meta.bar}`} />
-                    </summary>
+                    </button>
 
-                    <motion.div
-                      className="pl-3 pb-2 grid grid-cols-2 gap-2"
-                      variants={staggerCols}
-                      initial="initial"
-                      animate="animate"
-                    >
-                      {(SUBS_SAFE[pKey] ?? []).flatMap((col, idx) =>
-                        (col?.items ?? []).map((item) => {
-                          const itemLabel = String(item);
-                          return (
-                            <motion.button
-                              key={`sub-${pKey}-${idx}-${itemLabel}`}
-                              className="text-[14px] text-left px-3 py-2 rounded-xl border border-gray-100 hover:bg-gray-50 active:scale-[0.99] transition
-                                        flex items-center justify-between"
-                              onClick={() => {
-                                onSelectSub(pKey, itemLabel);
-                                onClose();
-                              }}
-                              variants={colItem}
-                              whileTap={{ scale: 0.98 }}
-                            >
-                              <span className="truncate">{itemLabel}</span>
-                              <span className="text-gray-300">›</span>
-                            </motion.button>
-                          );
-                        })
+                    <AnimatePresence initial={false}>
+                      {isOpen && (
+                        <motion.div
+                          key={`panel-${pKey}`}
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                          className="overflow-hidden"
+                        >
+                          <motion.div
+                            className="pl-3 pb-2 grid grid-cols-2 gap-2 pt-3"
+                            variants={staggerCols}
+                            initial="initial"
+                            animate="animate"
+                          >
+                            {(SUBS_SAFE[pKey] ?? []).flatMap((col, idx) =>
+                              (col?.items ?? []).map((item) => {
+                                const itemLabel = String(item);
+                                return (
+                                  <motion.button
+                                    key={`sub-${pKey}-${idx}-${itemLabel}`}
+                                    className="text-[14px] text-left px-3 py-2 rounded-xl border border-gray-100 hover:bg-gray-50 active:scale-[0.99] transition
+                                                flex items-center justify-between"
+                                    onClick={() => {
+                                      onSelectSub(pKey, itemLabel);
+                                      onClose();
+                                    }}
+                                    variants={colItem}
+                                    whileTap={{ scale: 0.98 }}
+                                  >
+                                    <span className="truncate">{itemLabel}</span>
+                                    <span className="text-gray-300">›</span>
+                                  </motion.button>
+                                );
+                              })
+                            )}
+                          </motion.div>
+                        </motion.div>
                       )}
-                    </motion.div>
-                  </details>
+                    </AnimatePresence>
+                  </div>
                 );
               })}
 
