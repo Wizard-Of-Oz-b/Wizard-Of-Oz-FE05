@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import CartCard from "../components/features/cart/CartCard";
 import CartDays from "../components/features/cart/CartDays";
 import CartToolbar from "../components/features/cart/CartToolbar";
@@ -14,21 +14,24 @@ import CartError from "../components/features/cart/CartError";
 import { useGetMyOrders } from "../hooks/payments/useOrderPayment";
 
 export default function UserCart() {
-  const { data: cart, isLoading, isError, error, refetch } = useCart();
+  const {
+    data: cart,
+    isLoading: isCartLoading,
+    isError: isCartError,
+    error,
+    refetch,
+  } = useCart();
 
-  // Todo 만약 장바구니가 비어있고 ready 중인 상품이 있다면?? 장바구니에서 -> 결제 페이지로 리다이렉션
-  // Todo 만약 결제 중인(ready) 상품이 있는 상태에서 장바구니에 담은 상태면 장바구니 페이지에서 결제에 추가할건지 버튼으로 물어보기
-
-  // const {
-  //     data: userOrder,
-  //     isLoading: orderLoading,
-  //     isError: orderIsError,
-  //     error: orderError,
-  //   } = useGetMyOrders();
+  const {
+    data: userOrder,
+    isLoading: orderLoading,
+    isError: orderIsError,
+    error: orderError,
+  } = useGetMyOrders();
 
   const purchaseMutation = useCreatePurchase();
   const clearCartMutation = useClearCart();
-  const nagivate = useNavigate();
+  const navigate = useNavigate();
   console.log(cart, "카트");
   const cartList = useMemo(() => {
     if (!cart?.items) {
@@ -42,7 +45,7 @@ export default function UserCart() {
     purchaseMutation.mutate();
   };
   const OnClickShopping = () => {
-    nagivate(`/`);
+    navigate(`/`);
   };
 
   const handleClearCart = () => {
@@ -52,6 +55,18 @@ export default function UserCart() {
     }
   };
 
+  useEffect(() => {
+    if (cart && userOrder) {
+      // 결제 중인 상품이 있으면 payment 로 이동한다.
+      if (cart?.item_count === 0 && userOrder?.results.length >= 1) {
+        navigate("/payment");
+      }
+    }
+  }, [cart, userOrder]);
+
+  const isLoading = isCartLoading || orderLoading;
+  const isError = isCartError || orderIsError;
+
   //로딩중에는 장바구니 스켈레톤 출력
   if (isLoading) {
     return <CartSkeleton />;
@@ -59,7 +74,7 @@ export default function UserCart() {
 
   // 장바구니 데이터 가져오다가 에러 발생시
   if (isError) {
-    return <CartError onRetry={refetch} error={error} />;
+    return <CartError onRetry={refetch} error={error + orderError} />;
   }
 
   return (
@@ -148,7 +163,9 @@ export default function UserCart() {
             onClick={handlePurchaseClick}
             disabled={purchaseMutation.isPending}
           >
-            전체 상품 주문
+            {userOrder?.results.length === 0
+              ? "전체 상품 주문"
+              : "주문 상품에 추가"}
           </button>
         )}
       </div>

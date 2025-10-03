@@ -37,6 +37,7 @@ userApi.interceptors.response.use(
           {},
           {
             withCredentials: true, // cross-origin 요청 시 쿠키 전송을 위해 필요
+            headers: { Accept: "application/json" } 
           }
         );
 

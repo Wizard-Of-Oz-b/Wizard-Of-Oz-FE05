@@ -13,8 +13,7 @@ export default function UserAddressModal({
   currentAddressId,
 }) {
   const [select, setSelect] = useState(currentAddressId || null); //address_id 저장
-  // Todo: is_active 인지 체크 할것
-  // Todo: active인 주소리스트 출력
+
   const modalRef = useRef(null);
   useOnClickOutside(modalRef, onClose);
 

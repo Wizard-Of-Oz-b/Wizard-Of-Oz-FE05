@@ -16,11 +16,12 @@ import EmptyPayment from "../../components/features/payment/EmptyPayment";
 import PaymentSkeleton from "../../components/skeletons/PaymentSkeleton";
 import { useGetMyAddresses } from "../../hooks/payments/useAddress";
 import UserAddressModal from "../../components/features/payment/UserAddressModal";
+import TermsModal from "../../components/features/payment/TermsModal";
 
 const SECTION_STYLE =
   "w-full border border-gray-200 rounded-2xl px-4 py-5 shadow-sm mb-2";
 const SECTION_TITLE_STYLE = "text-xl font-bold";
-const TEST_CUSTOMER_KEY = "YbX2HuSlsC9uVJW6NMRMj";
+// const TEST_CUSTOMER_KEY = "YbX2HuSlsC9uVJW6NMRMj";
 
 export default function UserPayment() {
   // const { data: userProfile, isLoading: userLoading } = useMyProfile();
@@ -55,7 +56,7 @@ export default function UserPayment() {
   const filterOrder = filterOrders(items?.results); //ready 상태만 가져옴
   const [testPaymentInfo, setTestPaymentInfo] = useState({
     amount: 0,
-    customerKey: TEST_CUSTOMER_KEY,
+    customerKey: "",
     orderId: "",
     orderName: "",
   });
@@ -74,6 +75,8 @@ export default function UserPayment() {
   const [isAddressListModalOpen, setIsAddressListModalOpen] = useState(false); // 사용자 주소 리스트 모달
   const [payment, setPayment] = useState("");
   const [isDefaultAddress, setIsDefaultAddress] = useState(true);
+  const [isTermsOpen, setTermsOpen] = useState(false);
+  const [termsAgree, setTermsAgree] = useState(false);
 
   // useEffect #1: 기본 유저 데이터 세팅
   // useEffect(() => {
@@ -232,21 +235,28 @@ export default function UserPayment() {
     // detailAddressRef.current?.focus(); 이후에 상세 주소에 포커싱 하기
   };
 
-  // '원본' 데이터인 userProfile에서 값을 가져와 '현재' 상태를 덮어씁니다.
-  // IsDefaultAddress를 true로 변경 한다.
-  // const handleResetToDefault = () => {
-  //   if (userProfile?.address) {
-  //     setShippingAddress((prev) => ({
-  //       ...prev,
-  //       recipient: userProfile.recipient || userProfile.nickname || "",
-  //       phone: userProfile.phone_number || "",
-  //       postcode: "",
-  //       address1: userProfile.address || "",
-  //       address2: "",
-  //     }));
-  //     setIsDefaultAddress(true);
-  //   }
-  // };
+  // 약관 클릭
+  const handleCheckboxChange = (e) => {
+    //이미 동의중일때 누르면 false
+    if(e.target.value){
+      setTermsAgree(false)
+    }else{
+    console.log('작동 테스트' ,termsAgree)
+      setTermsAgree(false)
+      setTermsAgree(true)
+    }
+  }
+
+  // 약관 모달 닫기
+  const handleTermsClose = () => {
+    setTermsOpen(false);
+  };
+  // 라벨 클릭
+  const handleLabelClick = (e) => {
+    e.preventDefault();
+    setTermsOpen(true);
+
+  }
 
   const handleSubmitPay = async (e) => {
     e.preventDefault(); // 결제중 새로고침 방지
@@ -307,7 +317,7 @@ export default function UserPayment() {
       {isPaymentProcessing && <CartLoadingSpin />}
       <form
         onSubmit={handleSubmitPay}
-        className="w-2/4 flex flex-col justify-center items-center"
+        className="w-[800px] flex flex-col justify-center items-center"
       >
         {/* 배송지 섹션 */}
         <section className={SECTION_STYLE}>
@@ -513,11 +523,20 @@ export default function UserPayment() {
         <section className={SECTION_STYLE}>
           <h2 className={SECTION_TITLE_STYLE}>약관</h2>
           <div>
-            <span>[필수] 개인정보 수집 및 이용 동의</span>
-            <input type="checkbox" name="" id="" className="ml-2" required />
+            <label htmlFor="agree-chk" onClick={handleLabelClick} className="select-none cursor-pointer">
+              [필수] 개인정보 수집 및 이용 동의
+            </label>
+            <input
+              type="checkbox"
+              id="agree-chk"
+              onChange={handleCheckboxChange}
+              checked={termsAgree}
+              className="ml-2"
+              required
+            />
           </div>
         </section>
-
+        
         {/* 결제 버튼 == 결제폼 submit 버튼 */}
         <button
           type="submit" //실 적용시
@@ -529,6 +548,8 @@ export default function UserPayment() {
           {testPaymentInfo.amount.toLocaleString()}원 결제
         </button>
       </form>
+    {isTermsOpen && <TermsModal onClose={handleTermsClose} isAgree={termsAgree} setAgree={setTermsAgree} />}
+
       <TossModal
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
