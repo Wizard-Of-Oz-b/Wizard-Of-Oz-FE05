@@ -127,7 +127,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchProductsPublic } from "../components/common/api/admin/productsPublic";
 
-export function useProducts(params = {}) {
+export function useProducts(params = {}, options = {}) {
   const {
     q = "",
     category_id = null,
@@ -139,9 +139,12 @@ export function useProducts(params = {}) {
     max_price,
   } = params;
 
+  const { enabled = true } = options;
+
   return useQuery({
     queryKey: ["products-public", { q, category_id, is_active, sort, page, size, min_price, max_price }],
     queryFn: () => fetchProductsPublic({ q, category_id, is_active, sort, page, size, min_price, max_price }),
+    enabled,
     keepPreviousData: true,
     staleTime: 5 * 60 * 1000,
   });

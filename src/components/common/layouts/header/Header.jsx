@@ -7,6 +7,8 @@ import PrimaryNav from "./desktop/PrimaryNav";
 import RightIcons from "./desktop/RightIcons";
 import DesktopDropdown from "./desktop/DesktopDropdown";
 import MobileMenu from "./mobile/MobileMenu";
+import useCategoryIndex from "./desktop/useCategoryIndex";
+import { getCategoryId } from "./categoryIdMap";
 
 export default function Header({ className = "", onSelectSub, onSearch }) {
   const [active, setActive] = useState(null);
@@ -19,6 +21,8 @@ export default function Header({ className = "", onSelectSub, onSearch }) {
   const navigate = useNavigate();
   const isHomepage = location.pathname === "/";
   const isLight = !!active || mobileOpen || !isHomepage;
+
+  const { ready, findCategoryIds } = useCategoryIndex();
 
   const open = (p) => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
@@ -38,18 +42,30 @@ export default function Header({ className = "", onSelectSub, onSearch }) {
     onSearch?.(q, primary);
     const qs = new URLSearchParams({ q, page: "1", sort: "created_at" });
     if (primary) qs.set("primary", String(primary));
-    navigate({ pathname: "/results/test", search: `?${qs.toString()}` });
+    navigate({ pathname: "/results/list", search: `?${qs.toString()}` });
     setKeyword("");
     setActive(null);
   };
 
   const handleSelectSub = (p, item) => {
-    const q = (item || "").trim();
-    if (!q) return;
+    const qRaw = (item || "").trim();
+    if (!qRaw) return; 
+    
     onSelectSub?.(p, item);
-    const qs = new URLSearchParams({ q, page: "1", sort: "created_at" });
-    if (p) qs.set("primary", String(p));
-    navigate({ pathname: "/results/test", search: `?${qs.toString()}` });
+
+    let cid = getCategoryId(p, qRaw);
+
+    if (!cid && ready) {
+      const cands = findCategoryIds(p, qRaw);
+      if (cands.length) cid = cands[0].id;
+    }
+
+    const qs = new URLSearchParams({ page: "1", sort: "created_at" });
+    if (p) qs.set("primary", String(p).toUpperCase());
+    qs.set("item", qRaw);
+    if (cid) qs.set("category_id", cid);
+
+    navigate({ pathname: "/products/list", search: `?${qs.toString()}` }, { replace: true });
     setActive(null);
     };
 

@@ -53,6 +53,7 @@ export default function StoreIntro() {
         mapRef.current = new maps.Map(mapElRef.current, {
           center: new maps.LatLng(activeStore.lat, activeStore.lng),
           zoom: 17,
+          scrollWheel: false,
         });
 
         markerRef.current = new maps.Marker({
