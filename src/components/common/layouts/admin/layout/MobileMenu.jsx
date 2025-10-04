@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown, Home, LayoutDashboard, LogOut } from 'lucide-react';
 import { NAV_SECTIONS, linkClass } from './navConfig';
+import React from 'react';
 
 const collapseVariants = {
   collapsed: { height: 0, opacity: 0 },
@@ -84,7 +85,7 @@ export default function MobileMenu({
                                   className={linkClass}
                                   onClick={() => setMenuOpen(false)}
                                 >
-                                  {n.icon}
+                                  {n.icon && React.createElement(n.icon, { className: 'h-4 w-4' })}
                                   <span>{n.label}</span>
                                 </NavLink>
                               </li>

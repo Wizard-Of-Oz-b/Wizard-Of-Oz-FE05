@@ -3,8 +3,10 @@ import { Pencil, Trash2 } from 'lucide-react';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import api from '../../../../../lib/axios';
+
+const FALLBACK_IMG = "/images/product-fallback.png";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -89,6 +91,7 @@ export default function ProductTable({
 
   // ★ 썸네일
   const [thumbMap, setThumbMap] = useState({});
+  const fetchedRef = useRef(new Set());
 
   // 이 페이지에서 썸네일이 비어있는 상품 id만 뽑음
   const idsNeedingThumb = useMemo(() => {
@@ -106,14 +109,15 @@ export default function ProductTable({
 
   // ★ 부족한 썸네일을 이미지 API로 채움
   useEffect(() => {
-    if (!idsNeedingThumb.length) return;
+    const targets = idsNeedingThumb.filter((id) => !fetchedRef.current.has(id));
+    if (!targets.length) return;
 
     let cancelled = false;
 
     (async () => {
       try {
         const results = await Promise.allSettled(
-          idsNeedingThumb.map((pid) =>
+          targets.map((pid) =>
             api
               .get(`/v1/admin/products/${pid}/images/`)
               .then((res) => ({
@@ -127,7 +131,9 @@ export default function ProductTable({
         for (const r of results) {
           if (r.status !== 'fulfilled') continue;
           const { pid, data } = r.value;
-          if (!data || data.length === 0) continue;
+          fetchedRef.current.add(pid);  //  재요청 방지하기
+
+          if (!data?.length) continue;
 
           const main = data.find((x) => x.is_main) || data[0];
 
@@ -140,7 +146,10 @@ export default function ProductTable({
         if (!cancelled && Object.keys(next).length) {
           setThumbMap((prev) => ({ ...prev, ...next }));
         }
-      } catch (e) {}
+      } catch (err) {
+        console.error(err);
+        targets.forEach((id) => fetchedRef.current.add(id));
+      }
     })();
 
     return () => {
@@ -199,18 +208,17 @@ export default function ProductTable({
                     </span>
                   </td>
 
-                  <td className="px-4 py-3 align-middle">
-                    {imgSrc ? (
+                  <td className="px-4 py-3 align-middle">                    
                       <img
-                        src={imgSrc}
-                        alt={(p.name ?? 'thumbnail') + ''}
+                        src={imgSrc || FALLBACK_IMG}
+                        alt={p.name ?? "상품 이미지"}
                         className="h-14 w-20 object-cover rounded-md shadow-sm"
-                      />
-                    ) : (
-                      <div className="h-14 w-20 rounded-md bg-gray-100 grid place-items-center text-xs text-gray-400">
-                        없음
-                      </div>
-                    )}
+                        onError={(e) => {
+                          if (!e.currentTarget.src.endsWith(FALLBACK_IMG)) {
+                            e.currentTarget.src = FALLBACK_IMG;
+                          }
+                        }}
+                      />                    
                   </td>
 
                   <td className="px-4 py-3 align-middle whitespace-nowrap text-gray-700">

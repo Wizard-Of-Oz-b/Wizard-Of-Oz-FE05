@@ -17,6 +17,10 @@ import {
 import HeartBurst from '../layouts/wishlist/components/HeartBurst';
 import { motion } from "framer-motion"; // ✅ whileTap, spring 등 사용
 import { addCartItem } from '../../../hooks/cart/cartHook';
+import Modal from '../layouts/admin/common/Modal';
+import { useAuth } from '../../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+useNavigate
 
 export default function ProductDetail({ product, onAddToCart, onToast }) {
   const [color, setColor] = useState(product.colors?.[0]?.code);
@@ -28,8 +32,9 @@ export default function ProductDetail({ product, onAddToCart, onToast }) {
   // ✅ 하트 파티클 관련 상태
   const [burstKey, setBurstKey] = useState(0);
   const [allowBurst, setAllowBurst] = useState(true);
-
-  
+  const { isLoggedIn } = useAuth();
+  const navigate = useNavigate();
+  const [showNotice, setShowNotice] = useState(false);
 
   useEffect(() => {
     const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)');
@@ -99,6 +104,16 @@ Object.fromEntries(
   }, [product]);
 
   const toggleWish = async () => {
+    // 조미현멘토님 피드백 
+    if (!isLoggedIn) {
+      setShowNotice(true);
+      setTimeout(() => {
+        setShowNotice(false);
+        navigate("/login");
+      }, 1500);
+      return;
+    }
+
     const prevWish = wish;
     setWish(!prevWish);
 
@@ -140,6 +155,14 @@ Object.fromEntries(
   const price = useMemo(() => KRW(product.price), [product.price]);
 
   const handleAddToCart = async () => {
+    if (!isLoggedIn) {
+      setShowNotice(true);
+      setTimeout(() => {
+        setShowNotice(false);
+        navigate("/login");
+        }, 1500);
+        return;
+    }
     if (adding) return;
     setAdding(true);
     try {
@@ -298,6 +321,15 @@ Object.fromEntries(
           onNext={nextLightbox}
         />
       )}
+
+      <Modal open={showNotice} onClose={() => setShowNotice(false)}>
+        <div className="p-6 text-center">
+          <h2 className="text-lg font-semibold text-gray-900">
+            가입된 회원만 사용이 가능합니다.
+          </h2>
+          <p className="text-sm text-gray-600 mt-2">잠시 후 로그인 페이지로 이동합니다.</p>
+        </div>
+      </Modal>
     </>
   );
 }

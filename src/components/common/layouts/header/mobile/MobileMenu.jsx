@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, Search, Sparkles, Heart, ShoppingCart, User, LogIn, UserPlus } from "lucide-react";
+import { X, Search, Sparkles, Heart, ShoppingCart, User, LogIn, UserPlus, Shield } from "lucide-react";
 import { spring, staggerCols, colItem } from "../animations";
 import { PRIMARY, SUGGEST, SUBS } from "../constants";
 import { useNavigate } from "react-router-dom";
@@ -24,7 +24,7 @@ export default function MobileMenu({
   onSelectSub = noop,
 }) {
   const navigate = useNavigate();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, isAdmin } = useAuth();
   const [openPrimary, setOpenPrimary] = useState(null);
   const scrollLockRef = useRef({ applied: false, top: 0, prev: {} });
 
@@ -101,7 +101,7 @@ export default function MobileMenu({
             exit={{ x: "100%", transition: { duration: 0.15 } }}
           >
           <div className="sticky top-0 z-10">
-            <div className="flex items-center justify-between px-5 h-16 border-b bg-gradient-to-r from-violet-50 to-pink-50">
+            <div className="flex items-center justify-between px-5 h-16 bg-gradient-to-r from-violet-50 to-pink-50">
               <div className="flex items-center gap-2">
                 <div className="h-9 w-9 flex items-center justify-center rounded-xl 
                     bg-gradient-to-br from-violet-500 to-pink-500 
@@ -127,7 +127,7 @@ export default function MobileMenu({
                 onSubmitSearch();
                 onClose();
               }}
-              className="px-5 py-3 border-b bg-white/95 backdrop-blur"
+              className="px-5 py-3 bg-white/95 backdrop-blur"
             >
               <div className="relative">
                 <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -259,7 +259,7 @@ export default function MobileMenu({
               )}
             </div>
 
-            <div className="mt-auto border-t bg-white/95 backdrop-blur px-5 py-3">
+            <div className="mt-auto bg-white/95 backdrop-blur shadow-[0_-2px_12px_rgba(0,0,0,0.05)] px-5 py-3">
               {!isLoggedIn ? (
                 <div className="grid grid-cols-2 gap-2">
                   <button
@@ -278,6 +278,16 @@ export default function MobileMenu({
                   </button>
                 </div>
               ) : (
+              <div className="mt-auto bg-white/95 backdrop-blur px-5 py-3 space-y-2">
+                {isAdmin && (
+                  <button
+                    className="flex items-center justify-center gap-2 rounded-xl border border-amber-300 bg-amber-50 px-5 py-2.5 hover:bg-amber-100 active:scale-[0.99] transition"
+                    onClick={() => { onClose(); navigate("/admin"); }}
+                  >
+                    <Shield className="w-5 h-5 text-amber-600" />
+                    <span className="text-sm font-medium text-amber-700">관리자</span>
+                  </button>
+                )}
                 <div className="grid grid-cols-3 gap-2">
                   <button
                     className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 py-2.5 hover:bg-gray-50 active:scale-[0.99] transition"
@@ -301,6 +311,7 @@ export default function MobileMenu({
                     <span className="text-sm font-medium">위시리스트</span>
                   </button>
                 </div>
+              </div>
               )}
             </div>
           </motion.div>
