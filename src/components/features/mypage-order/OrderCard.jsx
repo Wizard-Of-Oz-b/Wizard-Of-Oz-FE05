@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   useCancelPurchase,
   useGetPurchaseDetail,
@@ -8,56 +8,8 @@ import OrderProductCard from "./OrderProductCard";
 import CartLoadingSpin from "../cart/CartLoadingSpin";
 import DetailModal from "./DetailModal";
 import OrderCardSkeleton from "../../skeletons/OrderCardSkeleton";
+import { DEFAULT_STATUS, STATUS_MAP } from "../../../constants/orderStatus";
 
-// 배송 상태가 존재 하면 배송 상태 우선!
-const getStatusStyle = (status) => {
-  switch (status) {
-    case "delivered": //
-      return "text-green-600 font-semibold";
-    case "in transit": // 배송 중
-      return "text-blue-500 font-semibold";
-    case "pending": // 배송 대기
-      return "text-yellow-600 font-semibold";
-    default:
-      return "text-gray-500";
-  }
-};
-
-const getStatusName = (status) => {
-  switch (status) {
-    case "delivered": // 배송완료
-      return "배송 완료";
-    case "in transit": // 배송 중
-      return "배송 중";
-    case "pending": // 배송 대기
-      return "배송 대기";
-    default:
-      return "알수 없음";
-  }
-};
-
-// 주문 상태
-const getOrderStyle = (status) => {
-  switch (status) {
-    case "ready":
-      return "text-yellow-600 font-semibold";
-    case "paid":
-      return "text-blue-500 font-semibold";
-    case "canceled":
-      return "text-red-500 font-semibold";
-  }
-};
-
-const getOrdername = (status) => {
-  switch (status) {
-    case "ready":
-      return "결제 전";
-    case "paid":
-      return "결제 완료";
-    case "canceled":
-      return "결제 취소";
-  }
-};
 
 // 주문 페이지 에서 출력
 // 상태는 주문처리(ready), 주문완료(paid)로 구분해서 작성한다.
@@ -86,17 +38,18 @@ export default function OrderCard({ order }) {
   const pageError = isError || isShipError;
 
   console.log(order?.status, "스탯", order.purchase_id);
-  const orderStatus =
-    shipment?.total === 0
-      ? getOrdername(order?.status)
-      : getStatusName(shipment?.results[0].status);
-  const orderStyle =
-    shipment?.total === 0
-      ? getOrderStyle(order?.status)
-      : getStatusStyle(shipment?.results[0].status);
+
+
+  // 현재상태 배송상태가 가장 우선되어 표기됨
+  const currentStatusKey = shipment?.status || order?.status;
+  const statusInfo = STATUS_MAP[currentStatusKey] ?? DEFAULT_STATUS;
+  const orderStatus = statusInfo.name;
+  const orderStyle = statusInfo.style;
+
 
   const [detail, setDetail] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [cutOrderList, setCutOrderList] = useState([]) // 카드 하나에는 두개의 상품만 출력한다.
 
   const onClickDetail = () => {
     setDetail((prev) => !prev);
@@ -111,6 +64,13 @@ export default function OrderCard({ order }) {
 
   console.log(shipment?.results, "test");
 
+
+  useEffect(()=>{
+    if(orderData){
+      const cutList = orderData?.results.slice(0,2)
+      setCutOrderList(cutList);
+    }
+  },[orderData])
   //order 없으면 얼리 리턴
   if (!order) {
     return;
@@ -160,20 +120,21 @@ export default function OrderCard({ order }) {
             </th>
 
             {/* 상세 버튼 추후 취소 버튼도 추가할것 */}
-            <th className="p-4 text-right font-normal">
+            {shipment?.total !== 0 ? <th className="p-4 text-right font-normal">
               <button
                 onClick={onClickDetail}
                 className="text-sm text-gray-600 hover:underline cursor-pointer"
               >
                 운송 확인
               </button>
-            </th>
+            </th> : null}
+            
           </tr>
         </thead>
 
         {/*  상품 목록 바디 부분  */}
         <tbody>
-          {orderData?.results.map((el) => (
+          {cutOrderList.map((el) => (
             <OrderProductCard
               key={el.product_id + el.order_id + el.option_key}
               data={el}

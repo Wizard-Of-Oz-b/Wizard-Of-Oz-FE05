@@ -36,7 +36,7 @@ export default function DetailModal({ data, isOpen, onClose }) {
           </button>
         </header>
 
-        <div className="p-4 max-h-[30vh] overflow-y-auto mypage-detail-modal">
+        <div className="p-4 max-h-[60vh] overflow-y-auto mypage-detail-modal">
           {data && data.length > 0 ? (
             <div>
               {data.map((el) => (
