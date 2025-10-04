@@ -131,13 +131,22 @@ export default function UserCart() {
             장바구니에 담긴 상품이 없습니다.
           </div>
         )}
-        <div className="space-y-4">
+        <div className="flex flex-col space-y-4">
           {cart &&
             cart.item_count > 0 &&
             cartList.map((item) => (
               <CartCard key={item.id} data={item} view="card" />
             ))}
+          {cart?.item_count >= 1 && (
+            <button
+              onClick={handleClearCart}
+              className="border border-gray-300 rounded-md px-5 py-1 cursor-pointer hover:bg-gray-100"
+            >
+              장바구니 비우기
+            </button>
+          )}
         </div>
+
         {cart?.item_count > 0 && (
           <div className="mt-4">
             <div className="bg-gray-200 border-y-8 border-transparent py-3">

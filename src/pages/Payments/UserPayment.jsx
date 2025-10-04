@@ -548,7 +548,7 @@ export default function UserPayment() {
           {testPaymentInfo.amount.toLocaleString()}원 결제
         </button>
       </form>
-    {isTermsOpen && <TermsModal onClose={handleTermsClose} isAgree={termsAgree} setAgree={setTermsAgree} />}
+    {isTermsOpen && <TermsModal onClose={handleTermsClose} setAgree={setTermsAgree} />}
 
       <TossModal
         isOpen={isPaymentModalOpen}

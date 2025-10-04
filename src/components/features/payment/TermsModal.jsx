@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { termsText } from "../../../constants/terms";
 import useOnClickOutside from "../../../hooks/payments/useOnclickOutside";
 
-export default function TermsModal({ onClose, isAgree, setAgree }) {
+export default function TermsModal({ onClose, setAgree }) {
   const modalRef = useRef(null);
   useOnClickOutside(modalRef, onClose);
   const terms = termsText;

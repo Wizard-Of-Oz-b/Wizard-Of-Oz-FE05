@@ -7,6 +7,7 @@ import {
 import OrderProductCard from "./OrderProductCard";
 import CartLoadingSpin from "../cart/CartLoadingSpin";
 import DetailModal from "./DetailModal";
+import OrderCardSkeleton from "../../skeletons/OrderCardSkeleton";
 
 // 배송 상태가 존재 하면 배송 상태 우선!
 const getStatusStyle = (status) => {
@@ -116,10 +117,9 @@ export default function OrderCard({ order }) {
   }
   if (Loading) {
     return (
-      <>
-        {/* 차후 스켈레톤 적용하자 */}
-        로딩중
-      </>
+      <div className="space-y-4 w-full">
+        <OrderCardSkeleton />
+      </div>
     );
   }
   if (pageError) {
@@ -135,7 +135,7 @@ export default function OrderCard({ order }) {
   console.log(orderStatus, isModalOpen, "스테이터스");
 
   return (
-    <div className="w-full border shadow-sm rounded-lg flex justify-center items-center">
+    <div className="w-full border border-neutral-300 shadow-sm rounded-lg flex justify-center items-center">
       {cancelPurchaseMutation.isPending ? <CartLoadingSpin /> : null}
       {isModalOpen ? (
         <DetailModal
@@ -147,7 +147,7 @@ export default function OrderCard({ order }) {
 
       <table className="w-[97%]  mb-4 ">
         {/*  주문 정보 헤더 부분 */}
-        <thead className="border-b border-l-gray-200">
+        <thead className="border-b border-neutral-300">
           <tr>
             <th className="p-4 text-left font-normal" colSpan="2">
               <div className="flex gap-x-4 items-center">

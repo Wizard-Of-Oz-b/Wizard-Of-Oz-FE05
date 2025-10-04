@@ -37,7 +37,7 @@ export default function OrderProductCard({ data }) {
   }
 
   return (
-    <tr className="border-b last:border-b-0">
+    <tr className="border-b border-neutral-300 last:border-b-0">
       <td className="p-4">
         <div className="flex items-center">
           {isLoading ? (

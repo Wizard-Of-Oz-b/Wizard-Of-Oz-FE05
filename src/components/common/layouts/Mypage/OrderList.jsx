@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useGetMyAllOrders } from "../../../../hooks/payments/useOrderPayment";
 import OrderEmpty from "../../../features/mypage-order/OrderEmpty";
 import OrderCard from "../../../features/mypage-order/OrderCard";
@@ -32,6 +31,14 @@ export default function OrderList() {
         주문 내역을 불러오는 중입니다...
       </div>
     );
+  }
+  if(orderIsError){
+    return(
+      <div>
+        에러 발생
+        {orderError}
+      </div>
+    )
   }
 
   return (
