@@ -59,7 +59,7 @@ export default function UserAddressModal({
       >
         <div className="flex w-full justify-between items-center px-4 py-2 border-b border-gray-200 shadow-md">
           <h2 className="text-xl font-bold">배송지 선택</h2>
-          <button onClick={onClose} className="text-2xl">
+          <button onClick={onClose} className="text-2xl font-bold">
             &times;
           </button>
         </div>

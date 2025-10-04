@@ -9,7 +9,7 @@ export const STATUS_MAP = {
     name: "배송 완료",
     style: "text-green-600 font-semibold",
   },
-  "in transit": {
+  in_transit: {
     name: "배송 중",
     style: "text-blue-500 font-semibold",
   },
