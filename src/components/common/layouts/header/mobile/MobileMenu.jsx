@@ -101,7 +101,7 @@ export default function MobileMenu({
             exit={{ x: "100%", transition: { duration: 0.15 } }}
           >
           <div className="sticky top-0 z-10">
-            <div className="flex items-center justify-between px-5 h-16 border-b bg-gradient-to-r from-violet-50 to-pink-50">
+            <div className="flex items-center justify-between px-5 h-16 bg-gradient-to-r from-violet-50 to-pink-50">
               <div className="flex items-center gap-2">
                 <div className="h-9 w-9 flex items-center justify-center rounded-xl 
                     bg-gradient-to-br from-violet-500 to-pink-500 
@@ -127,7 +127,7 @@ export default function MobileMenu({
                 onSubmitSearch();
                 onClose();
               }}
-              className="px-5 py-3 border-b bg-white/95 backdrop-blur"
+              className="px-5 py-3 bg-white/95 backdrop-blur"
             >
               <div className="relative">
                 <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -259,7 +259,7 @@ export default function MobileMenu({
               )}
             </div>
 
-            <div className="mt-auto border-t bg-white/95 backdrop-blur px-5 py-3">
+            <div className="mt-auto bg-white/95 backdrop-blur shadow-[0_-2px_12px_rgba(0,0,0,0.05)] px-5 py-3">
               {!isLoggedIn ? (
                 <div className="grid grid-cols-2 gap-2">
                   <button
