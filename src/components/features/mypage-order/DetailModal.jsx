@@ -47,6 +47,7 @@ export default function DetailModal({ data, isOpen, onClose }) {
               <div>
                 {data.map((el) => (
                   <OrderProductCard
+                    view="card"
                     key={el.order_id + el.product_name}
                     data={el}
                   />

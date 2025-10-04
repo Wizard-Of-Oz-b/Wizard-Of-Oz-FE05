@@ -37,8 +37,7 @@ export default function OrderCard({ order }) {
   // 에러
   const pageError = isError || isShipError;
 
-  console.log(order?.status, "스탯", order.purchase_id , shipment);
-
+  console.log(order?.status, "스탯", order.purchase_id, shipment);
 
   const [orderStyle, setOrderStyle] = useState("");
   const [orderStatus, setOrderStatus] = useState("");
@@ -72,8 +71,8 @@ export default function OrderCard({ order }) {
     if (!Loading) {
       const currentStatusKey = shipment?.results[0]?.status || order?.status;
       const statusInfo = STATUS_MAP[currentStatusKey] ?? DEFAULT_STATUS;
-      
-      console.log(shipment,order?.purchase_id.slice(0, 8) , '배송테스트')
+
+      console.log(shipment, order?.purchase_id.slice(0, 8), "배송테스트");
       setOrderStatus(statusInfo?.name);
       setOrderStyle(statusInfo?.style);
     }
@@ -188,7 +187,7 @@ export default function OrderCard({ order }) {
               <tr>
                 <td>
                   {/* 배송상세 설명 */}
-                  {(shipment?.total >= 1 && detail) ? (
+                  {shipment?.total >= 1 && detail ? (
                     <div className="flex flex-col">
                       <span className="text-gray-600">
                         택배업체 : {shipment?.results[0].carrier}
@@ -234,7 +233,15 @@ export default function OrderCard({ order }) {
             ))}
           </div>
 
-          {/* 전체 합계 */}
+          <div className="py-3 text-center border-t">
+            <button
+              onClick={() => setIsModalOpen((prev) => !prev)}
+              className="text-sm font-semibold text-gray-700 hover:text-black"
+            >
+              전체 상품 보기
+            </button>
+          </div>
+
           {/* 배송 정보 */}
           {shipment?.total !== 0 && (
             <div className="py-3 border-t">
