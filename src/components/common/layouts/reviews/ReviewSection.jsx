@@ -8,6 +8,8 @@ import {
   deleteReview,
 } from "./api";
 import { useAuth } from "../../../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import Modal from "../admin/common/Modal";
 
 export default function ReviewSection({
   productId,
@@ -20,7 +22,10 @@ export default function ReviewSection({
   pageSize = 20,
   onToast,
 }) {
-  const { user, isAdmin: adminFromContext } = useAuth();
+  const { user, isAdmin: adminFromContext, isLoggedIn } = useAuth();
+  const navigate = useNavigate();
+
+  const [showNotice, setShowNotice] = useState(false);
   const effectiveIsAdmin = isAdmin || adminFromContext;
 
   const authedUserId = useMemo(
@@ -74,6 +79,15 @@ export default function ReviewSection({
   const canCreate = enableCreate && !!authedUserId;
 
   const handleCreate = useCallback(async () => {
+    if (!isLoggedIn) {
+      setShowNotice(true);
+      setTimeout(() => {
+        setShowNotice(false);
+        navigate("/login");
+      }, 1500);
+      return;
+    }
+
     if (!productId) return;
     if (!authedUserId) {
       toast("error", "리뷰를 작성하려면 로그인하세요.");
@@ -101,7 +115,7 @@ export default function ReviewSection({
     } finally {
       setSubmitting(false);
     }
-  }, [productId, authedUserId, rating, content, onCreate, toast]);
+  }, [isLoggedIn, productId, authedUserId, rating, content, onCreate, toast, navigate]);
 
   const getOwnerId = (r) =>
     r?.user_id ??
@@ -119,6 +133,7 @@ export default function ReviewSection({
   };
 
   return (
+  <>
     <section className="w-full rounded-xl border border-gray-200 bg-white p-5 sm:p-6">
       <header className="mb-4 flex items-center justify-between border-b border-gray-200 pb-3">
         <h2 className="text-[15px] font-semibold text-gray-900 tracking-tight">리뷰</h2>
@@ -126,14 +141,33 @@ export default function ReviewSection({
       </header>
 
       {/* 작성 폼 */}
-      {canCreate ? (
+      {enableCreate && (
         <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
           <div className="flex items-center justify-between gap-3">
-            <StarRating value={rating} onChange={setRating} size={20} />
+            <StarRating
+              value={rating}
+              onChange={(v) => {
+                if (!isLoggedIn) {
+                  setShowNotice(true);
+                  setTimeout(() => {
+                    setShowNotice(false);
+                    navigate("/login");
+                  }, 1500);
+                  return;
+                }
+                setRating(v);
+              }}
+              size={20}
+            />
             <button
               onClick={handleCreate}
-              disabled={submitting}
-              className="inline-flex items-center rounded-md bg-black px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-900 disabled:opacity-50"
+              disabled={submitting || !isLoggedIn}
+              className={`inline-flex items-center rounded-md px-3 py-1.5 text-xs font-medium 
+                ${
+                  isLoggedIn
+                  ? "bg-black text-white hover:bg-gray-900"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                }`}
             >
               등록
             </button>
@@ -141,26 +175,29 @@ export default function ReviewSection({
           <div className="mt-3">
             <textarea
               value={content}
-              onChange={(e) => setContent(e.target.value)}
+              onChange={(e) => {
+                if (!isLoggedIn) {
+                  setShowNotice(true);
+                  setTimeout(() => {
+                    setShowNotice(false);
+                  }, 1500);
+                  return;
+                }
+                setContent(e.target.value);
+              }}
               rows={3}
-              className="w-full rounded-md border border-gray-200 bg-white p-2 text-sm outline-none placeholder:text-gray-400 focus:border-slate-400 focus:ring-1 focus:ring-slate-300"
-              placeholder="상품 사용 후기를 남겨주세요."
+              className={`w-full rounded-md border border-gray-200 p-2 text-sm outline-none placeholder:text-gray-400 
+              ${isLoggedIn ? "bg-white" : "bg-gray-100 cursor-not-allowed"}`}
+              placeholder={
+                isLoggedIn
+                ? "상품 사용 후기를 남겨주세요."
+                : "회원만 작성할 수 있습니다."
+              }
+              disabled={!isLoggedIn}
             />
           </div>
         </div>
-      ) : enableCreate ? (
-        <div className="mb-6 rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-600 flex items-center justify-between">
-          <span>리뷰를 작성하려면 로그인해 주세요.</span>
-          {typeof onLoginClick === "function" && (
-            <button
-              onClick={onLoginClick}
-              className="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium hover:bg-white"
-            >
-              로그인
-            </button>
-          )}
-        </div>
-      ) : null}
+      )}
 
       {/* 목록 */}
       {loading ? (
@@ -223,5 +260,15 @@ export default function ReviewSection({
         </ul>
       )}
     </section>
+
+    <Modal open={showNotice} onClose={() => setShowNotice(false)}>
+      <div className="p-6 text-center">
+        <h2 className="text-lg font-semibold text-gray-900">
+          가입된 회원만 사용이 가능합니다.
+        </h2>
+        <p className="text-sm text-gray-600 mt-2">잠시 후 로그인 페이지로 이동합니다.</p>
+      </div>
+    </Modal>
+    </>
   );
 }
