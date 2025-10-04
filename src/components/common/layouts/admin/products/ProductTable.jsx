@@ -6,6 +6,8 @@ import timezone from 'dayjs/plugin/timezone';
 import React, { useEffect, useMemo, useState } from 'react';
 import api from '../../../../../lib/axios';
 
+const FALLBACK_IMG = "/images/product-fallback.png";
+
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -199,18 +201,17 @@ export default function ProductTable({
                     </span>
                   </td>
 
-                  <td className="px-4 py-3 align-middle">
-                    {imgSrc ? (
+                  <td className="px-4 py-3 align-middle">                    
                       <img
-                        src={imgSrc}
-                        alt={(p.name ?? 'thumbnail') + ''}
+                        src={imgSrc || FALLBACK_IMG}
+                        alt={p.name ?? "상품 이미지"}
                         className="h-14 w-20 object-cover rounded-md shadow-sm"
-                      />
-                    ) : (
-                      <div className="h-14 w-20 rounded-md bg-gray-100 grid place-items-center text-xs text-gray-400">
-                        없음
-                      </div>
-                    )}
+                        onError={(e) => {
+                          if (!e.currentTarget.src.endsWith(FALLBACK_IMG)) {
+                            e.currentTarget.src = FALLBACK_IMG;
+                          }
+                        }}
+                      />                    
                   </td>
 
                   <td className="px-4 py-3 align-middle whitespace-nowrap text-gray-700">
