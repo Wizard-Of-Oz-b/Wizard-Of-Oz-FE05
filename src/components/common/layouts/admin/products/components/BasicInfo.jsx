@@ -126,8 +126,8 @@ export default function BasicInfo({ form, set }) {
           <div>
             <FieldLabel>판매 상태</FieldLabel>
             <select
-              value={form.is_available ? 'y' : 'n'}
-              onChange={(e) => set('is_available', e.target.value === 'y')}
+              value={Boolean(form.is_active) ? 'y' : 'n'}
+              onChange={(e) => set('is_active', e.target.value === 'y')}
               className="h-11 w-full rounded-xl bg-gray-50 px-3 text-sm outline-none focus:ring-2 focus:ring-violet-400 border-0 shadow-sm"
             >
               <option value="y">판매중</option>
