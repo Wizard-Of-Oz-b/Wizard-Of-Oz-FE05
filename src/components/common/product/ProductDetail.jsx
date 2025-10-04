@@ -155,6 +155,14 @@ Object.fromEntries(
   const price = useMemo(() => KRW(product.price), [product.price]);
 
   const handleAddToCart = async () => {
+    if (!isLoggedIn) {
+      setShowNotice(true);
+      setTimeout(() => {
+        setShowNotice(false);
+        navigate("/login");
+        }, 1500);
+        return;
+    }
     if (adding) return;
     setAdding(true);
     try {
