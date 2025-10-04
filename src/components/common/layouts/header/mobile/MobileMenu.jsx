@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, Search, Sparkles, Heart, ShoppingCart, User, LogIn, UserPlus } from "lucide-react";
+import { X, Search, Sparkles, Heart, ShoppingCart, User, LogIn, UserPlus, Shield } from "lucide-react";
 import { spring, staggerCols, colItem } from "../animations";
 import { PRIMARY, SUGGEST, SUBS } from "../constants";
 import { useNavigate } from "react-router-dom";
@@ -24,7 +24,7 @@ export default function MobileMenu({
   onSelectSub = noop,
 }) {
   const navigate = useNavigate();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, isAdmin } = useAuth();
   const [openPrimary, setOpenPrimary] = useState(null);
   const scrollLockRef = useRef({ applied: false, top: 0, prev: {} });
 
@@ -278,6 +278,16 @@ export default function MobileMenu({
                   </button>
                 </div>
               ) : (
+              <div className="mt-auto bg-white/95 backdrop-blur px-5 py-3 space-y-2">
+                {isAdmin && (
+                  <button
+                    className="flex items-center justify-center gap-2 rounded-xl border border-amber-300 bg-amber-50 px-5 py-2.5 hover:bg-amber-100 active:scale-[0.99] transition"
+                    onClick={() => { onClose(); navigate("/admin"); }}
+                  >
+                    <Shield className="w-5 h-5 text-amber-600" />
+                    <span className="text-sm font-medium text-amber-700">관리자</span>
+                  </button>
+                )}
                 <div className="grid grid-cols-3 gap-2">
                   <button
                     className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 py-2.5 hover:bg-gray-50 active:scale-[0.99] transition"
@@ -301,6 +311,7 @@ export default function MobileMenu({
                     <span className="text-sm font-medium">위시리스트</span>
                   </button>
                 </div>
+              </div>
               )}
             </div>
           </motion.div>
