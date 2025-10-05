@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CartCard from "../components/features/cart/CartCard";
 import CartDays from "../components/features/cart/CartDays";
 import CartToolbar from "../components/features/cart/CartToolbar";
@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import CartEmpty from "../components/features/cart/CartEmpty";
 import CartError from "../components/features/cart/CartError";
 import { useGetMyOrders } from "../hooks/payments/useOrderPayment";
+import ConfirmModal from "../components/common/ConfirmModal";
 
 export default function UserCart() {
   const {
@@ -40,6 +41,7 @@ export default function UserCart() {
     return cart.items.sort((a, b) => a.id.localeCompare(b.id));
   }, [cart]);
   console.log(cartList, "정렬");
+  const [isClearAllModalOpen, setIsClearAllModalOpen] = useState(false);
   const handlePurchaseClick = () => {
     console.log("결제하기 버튼 클릭! API 요청을 보냅니다.");
     purchaseMutation.mutate();
@@ -49,10 +51,15 @@ export default function UserCart() {
   };
 
   const handleClearCart = () => {
-    // 경고창 추후에 모달로 변경 하자..
-    if (window.confirm("정말로 장바구니를 모두 비우시겠습니까?")) {
-      clearCartMutation.mutate();
-    }
+    setIsClearAllModalOpen(true);
+    // if (window.confirm("정말로 장바구니를 모두 비우시겠습니까?")) {
+    //   clearCartMutation.mutate();
+    // }
+  };
+
+  const handleConfrimClearCart = () => {
+    clearCartMutation.mutate();
+    setIsClearAllModalOpen(false);
   };
 
   useEffect(() => {
@@ -80,6 +87,17 @@ export default function UserCart() {
   return (
     <div className="w-full max-w-6xl mx-auto p-4">
       {/* 데스크톱  모바일 출력시 미출력*/}
+      {isClearAllModalOpen && (
+        <ConfirmModal
+          isOpen={isClearAllModalOpen}
+          onClose={() => setIsClearAllModalOpen(false)}
+          onConfirm={handleConfrimClearCart}
+          title="장바구니 비우기"
+          message="정말로 장바구니를 비우시겠습니까?"
+          confirmText="장바구니 비우기"
+          cancelText="취소"
+        />
+      )}
       <div className="hidden lg:block">
         <table className="w-full border-collapse">
           <thead>
