@@ -223,7 +223,9 @@ export default function UserPayment() {
     console.log(addressData, "주소");
     setShippingAddress(() => ({
       recipient: addressData?.recipient || "",
-      phone: addressData?.phone || 0,
+      phone: addressData?.phone
+        .replace(/[^0-9]/g, "")
+        .replace(/(^02.{0}|^01.{1}|[0-9]{3})([0-9]+)([0-9]{4})/, "$1-$2-$3") || 0,
       postcode: addressData?.postcode || "",
       address1: addressData?.address1 || "",
       address2: addressData?.address2 || "",
@@ -273,7 +275,6 @@ export default function UserPayment() {
         phone: prev?.phone.replaceAll("-", ""),
       }));
       await updateAddress({ address: shippingAddress });
-      console.log("새로운 배송지로 진행");
       // 주소 추가 경고창 보내고, 바로 중단할것
 
       // 현재 어떤 결제 방식 선택하는지 Toss선택하면 Toss 모달 화면 출력....
@@ -328,7 +329,7 @@ export default function UserPayment() {
             <button
               type="button"
               onClick={handleModalOpen}
-              className="border border-gray-400 rounded-lg px-1"
+              className="border border-gray-400 bg-violet-600 px-2 text-neutral-50 rounded-lg "
             >
               새로운 배송지 검색
             </button>
@@ -336,7 +337,7 @@ export default function UserPayment() {
           <div className="flex flex-col mt-3">
             <button
               type="button"
-              className={`text-sm text-gray-500 text-center border rounded-sm border-gray-300 px-0.5 w-[75px]
+              className={`text-gray-500 text-center border rounded-sm border-gray-300 px-0.5 w-[90px]
               cursor-pointer select-none`}
               onClick={handleAddressListModalOpen}
             >
@@ -491,8 +492,8 @@ export default function UserPayment() {
             <button
               type="button"
               value="account"
-              className={`border border-gray-400 rounded-md px-2 mr-2 transition delay-75 ${
-                payment === "account" && "bg-black text-white"
+              className={`border font-bold border-gray-400 rounded-md px-2 mr-2 transition delay-75 cursor-pointer ${
+                payment === "account" && " bg-violet-600 text-white"
               }`}
               onClick={(e) => handlePaymentBtn(e.target.value)}
             >
@@ -502,8 +503,8 @@ export default function UserPayment() {
             <button
               type="button"
               value="toss"
-              className={`border border-gray-400 rounded-md px-2 mr-2 transition delay-75 ${
-                payment === "toss" && "bg-black text-white"
+              className={`border border-gray-400 font-bold rounded-md px-2 mr-2 transition delay-75 cursor-pointer ${
+                payment === "toss" && " bg-violet-600 text-white"
               }`}
               onClick={(e) => handlePaymentBtn(e.target.value)}
             >
@@ -543,7 +544,7 @@ export default function UserPayment() {
         <button
           type="submit" //실 적용시
           // type="button" //테스트
-          className="w-100 border rounded-sm bg-black text-white py-1 cursor-pointer transition delay-75 hover:text-black hover:bg-white"
+          className="w-100 border rounded-sm bg-violet-700 text-white py-1 cursor-pointer transition delay-75 hover:bg-violet-800"
           // onClick={handlePurchase}
           disabled={isPaymentProcessing} // 결제 진행중에는 두번 요청 X
         >

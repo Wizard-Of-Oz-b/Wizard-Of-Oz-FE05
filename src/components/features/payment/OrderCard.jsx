@@ -35,7 +35,7 @@ export default function Ordercard({ data }) {
   }
 
   return (
-    <div className="flex mt-2 border-t pt-3 border-gray-300">
+    <div className="flex mt-2 border-t pt-3 bg-neutral-100 px-2 rounded-xl border-gray-300">
       {isLoading ? (
         <div className="w-[70px] h-[90px] bg-gray-300"></div>
       ) : (
