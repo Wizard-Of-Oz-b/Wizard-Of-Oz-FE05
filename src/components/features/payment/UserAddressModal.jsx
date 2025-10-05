@@ -54,7 +54,7 @@ export default function UserAddressModal({
   return (
     <div className="flex flex-col justify-center items-center fixed inset-0 w-full h-full backdrop-blur-xs z-50">
       <div
-        className="flex flex-col border shadow-2xl rounded-lg py-3 items-center  w-full max-w-xl h-[600px] bg-white"
+        className="flex flex-col border shadow-2xl rounded-lg py-3 items-center  max-w-xl h-[600px] bg-white"
         ref={modalRef}
       >
         <div className="flex w-full justify-between items-center px-4 py-2 border-b border-gray-200 shadow-md">
@@ -78,7 +78,7 @@ export default function UserAddressModal({
           <button
             type="button"
             onClick={setShipAddress}
-            className="bg-black text-white px-6 py-2 rounded-lg cursor-pointer"
+            className="w-full bg-violet-700 text-white px-6 py-2 rounded-lg cursor-pointer"
           >
             확인
           </button>
