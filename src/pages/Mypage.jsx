@@ -8,6 +8,7 @@ import { useAuth } from "../context/AuthContext";
 
 // 조미현멘토님 피드백 반영, 회원탈퇴를 회원정보 관리 내 자그마하게 ...
 const menuItems = [
+  { name: "대시보드", path: "/mypage", icon: Gift, end: true },
   { name: "주문내역", path: "orderlist", icon: Package },
   { name: "회원정보 관리", path: "memberinfo", icon: UserCog },
   { name: "배송지 관리", path: "shipping", icon: MapPin },
@@ -79,10 +80,11 @@ export default function Mypage() {
             {/* 네비게이션 */}
             <nav className="rounded-2xl border border-neutral-200 bg-white p-2 shadow-sm">
               <ul className="space-y-1">
-                {menuItems.map(({ name, path, icon: Icon }) => (
+                {menuItems.map(({ name, path, icon: Icon, end }) => (
                   <li key={path}>
                     <NavLink
                       to={path}
+                      end={end}
                       className={({ isActive }) =>
                         [
                           "group flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition",
