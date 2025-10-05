@@ -17,10 +17,9 @@ import {
 import HeartBurst from '../layouts/wishlist/components/HeartBurst';
 import { motion } from "framer-motion"; // ✅ whileTap, spring 등 사용
 import { addCartItem } from '../../../hooks/cart/cartHook';
-import Modal from '../layouts/admin/common/Modal';
 import { useAuth } from '../../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-useNavigate
+import { useAlertModal } from '../layouts/common/modal/useAlertModal';  // 모달 컴포넌트 변경
 
 export default function ProductDetail({ product, onAddToCart, onToast }) {
   const [color, setColor] = useState(product.colors?.[0]?.code);
@@ -34,7 +33,7 @@ export default function ProductDetail({ product, onAddToCart, onToast }) {
   const [allowBurst, setAllowBurst] = useState(true);
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
-  const [showNotice, setShowNotice] = useState(false);
+  const { showModal, ModalComponent } = useAlertModal();
 
   useEffect(() => {
     const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)');
@@ -103,14 +102,19 @@ Object.fromEntries(
     };
   }, [product]);
 
+  const requireLogin = () => {
+    showModal({
+      type: "warning",
+      title: "로그인이 필요합니다",
+      message: "해당 기능은 회원 전용입니다. 로그인 페이지로 이동할게요.",
+    });
+    setTimeout(() => navigate("/login"), 1200);
+  };
+
   const toggleWish = async () => {
     // 조미현멘토님 피드백 
     if (!isLoggedIn) {
-      setShowNotice(true);
-      setTimeout(() => {
-        setShowNotice(false);
-        navigate("/login");
-      }, 1500);
+      requireLogin();
       return;
     }
 
@@ -156,12 +160,8 @@ Object.fromEntries(
 
   const handleAddToCart = async () => {
     if (!isLoggedIn) {
-      setShowNotice(true);
-      setTimeout(() => {
-        setShowNotice(false);
-        navigate("/login");
-        }, 1500);
-        return;
+      requireLogin();
+      return;
     }
     if (adding) return;
     setAdding(true);
@@ -322,14 +322,7 @@ Object.fromEntries(
         />
       )}
 
-      <Modal open={showNotice} onClose={() => setShowNotice(false)}>
-        <div className="p-6 text-center">
-          <h2 className="text-lg font-semibold text-gray-900">
-            가입된 회원만 사용이 가능합니다.
-          </h2>
-          <p className="text-sm text-gray-600 mt-2">잠시 후 로그인 페이지로 이동합니다.</p>
-        </div>
-      </Modal>
+      {ModalComponent}
     </>
   );
 }

@@ -58,7 +58,7 @@ export default function AlertModal({ type = "info", title, message, onClose }) {
         <div className="flex justify-end">
           <button
             onClick={onClose}
-            className={`px-4 py-2 text-white rounded-lg ${btnColor}`}
+            className={`px-4 py-2 text-white rounded-lg ${btnColor} cursor-pointer`}  // cursor-pointer 적용
           >
             확인
           </button>

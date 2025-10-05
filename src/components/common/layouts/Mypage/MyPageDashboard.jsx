@@ -283,7 +283,7 @@ export default function MyPageDashboard() {
         </div>
 
         {/* 추천 상품 섹션 */}
-        <RandomProducts limit={4} />
+        <RandomProducts limit={8} />
       </div>
     </div>
   );
