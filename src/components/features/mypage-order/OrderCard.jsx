@@ -10,6 +10,7 @@ import DetailModal from "./DetailModal";
 import OrderCardSkeleton from "../../skeletons/OrderCardSkeleton";
 import { DEFAULT_STATUS, STATUS_MAP } from "../../../constants/orderStatus";
 import { AnimatePresence, motion } from "framer-motion";
+import ConfirmModal from "../../common/ConfirmModal";
 
 // 주문 페이지 에서 출력
 // 상태는 주문처리(ready), 주문완료(paid)로 구분해서 작성한다.
@@ -43,6 +44,7 @@ export default function OrderCard({ order }) {
   const [orderStatus, setOrderStatus] = useState("");
   const [detail, setDetail] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [cutOrderList, setCutOrderList] = useState([]); // 카드 하나에는 두개의 상품만 출력한다.
 
   const onClickDetail = () => {
@@ -50,10 +52,14 @@ export default function OrderCard({ order }) {
   };
 
   const onClickcancled = () => {
-    if (window.confirm("정말로 이 주문을 취소하시겠습니까?")) {
-      cancelPurchaseMutation.mutate(order.purchase_id);
-    }
-    console.log("취소");
+    console.log("캔슬 모달 열기");
+    setIsConfirmModalOpen(true);
+  };
+
+  const handleConfirmCancel = () => {
+    // 취소 후 모달 닫기
+    cancelPurchaseMutation.mutate(order.purchase_id);
+    setIsConfirmModalOpen(false);
   };
 
   console.log(shipment?.results, "test");
@@ -109,13 +115,23 @@ export default function OrderCard({ order }) {
         className="w-full border border-neutral-300 shadow-sm rounded-lg flex justify-center items-center"
       >
         {cancelPurchaseMutation.isPending ? <CartLoadingSpin /> : null}
-        {isModalOpen ? (
+        {isModalOpen && (
           <DetailModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             data={orderData?.results}
           />
-        ) : null}
+        )}
+        {isConfirmModalOpen && (
+          <ConfirmModal
+            isOpen={isConfirmModalOpen}
+            onClose={() => setIsConfirmModalOpen(false)}
+            onConfirm={handleConfirmCancel}
+            title="주문 취소"
+            message="정말로 주문을 취소 하시겠습니까?"
+            confirmText="결제 취소"
+          />
+        )}
         {/* 데스크톱 */}
         <div className="hidden lg:flex w-[97%]">
           <table className="w-full  mb-4 ">
@@ -158,7 +174,10 @@ export default function OrderCard({ order }) {
               ))}
               <tr>
                 <td>
-                  <button onClick={() => setIsModalOpen((prev) => !prev)}>
+                  <button
+                    onClick={() => setIsModalOpen((prev) => !prev)}
+                    className="cursor-pointer border rounded-3xl px-2 my-2 hover:bg-neutral-50"
+                  >
                     상세 보기
                   </button>
                 </td>
@@ -176,7 +195,7 @@ export default function OrderCard({ order }) {
                     {order?.status === "paid" && shipment?.total === 0 ? (
                       <button
                         onClick={onClickcancled}
-                        className="border border-gray-300 rounded-lg px-2 py-0.5 mt-1 bg-red-400 text-white"
+                        className="border border-gray-300 rounded-2xl px-2 py-0.5 mt-1 cursor-pointer bg-red-400 hover:bg-red-600 text-white"
                       >
                         주문 취소
                       </button>

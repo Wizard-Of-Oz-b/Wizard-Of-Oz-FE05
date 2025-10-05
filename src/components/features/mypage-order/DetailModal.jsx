@@ -25,7 +25,7 @@ export default function DetailModal({ data, isOpen, onClose }) {
   return (
     <AnimatePresence>
       <div
-        className="fixed inset-0 w-full h-full bg-black/50 flex justify-center items-center z-50 
+        className="fixed inset-0 w-full h-full bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 
         p-4"
       >
         <motion.div
@@ -37,7 +37,7 @@ export default function DetailModal({ data, isOpen, onClose }) {
         >
           <div className="flex justify-between items-center p-4 border-b border-gray-200 shadow-md">
             <p className="font-bold text-xl">상품 상세보기</p>
-            <button onClick={onClose} className="text-2xl font-bold">
+            <button onClick={onClose} className="text-2xl font-bold cursor-pointer">
               &times;
             </button>
           </div>
