@@ -49,6 +49,7 @@ import MyReviewsPage from "./components/common/layouts/Mypage/MyReviews.jsx";
 import ShippingAddressManager from "./components/common/layouts/Mypage/ShippingAddressManager.jsx";
 import OrderList from "./components/common/layouts/Mypage/OrderList.jsx";
 import StoreIntro from "./pages/StoreInfo.jsx";
+import MyPageDashboard from "./components/common/layouts/Mypage/MyPageDashboard.jsx";
 
 
 const queryClient = new QueryClient();
@@ -77,14 +78,13 @@ export default function App() {
 
               {/* 마이페이지 (이중 중첩 라우팅) */}
               <Route path="/mypage" element={<Mypage />}>
-                <Route path="orderlist" element={<OrderList />} />
+                <Route index element={<MyPageDashboard />} />
                 <Route path="memberinfo" element={<MemberInfo />} />
                 <Route path="shipping" element={<ShippingAddressManager />} />
                 <Route path="password" element={<Password />} />
                 <Route path="withdrawal" element={<MemberWithdrawal />} />
                 <Route path="reviews" element={<MyReviewsPage />} />
                 <Route path="orderlist" element={<OrderList />} />
-
               </Route>
             </Route>
             <Route path="/auth/callback/:provider" element={<OAuthCallback />} />

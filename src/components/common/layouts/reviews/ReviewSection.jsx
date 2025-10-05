@@ -9,7 +9,7 @@ import {
 } from "./api";
 import { useAuth } from "../../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import Modal from "../admin/common/Modal";
+import { useAlertModal } from "../common/modal/useAlertModal";
 
 export default function ReviewSection({
   productId,
@@ -25,7 +25,7 @@ export default function ReviewSection({
   const { user, isAdmin: adminFromContext, isLoggedIn } = useAuth();
   const navigate = useNavigate();
 
-  const [showNotice, setShowNotice] = useState(false);
+  const { showModal, ModalComponent } = useAlertModal();
   const effectiveIsAdmin = isAdmin || adminFromContext;
 
   const authedUserId = useMemo(
@@ -78,13 +78,21 @@ export default function ReviewSection({
 
   const canCreate = enableCreate && !!authedUserId;
 
+  const requireLogin = useCallback(() => {
+    showModal({
+      type: "warning",
+      title: "로그인이 필요합니다",
+      message: "해당 기능은 회원 전용입니다. 로그인 페이지로 이동할게요.",
+    });
+    setTimeout(() => {
+      if (typeof onLoginClick === "function") onLoginClick();
+      else navigate("/login");
+    }, 1200);
+  }, [navigate, onLoginClick, showModal]);
+
   const handleCreate = useCallback(async () => {
     if (!isLoggedIn) {
-      setShowNotice(true);
-      setTimeout(() => {
-        setShowNotice(false);
-        navigate("/login");
-      }, 1500);
+      requireLogin();
       return;
     }
 
@@ -261,14 +269,7 @@ export default function ReviewSection({
       )}
     </section>
 
-    <Modal open={showNotice} onClose={() => setShowNotice(false)}>
-      <div className="p-6 text-center">
-        <h2 className="text-lg font-semibold text-gray-900">
-          가입된 회원만 사용이 가능합니다.
-        </h2>
-        <p className="text-sm text-gray-600 mt-2">잠시 후 로그인 페이지로 이동합니다.</p>
-      </div>
-    </Modal>
+    {ModalComponent}    
     </>
   );
 }

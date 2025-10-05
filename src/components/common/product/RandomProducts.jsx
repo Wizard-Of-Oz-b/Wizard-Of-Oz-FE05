@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react';
 import { KRW } from '../../../models/product';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, A11y } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 
 const API_BASE =
   import.meta.env.VITE_API_BASE || 'http://127.0.0.1:8000/api/v1';
@@ -42,25 +47,37 @@ export default function RandomProducts({ limit = 6 }) {
     <section className="mt-12">
       <h3 className="text-lg font-semibold mb-4">추천 상품</h3>
 
-      <div className="flex gap-3 overflow-x-auto pb-2">
+      <Swiper
+        modules={[Navigation, Pagination, A11y]}
+        navigation
+        pagination={{ clickable: true }}
+        spaceBetween={12}
+        slidesPerView={2}
+        breakpoints={{
+          640: { slidesPerView: 2, spaceBetween: 12 },
+          768: { slidesPerView: 3, spaceBetween: 16 },
+          1024:{ slidesPerView: 4, spaceBetween: 18 },
+          1280:{ slidesPerView: 5, spaceBetween: 20 },
+        }}
+        style={{ paddingBottom: 24 }} // 점(페이지네이션) 여백
+      >
         {items.map((it) => (
-          <a
-            key={it.id}
-            href={`/products/${it.id}`}
-            className="w-[210px] sm:w-[250px] lg:w-[290px] flex-none"
-          >
+          <SwiperSlide key={it.id}>
+          <a href={`/products/${it.id}`} className="block w-full">
             <div className="aspect-[3/4] overflow-hidden rounded border border-gray-200 bg-white">
               <img
                 src={it.img}
                 alt={it.name}
+                loading="lazy"
                 className="h-full w-full object-cover"
               />
             </div>
             <p className="mt-2 text-sm text-gray-700 line-clamp-1">{it.name}</p>
             <p className="text-sm font-medium">{KRW(it.price)}</p>
           </a>
+        </SwiperSlide>
         ))}
-      </div>
+      </Swiper>
     </section>
   );
 }

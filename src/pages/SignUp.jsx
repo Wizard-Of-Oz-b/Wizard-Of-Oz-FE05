@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAlertModal } from "../components/common/layouts/common/modal/useAlertModal"; // AlertModal 훅
 import { useNavigate } from "react-router-dom";
 import { loginAndStore, registerUser } from "../lib/axios";
-import { Sparkles, CheckCircle2, User, AtSign, Lock, Phone, MapPin } from "lucide-react";
+import { Sparkles, CheckCircle2, User, AtSign, Lock, Phone, MapPin, Eye, EyeOff } from "lucide-react";
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -26,6 +26,7 @@ export default function Signup() {
 
   const { showModal, ModalComponent } = useAlertModal(); // 모달 훅
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -363,11 +364,18 @@ return (
                         name="password"
                         value={formData.password}
                         onChange={handleChange}
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         placeholder="비밀번호를 입력하세요."
                         className="w-full h-12 pl-10 pr-3 rounded-md border border-neutral-300 bg-white text-sm text-neutral-900 placeholder:text-neutral-400
                                    outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-500/20"
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((p) => !p)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
                     </div>
 
                     {formData.password && (
@@ -395,7 +403,7 @@ return (
                         name="confirmPassword"
                         value={formData.confirmPassword}
                         onChange={handleChange}
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         placeholder="비밀번호를 다시 입력하세요"
                         className="w-full h-12 pl-10 pr-3 rounded-md border border-neutral-300 bg-white text-sm text-neutral-900 placeholder:text-neutral-400
                                    outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-500/20"
