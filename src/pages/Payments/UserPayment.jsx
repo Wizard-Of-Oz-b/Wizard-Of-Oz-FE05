@@ -238,12 +238,14 @@ export default function UserPayment() {
   // 약관 클릭
   const handleCheckboxChange = (e) => {
     //이미 동의중일때 누르면 false
-    if(e.target.value){
+    console.log( e.target.checked,'g')
+    if(termsAgree){
       setTermsAgree(false)
     }else{
-    console.log('작동 테스트' ,termsAgree)
+      console.log('test')
       setTermsAgree(false)
-      setTermsAgree(true)
+      setTermsOpen(true);
+
     }
   }
 
