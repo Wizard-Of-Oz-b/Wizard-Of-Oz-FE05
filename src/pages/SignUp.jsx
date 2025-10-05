@@ -27,7 +27,6 @@ export default function Signup() {
   const { showModal, ModalComponent } = useAlertModal(); // 모달 훅
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
