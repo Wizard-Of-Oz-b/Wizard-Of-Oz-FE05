@@ -78,15 +78,13 @@ export default function App() {
 
               {/* 마이페이지 (이중 중첩 라우팅) */}
               <Route path="/mypage" element={<Mypage />}>
-                <Route path="orderlist" element={<OrderList />} />
+                <Route index element={<MyPageDashboard />} />
                 <Route path="memberinfo" element={<MemberInfo />} />
                 <Route path="shipping" element={<ShippingAddressManager />} />
                 <Route path="password" element={<Password />} />
                 <Route path="withdrawal" element={<MemberWithdrawal />} />
                 <Route path="reviews" element={<MyReviewsPage />} />
                 <Route path="orderlist" element={<OrderList />} />
-                <Route path="dashboard" element={<MyPageDashboard />} />
-
               </Route>
             </Route>
             <Route path="/auth/callback/:provider" element={<OAuthCallback />} />
