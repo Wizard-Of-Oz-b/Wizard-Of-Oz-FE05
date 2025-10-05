@@ -11,7 +11,7 @@ export default function UserAddressCard({ data, onSelect, select }) {
   console.log(select);
   return (
     <div
-      className={`flex w-[500px] h-[150px] rounded-lg px-3 py-1 ${selectStyle}`}
+      className={`flex w-[500px] h-[150px] bg-white rounded-lg px-3 py-1 ${selectStyle}`}
       onClick={() => onSelect(data?.address_id)}
     >
       <table>
