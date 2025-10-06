@@ -23,7 +23,7 @@ export default function TermsModal({ onClose, setAgree }) {
             &times;
           </button>
         </div>
-        <div className="flex-grow overflow-y-auto p-4 space-y-3 payment-address">
+        <div className="flex-grow overflow-y-auto p-4 space-y-3 payment-address whitespace-pre-line">
           {terms}
         </div>
 
