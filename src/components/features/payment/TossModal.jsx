@@ -86,6 +86,17 @@ export default function PaymentModal({ isOpen, onClose, paymentData }) {
     }
   }, [widgets, paymentData?.amount]);
 
+  // useEffect #4: 스크롤 방지
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    }
+
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
   // 결제하기 버튼 클릭 핸들러
   const handlePayment = async () => {
     if (!widgets || !ready) {
@@ -113,13 +124,18 @@ export default function PaymentModal({ isOpen, onClose, paymentData }) {
 
   return (
     <div className="fixed inset-0 w-full h-full bg-black/50 flex justify-center items-center z-50">
-      {/* 모달 닫기 기능이 필요하다면 이 div에 onClick={onClose}를 추가할 수 있습니다. */}
+
       <div
         className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg"
         onClick={(e) => e.stopPropagation()}
         ref={modalRef}
       >
-        <h2 className="text-2xl font-bold mb-6">주문서</h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">주문서</h2>
+          <button onClick={onClose} className="text-2xl font-bold">
+            &times;
+          </button>
+        </div>  
 
         <div id="payment-method" className="w-full"></div>
         <div id="agreement" className="w-full mt-4"></div>

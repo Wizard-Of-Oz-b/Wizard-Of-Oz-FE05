@@ -32,14 +32,14 @@ export default function UserPayment() {
     error: orderError,
   } = useGetMyOrders(); // 주문서
   const purchaseId = userOrder?.results[0]?.purchase_id;
-  console.log(userOrder?.results.length, "길이");
+
   const {
     data: items,
     isLoading: areItemsLoading,
     isError: areItemError,
     error: itemError,
   } = useGetPurchaseItems(purchaseId); // 주문 내용
-  console.log(items);
+
   const { mutateAsync: updateAddress, isPending: isAddressUpdate } =
     useUpdateShippingAddress();
 
@@ -51,8 +51,6 @@ export default function UserPayment() {
     error: MyAddressError,
   } = useGetMyAddresses();
 
-  console.log(userOrder, "주문");
-  console.log(myAddress);
   const filterOrder = filterOrders(items?.results); //ready 상태만 가져옴
   const [testPaymentInfo, setTestPaymentInfo] = useState({
     amount: 0,
@@ -118,7 +116,7 @@ export default function UserPayment() {
       const orderName = `${filterOrder[0].product_name} ${
         filterOrder.length >= 2 && "외 " + (filterOrder.length - 1) + "건"
       }`;
-      console.log(orderName);
+
       setTestPaymentInfo((prev) => ({
         ...prev,
         amount: totalPrice,
@@ -182,7 +180,6 @@ export default function UserPayment() {
   // };
 
   const handlePaymentBtn = (payment) => {
-    console.log(payment);
     setPayment(payment);
   };
   // 주소 모달창
@@ -204,9 +201,10 @@ export default function UserPayment() {
 
   // 주소 변경
   const handleCompleteAddress = (addressData) => {
-    console.log(addressData, "주소");
     setShippingAddress((prev) => ({
       ...prev,
+      recipient: '',
+      phone: '',
       postcode: addressData.zoneCode,
       address1: addressData.address,
       address2: "",
@@ -220,7 +218,6 @@ export default function UserPayment() {
 
   // 기본 주소 리스트 선택값 상태에 할당
   const handleSelectAddressList = (addressData) => {
-    console.log(addressData, "주소");
     setShippingAddress(() => ({
       recipient: addressData?.recipient || "",
       phone: addressData?.phone
@@ -238,13 +235,11 @@ export default function UserPayment() {
   };
 
   // 약관 클릭
-  const handleCheckboxChange = (e) => {
+  const handleCheckboxChange = () => {
     //이미 동의중일때 누르면 false
-    console.log( e.target.checked,'g')
     if(termsAgree){
       setTermsAgree(false)
     }else{
-      console.log('test')
       setTermsAgree(false)
       setTermsOpen(true);
 
@@ -287,7 +282,6 @@ export default function UserPayment() {
       console.error(error, "결제 시도중 에러"); //나중에 모달 창으로 변경 할것
     }
   };
-  console.log(shippingAddress);
 
   // 초기 기본값 로딩시 스켈레톤 출력
   const isLoadingData = areMyAddressLoading || orderLoading || areItemsLoading;
@@ -320,7 +314,7 @@ export default function UserPayment() {
       {isPaymentProcessing && <CartLoadingSpin />}
       <form
         onSubmit={handleSubmitPay}
-        className="w-[800px] flex flex-col justify-center items-center"
+        className="p-2 sm:p-0 w-dvw lg:w-[800px] flex flex-col justify-center items-center"
       >
         {/* 배송지 섹션 */}
         <section className={SECTION_STYLE}>
@@ -356,7 +350,7 @@ export default function UserPayment() {
                   <td className="p-2">
                     <input
                       id="recipient"
-                      className="w-full border border-gray-400 rounded-sm px-2 py-1"
+                      className="lg:w-full border border-gray-400 rounded-sm px-2 py-1"
                       name="recipient"
                       value={shippingAddress.recipient}
                       onChange={handleInputChange}
@@ -377,7 +371,7 @@ export default function UserPayment() {
                     <input
                       name="phone"
                       id="phone"
-                      className="w-full border border-gray-400 rounded-sm px-2 py-1"
+                      className="lg:w-full border border-gray-400 rounded-sm px-2 py-1"
                       value={shippingAddress.phone}
                       onChange={handleInputChange}
                       maxLength={13}
@@ -398,7 +392,7 @@ export default function UserPayment() {
                     <input
                       id="address1"
                       name="address1"
-                      className="w-full border border-gray-400 rounded-sm px-2 py-1"
+                      className="lg:w-full border border-gray-400 rounded-sm px-2 py-1"
                       value={shippingAddress.address1}
                       onChange={handleInputChange}
                       readOnly
@@ -419,10 +413,11 @@ export default function UserPayment() {
                     <input
                       id="address2"
                       name="address2"
-                      className="w-full border border-gray-400 rounded-sm px-2 py-1"
+                      className="lg:w-full border border-gray-400 rounded-sm px-2 py-1"
                       value={shippingAddress.address2}
                       onChange={handleInputChange}
                       readOnly={isDefaultAddress}
+                      max={30}
                       required
                     />
                   </td>
@@ -440,7 +435,7 @@ export default function UserPayment() {
                     <input
                       id="postcode"
                       name="postcode"
-                      className="w-full border border-gray-400 rounded-sm px-2 py-1"
+                      className="lg:w-full border border-gray-400 rounded-sm px-2 py-1"
                       value={shippingAddress.postcode}
                       onChange={handleInputChange}
                       readOnly
@@ -455,6 +450,7 @@ export default function UserPayment() {
         {/* 새로운 배송지 검색 */}
         {isModalOpen && (
           <AddressModal
+            isOpen={isModalOpen}
             onClose={handleModalClose}
             onSearch={handleCompleteAddress}
           />
@@ -544,14 +540,14 @@ export default function UserPayment() {
         <button
           type="submit" //실 적용시
           // type="button" //테스트
-          className="w-100 border rounded-sm bg-violet-700 text-white py-1 cursor-pointer transition delay-75 hover:bg-violet-800"
+          className="w-full  lg:w-100 border rounded-sm bg-violet-700 text-white py-1 cursor-pointer transition delay-75 hover:bg-violet-800"
           // onClick={handlePurchase}
           disabled={isPaymentProcessing} // 결제 진행중에는 두번 요청 X
         >
           {testPaymentInfo.amount.toLocaleString()}원 결제
         </button>
       </form>
-    {isTermsOpen && <TermsModal onClose={handleTermsClose} setAgree={setTermsAgree} />}
+    {isTermsOpen && <TermsModal isOpen={isTermsOpen} onClose={handleTermsClose} setAgree={setTermsAgree} />}
 
       <TossModal
         isOpen={isPaymentModalOpen}
