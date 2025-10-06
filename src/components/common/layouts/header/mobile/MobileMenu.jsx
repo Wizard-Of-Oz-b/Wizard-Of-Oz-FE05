@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, Search, Sparkles, Heart, ShoppingCart, User, LogIn, UserPlus, Shield } from "lucide-react";
+import { X, Search, Sparkles, Heart, ShoppingCart, User, LogIn, UserPlus, Shield, LogOut } from "lucide-react";
 import { spring, staggerCols, colItem } from "../animations";
 import { PRIMARY, SUGGEST, SUBS } from "../constants";
 import { useNavigate } from "react-router-dom";
@@ -24,9 +24,18 @@ export default function MobileMenu({
   onSelectSub = noop,
 }) {
   const navigate = useNavigate();
-  const { isLoggedIn, isAdmin } = useAuth();
+  const { isLoggedIn, isAdmin, logout } = useAuth();
   const [openPrimary, setOpenPrimary] = useState(null);
   const scrollLockRef = useRef({ applied: false, top: 0, prev: {} });
+
+  const handleLogout = async () => {
+    try {
+      await logout?.();
+    } finally {
+      onClose();
+      navigate("/");
+    }
+  };
 
   useEffect(() => {
     const body = document.body;
@@ -285,32 +294,39 @@ export default function MobileMenu({
                     onClick={() => { onClose(); navigate("/admin"); }}
                   >
                     <Shield className="w-5 h-5 text-amber-600" />
-                    <span className="text-sm font-medium text-amber-700">관리자</span>
+                    <span className="text-sm font-medium text-amber-700">관리자 페이지로 이동하기</span>
                   </button>
                 )}
                 <div className="grid grid-cols-3 gap-2">
                   <button
-                    className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 py-2.5 hover:bg-gray-50 active:scale-[0.99] transition"
+                    className="flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 py-2.5 hover:bg-gray-50 active:scale-[0.99] transition px-3"
                     onClick={() => { onClose(); navigate("/mypage"); }}
                   >
-                    <User className="w-5 h-5" />
-                    <span className="text-sm font-medium">마이페이지</span>
+                    <User className="w-4 h-4 shrink-0" aria-hidden="true" />
+                    <span className="text-[12px] font-medium whitespace-nowrap tracking-tight leading-none">마이페이지</span>
                   </button>
                   <button
-                    className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 py-2.5 hover:bg-gray-50 active:scale-[0.99] transition"
+                    className="flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 py-2.5 hover:bg-gray-50 active:scale-[0.99] transition px-3"
                     onClick={() => { onClose(); navigate("/cart"); }}
                   >
-                    <ShoppingCart className="w-5 h-5" />
-                    <span className="text-sm font-medium">장바구니</span>
+                    <ShoppingCart className="w-4 h-4 shrink-0" aria-hidden="true" />
+                    <span className="text-[12px] font-medium whitespace-nowrap tracking-tight leading-none">장바구니</span>
                   </button>
                   <button
-                    className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 py-2.5 hover:bg-gray-50 active:scale-[0.99] transition"
+                    className="flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 py-2.5 hover:bg-gray-50 active:scale-[0.99] transition px-3"
                     onClick={() => { onClose(); navigate("/wishlist"); }}
                   >
-                    <Heart className="w-5 h-5" />
-                    <span className="text-sm font-medium">위시리스트</span>
+                    <Heart className="w-4 h-4 shrink-0" aria-hidden="true" />
+                    <span className="text-[12px] font-medium whitespace-nowrap tracking-tight leading-none">위시리스트</span>
                   </button>
                 </div>
+                  <button
+                    className="mt-2 w-full flex items-center justify-center gap-2 rounded-xl border text-white py-2.5 bg-black active:scale-[0.99] transition"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="w-5 h-5" />
+                    <span className="text-sm font-medium">로그아웃</span>
+                  </button>
               </div>
               )}
             </div>
