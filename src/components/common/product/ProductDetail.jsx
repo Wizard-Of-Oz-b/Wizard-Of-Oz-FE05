@@ -20,6 +20,7 @@ import { addCartItem } from '../../../hooks/cart/cartHook';
 import { useAuth } from '../../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useAlertModal } from '../layouts/common/modal/useAlertModal';  // 모달 컴포넌트 변경
+import SizeGuideModal from './SizeGuideModal';
 
 export default function ProductDetail({ product, onAddToCart, onToast }) {
   const [color, setColor] = useState(product.colors?.[0]?.code);
@@ -34,11 +35,18 @@ export default function ProductDetail({ product, onAddToCart, onToast }) {
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
   const { showModal, ModalComponent } = useAlertModal();
+  const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
 
   useEffect(() => {
     const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)');
     if (mq) setAllowBurst(!mq.matches);
   }, []);
+
+  const shortId = (id) => {
+    if (!id) return "-";
+    const s = String(id).replace(/-/g, "");
+    return s.slice(0, 8);
+  }
 
 const option_key = new URLSearchParams(
 Object.fromEntries(
@@ -221,7 +229,9 @@ Object.fromEntries(
             <div className="mt-5">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-gray-700">색상</p>
-                <p className="text-xs text-gray-500">상품번호: {product.id}</p>
+                <p className="text-xs text-gray-500">
+                  상품번호: {shortId(product.product_id ?? product.id)}
+                </p>
               </div>
               <ColorSwatches
                 colors={product.colors}
@@ -237,7 +247,11 @@ Object.fromEntries(
             <div className="mt-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-gray-700">사이즈</p>
-                <button className="flex items-center gap-1 text-xs text-gray-600">
+                <button 
+                  type="button"
+                  onClick={() => setSizeGuideOpen(true)}
+                  className="flex items-center gap-1 text-xs text-gray-600 hover:text-gray-800"
+                >
                   사이즈 가이드 <ChevronDown size={14} />
                 </button>
               </div>
@@ -321,6 +335,12 @@ Object.fromEntries(
           onNext={nextLightbox}
         />
       )}
+
+      <SizeGuideModal
+        open={sizeGuideOpen}
+        onClose={() => setSizeGuideOpen(false)}
+        sizeChart={product.size_chart}
+      />
 
       {ModalComponent}
     </>
