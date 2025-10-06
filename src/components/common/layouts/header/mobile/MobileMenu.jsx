@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, Search, Sparkles, Heart, ShoppingCart, User, LogIn, UserPlus, Shield } from "lucide-react";
+import { X, Search, Sparkles, Heart, ShoppingCart, User, LogIn, UserPlus, Shield, LogOut } from "lucide-react";
 import { spring, staggerCols, colItem } from "../animations";
 import { PRIMARY, SUGGEST, SUBS } from "../constants";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../../../context/AuthContext";
+import api, { logoutLocal } from "../../../../../lib/axios";
 
 const noop = () => {};
 
@@ -24,9 +25,18 @@ export default function MobileMenu({
   onSelectSub = noop,
 }) {
   const navigate = useNavigate();
-  const { isLoggedIn, isAdmin } = useAuth();
+  const { isLoggedIn, isAdmin, setUser } = useAuth();
   const [openPrimary, setOpenPrimary] = useState(null);
   const scrollLockRef = useRef({ applied: false, top: 0, prev: {} });
+
+  const handleLogout = async () => {
+      setUser(null);
+      onClose();
+      navigate("/", { replace: true });
+      setTimeout(() => {
+        try { logoutLocal(); } catch {}
+      }, 0);
+  };
 
   useEffect(() => {
     const body = document.body;
@@ -232,7 +242,7 @@ export default function MobileMenu({
                                   <motion.button
                                     key={`sub-${pKey}-${idx}-${itemLabel}`}
                                     className="text-[14px] text-left px-3 py-2 rounded-xl border border-gray-100 hover:bg-gray-50 active:scale-[0.99] transition
-                                                flex items-center justify-between"
+                                                flex items-center justify-between cursor-pointer"
                                     onClick={() => {
                                       onSelectSub(pKey, itemLabel);
                                       onClose();
@@ -263,14 +273,16 @@ export default function MobileMenu({
               {!isLoggedIn ? (
                 <div className="grid grid-cols-2 gap-2">
                   <button
-                    className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 py-2.5 hover:bg-gray-50 active:scale-[0.99] transition"
+                    type="button"
+                    className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 py-2.5 hover:bg-gray-50 active:scale-[0.99] transition cursor-pointer"
                     onClick={() => { onClose(); navigate("/login"); }}
                   >
                     <LogIn className="w-5 h-5" />
                     <span className="text-sm font-medium">로그인</span>
                   </button>
                   <button
-                    className="flex items-center justify-center gap-2 rounded-xl bg-black text-white py-2.5 hover:opacity-90 active:scale-[0.99] transition"
+                    type="button"
+                    className="flex items-center justify-center gap-2 rounded-xl bg-black text-white py-2.5 hover:opacity-90 active:scale-[0.99] transition cursor-pointer"
                     onClick={() => { onClose(); navigate("/signup"); }}
                   >
                     <UserPlus className="w-5 h-5" />
@@ -281,36 +293,48 @@ export default function MobileMenu({
               <div className="mt-auto bg-white/95 backdrop-blur px-5 py-3 space-y-2">
                 {isAdmin && (
                   <button
-                    className="flex items-center justify-center gap-2 rounded-xl border border-amber-300 bg-amber-50 px-5 py-2.5 hover:bg-amber-100 active:scale-[0.99] transition"
+                    type="button"
+                    className="flex items-center w-full justify-center gap-2 rounded-xl border border-amber-300 bg-amber-50 px-5 py-2.5 hover:bg-amber-100 active:scale-[0.99] transition cursor-pointer"
                     onClick={() => { onClose(); navigate("/admin"); }}
                   >
                     <Shield className="w-5 h-5 text-amber-600" />
-                    <span className="text-sm font-medium text-amber-700">관리자</span>
+                    <span className="text-sm font-medium text-amber-700">관리자 페이지로 이동하기</span>
                   </button>
                 )}
                 <div className="grid grid-cols-3 gap-2">
                   <button
-                    className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 py-2.5 hover:bg-gray-50 active:scale-[0.99] transition"
+                    type="button"
+                    className="flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 py-2.5 hover:bg-gray-50 active:scale-[0.99] transition px-3 cursor-pointer"
                     onClick={() => { onClose(); navigate("/mypage"); }}
                   >
-                    <User className="w-5 h-5" />
-                    <span className="text-sm font-medium">마이페이지</span>
+                    <User className="w-4 h-4 shrink-0" aria-hidden="true" />
+                    <span className="text-[12px] font-medium whitespace-nowrap tracking-tight leading-none">마이페이지</span>
                   </button>
                   <button
-                    className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 py-2.5 hover:bg-gray-50 active:scale-[0.99] transition"
+                    type="button"
+                    className="flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 py-2.5 hover:bg-gray-50 active:scale-[0.99] transition px-3 cursor-pointer"
                     onClick={() => { onClose(); navigate("/cart"); }}
                   >
-                    <ShoppingCart className="w-5 h-5" />
-                    <span className="text-sm font-medium">장바구니</span>
+                    <ShoppingCart className="w-4 h-4 shrink-0" aria-hidden="true" />
+                    <span className="text-[12px] font-medium whitespace-nowrap tracking-tight leading-none">장바구니</span>
                   </button>
                   <button
-                    className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 py-2.5 hover:bg-gray-50 active:scale-[0.99] transition"
+                    type="button"
+                    className="flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 py-2.5 hover:bg-gray-50 active:scale-[0.99] transition px-3 cursor-pointer"
                     onClick={() => { onClose(); navigate("/wishlist"); }}
                   >
-                    <Heart className="w-5 h-5" />
-                    <span className="text-sm font-medium">위시리스트</span>
+                    <Heart className="w-4 h-4 shrink-0" aria-hidden="true" />
+                    <span className="text-[12px] font-medium whitespace-nowrap tracking-tight leading-none">위시리스트</span>
                   </button>
                 </div>
+                  <button
+                    type="button"
+                    className="mt-2 w-full flex items-center justify-center gap-2 rounded-xl border text-white py-2.5 bg-black active:scale-[0.99] transition cursor-pointer"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="w-5 h-5" />
+                    <span className="text-sm font-medium">로그아웃</span>
+                  </button>
               </div>
               )}
             </div>
