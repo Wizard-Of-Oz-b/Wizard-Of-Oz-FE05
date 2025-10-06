@@ -290,7 +290,7 @@ export default function MobileMenu({
               <div className="mt-auto bg-white/95 backdrop-blur px-5 py-3 space-y-2">
                 {isAdmin && (
                   <button
-                    className="flex items-center justify-center gap-2 rounded-xl border border-amber-300 bg-amber-50 px-5 py-2.5 hover:bg-amber-100 active:scale-[0.99] transition"
+                    className="flex items-center w-full justify-center gap-2 rounded-xl border border-amber-300 bg-amber-50 px-5 py-2.5 hover:bg-amber-100 active:scale-[0.99] transition"
                     onClick={() => { onClose(); navigate("/admin"); }}
                   >
                     <Shield className="w-5 h-5 text-amber-600" />
