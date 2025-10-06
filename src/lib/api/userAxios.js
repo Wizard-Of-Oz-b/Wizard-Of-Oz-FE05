@@ -46,7 +46,7 @@ userApi.interceptors.response.use(
           }
         );
 
-        const newAccessToken = data.accessToken;
+        const newAccessToken = data?.access;
         setAccessToken(newAccessToken); // 새로 받은 Access Token을 쿠키에 저장
         
         userApi.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
