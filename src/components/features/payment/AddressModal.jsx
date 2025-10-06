@@ -13,13 +13,16 @@ export default function AddressModal({ onClose, onSearch }) {
     })
   };
 
-
+  const daumStyle = {
+    border: '1px'
+  }
   return (
-    <div className="fixed inset-0 w-full h-full bg-black/50 flex justify-center items-center z-50">
-      <div className="w-100" ref={modalRef}>
+    <div className="fixed inset-0 w-full h-full backdrop-blur-xs flex justify-center items-center z-50">
+      <div className="w-100 border" ref={modalRef}>
         <DaumPostcodeEmbed 
         onComplete={handleComplete}
-        autoClose={true} 
+        autoClose={true}
+        style={daumStyle} 
         />
       </div>
     </div>

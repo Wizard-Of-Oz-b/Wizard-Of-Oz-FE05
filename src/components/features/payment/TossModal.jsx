@@ -1,5 +1,6 @@
 import { loadTossPayments, ANONYMOUS } from "@tosspayments/tosspayments-sdk";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import useOnClickOutside from "../../../hooks/payments/useOnclickOutside";
 
 // 공식 예제 코드의 로직을 Modal 컴포넌트 안에 재구성합니다.
 export default function PaymentModal({ isOpen, onClose, paymentData }) {
@@ -10,6 +11,8 @@ export default function PaymentModal({ isOpen, onClose, paymentData }) {
   });
   const [ready, setReady] = useState(false);
 
+  const modalRef = useRef(null);
+  useOnClickOutside(modalRef, onClose);
   // useEffect #1: 위젯 인스턴스 생성
   useEffect(() => {
     if (!isOpen) {
@@ -46,7 +49,7 @@ export default function PaymentModal({ isOpen, onClose, paymentData }) {
           currency: "KRW",
           value: Number(paymentData?.amount),
         };
-        console.log('위젯 값', newAmount)
+        console.log("위젯 값", newAmount);
         await widgets.setAmount(newAmount);
         setAmount(newAmount);
 
@@ -77,10 +80,9 @@ export default function PaymentModal({ isOpen, onClose, paymentData }) {
     const newAmountValue = Number(paymentData.amount);
     if (amount.value !== newAmountValue) {
       setAmount({ currency: "KRW", value: newAmountValue });
-      console.log(newAmountValue ,'테스트 금액 변경');
+      console.log(newAmountValue, "테스트 금액 변경");
       // widgets.setAmount(amount);
       widgets.setAmount({ currency: "KRW", value: newAmountValue });
-
     }
   }, [widgets, paymentData?.amount]);
 
@@ -115,6 +117,7 @@ export default function PaymentModal({ isOpen, onClose, paymentData }) {
       <div
         className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg"
         onClick={(e) => e.stopPropagation()}
+        ref={modalRef}
       >
         <h2 className="text-2xl font-bold mb-6">주문서</h2>
 

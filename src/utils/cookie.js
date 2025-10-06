@@ -1,5 +1,7 @@
 import Cookies from 'js-cookie'
 const ACCESS_TOKEN_KEY = 'accessToken'
+// const ACCESS_TOKEN_KEY = 'access'
+
 
 
 // 액세스 쿠키 가져오기

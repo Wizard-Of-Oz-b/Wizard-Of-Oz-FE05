@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useGetMyAllOrders } from "../../../../hooks/payments/useOrderPayment";
 import OrderEmpty from "../../../features/mypage-order/OrderEmpty";
 import OrderCard from "../../../features/mypage-order/OrderCard";
@@ -20,16 +19,24 @@ export default function OrderList() {
     error: orderError,
   } = useGetMyAllOrders({ page: currentPage, size: pageSize });
 
-  const totalPage = userOrderList?.count / pageSize || 0
-  const handleChangePage = (newPage) =>{
-    setSearchParams({page: newPage})
-    console.log(newPage, 'xptmx')
-  }
+  const totalPage = userOrderList?.count / pageSize || 0;
+  const handleChangePage = (newPage) => {
+    setSearchParams({ page: newPage });
+    console.log(newPage, "xptmx");
+  };
   console.log(userOrderList, "리스트");
   if (orderLoading) {
     return (
       <div className="text-center py-8 text-gray-500">
         주문 내역을 불러오는 중입니다...
+      </div>
+    );
+  }
+  if (orderIsError) {
+    return (
+      <div>
+        에러 발생
+        {orderError}
       </div>
     );
   }
@@ -41,12 +48,23 @@ export default function OrderList() {
         <OrderEmpty />
       ) : (
         <div>
-          <div className="flex flex-col gap-2 justify-center items-center mb-3">
+          <div className="flex flex-col gap-2 justify-center items-center mb-2">
+            <div className="flex flex-col w-full justify-center mb-3">
+              <h2 className="text-xl font-extrabold">주문 내역 조회</h2>
+              <p className="mt-1 text-sm text-neutral-600">
+                최근 주문 내역을 확인해보세요.
+              </p>
+            </div>
+
             {userOrderList.results.map((el) => (
               <OrderCard key={el.purchase_id} order={el} />
             ))}
           </div>
-          <ProductPagination currentPage={currentPage} totalPage={Math.ceil(totalPage)} onPageChange={handleChangePage}/>
+          <ProductPagination
+            currentPage={currentPage}
+            totalPage={Math.ceil(totalPage)}
+            onPageChange={handleChangePage}
+          />
         </div>
       )}
 

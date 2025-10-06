@@ -12,7 +12,7 @@ export const BOTTOM_CATEGORY = {
   1: '반바지',
   2: '긴바지',
   3: '청바지',
-  4: '슬렉스',
+  4: '슬랙스',
 }
 
 export const SHOES_CATEGORY = {
