@@ -11,6 +11,7 @@ import OrderCardSkeleton from "../../skeletons/OrderCardSkeleton";
 import { DEFAULT_STATUS, STATUS_MAP } from "../../../constants/orderStatus";
 import { AnimatePresence, motion } from "framer-motion";
 import ConfirmModal from "../../common/ConfirmModal";
+import { useNavigate } from "react-router-dom";
 
 // 주문 페이지 에서 출력
 // 상태는 주문처리(ready), 주문완료(paid)로 구분해서 작성한다.
@@ -32,6 +33,7 @@ export default function OrderCard({ order }) {
     isError: isShipError,
     error: shipError,
   } = useGetShipmentInfo(order?.purchase_id);
+  const navigate = useNavigate()
   const cancelPurchaseMutation = useCancelPurchase();
   // 로딩
   const Loading = isLoading || isShipLoading;
@@ -47,6 +49,9 @@ export default function OrderCard({ order }) {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [cutOrderList, setCutOrderList] = useState([]); // 카드 하나에는 두개의 상품만 출력한다.
 
+  const onClickMovePay = () => {
+    navigate('/payment')
+  }
   const onClickDetail = () => {
     setDetail((prev) => !prev);
   };
@@ -109,9 +114,9 @@ export default function OrderCard({ order }) {
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ x: 300, opacity: 0 }}
+        initial={{ x: 50, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
-        exit={{ x: -300, opacity: 0 }}
+        exit={{ x: -50, opacity: 0 }}
         className="w-full border border-neutral-300 shadow-sm rounded-lg flex justify-center items-center"
       >
         {cancelPurchaseMutation.isPending ? <CartLoadingSpin /> : null}
@@ -178,20 +183,28 @@ export default function OrderCard({ order }) {
                     onClick={() => setIsModalOpen((prev) => !prev)}
                     className="cursor-pointer border rounded-3xl px-2 my-2 hover:bg-neutral-50"
                   >
-                    상세 보기
+                    전체 상품 보기
                   </button>
                 </td>
               </tr>
             </tbody>
 
             {/* 전체 합계 푸터 부분 */}
-            <tfoot className="border-t border-gray-200">
+            <tfoot className="border-t border-gray-300">
               <tr>
                 <td className="p-4" colSpan="3">
                   <div className="flex flex-col items-end">
                     <span className="font-bold">
                       총 {parseInt(order?.items_total).toLocaleString()} 원
                     </span>
+                    {order?.status === "ready" && shipment?.total === 0 ? (
+                      <button
+                        onClick={onClickMovePay}
+                        className="border border-gray-300 rounded-2xl px-2 py-0.5 mt-1 cursor-pointer bg-violet-500 hover:bg-violet-600 text-white"
+                      >
+                        결제 하러가기
+                      </button>
+                    ) : null}
                     {order?.status === "paid" && shipment?.total === 0 ? (
                       <button
                         onClick={onClickcancled}
@@ -287,6 +300,15 @@ export default function OrderCard({ order }) {
                 {parseInt(order?.items_total).toLocaleString()} 원
               </span>
             </div>
+            {order?.status === "ready" && shipment?.total === 0 && (
+              <button
+                onClick={onClickMovePay}
+                className="w-full text-center mt-3 rounded-md px-2 py-2 bg-violet-500 text-white font-semibold"
+              >
+                결제 하러가기
+              </button>
+
+            )}
             {order?.status === "paid" && shipment?.total === 0 && (
               <button
                 onClick={onClickcancled}
