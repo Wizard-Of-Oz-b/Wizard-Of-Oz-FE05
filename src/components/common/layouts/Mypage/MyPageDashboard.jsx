@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   Bell,
   Package2,
@@ -6,19 +6,21 @@ import {
   CheckCircle2,
   XCircle,
   Receipt,
-  TicketPercent,
-  HelpCircle,
   ChevronRight,
 } from 'lucide-react';
 import RandomProducts from '../../product/RandomProducts';
-import api from '../../../../lib/axios';
+import { useGetMyAllOrders } from '../../../../hooks/payments/useOrderPayment';
 
 export default function MyPageDashboard() {
-  const [orders, setOrders] = useState([]);
-  const [ordersCount, setOrdersCount] = useState(0);
-  const [shipments, setShipments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const {
+    data: orderPage,
+    isLoading: orderLoading,
+    isError: orderIsError,
+    error: orderError,
+  } = useGetMyAllOrders({ page: 1, size: 3 });
+  const orders = orderPage?.results ?? [];
+  const ordersCount = Number(orderPage?.count || 0);
+  const shipments = [];
 
   const noticeMocks = [
     {
@@ -39,77 +41,13 @@ export default function MyPageDashboard() {
     },
   ];
 
-  const txt = (v) =>
-    v == null
-      ? '-'
-      : typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean'
-      ? String(v)
-      : Array.isArray(v)
-      ? v.map(txt).join(', ')
-      : v.name || v.title || v.label
-      ? String(v.name || v.title || v.label)
-      : JSON.stringify(v);
-
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const r1 = await api.get('/v1/orders/purchases/', {
-          params: { size: 3 },
-        });
-        const r2 = await api.get('/v1/shipments/', {
-          params: { status: 'in transit', size: 5 },
-        });
-
-        if (!alive) return;
-        const baseOrders = r1.data?.results || [];
-        const enriched = await Promise.all(
-          baseOrders.map(async (p) => {
-            try {
-              const ir = await api.get(
-                `/v1/orders/purchases/${p.purchase_id}/items/`,
-                { params: { size: 1 } }
-              );
-              const first = ir.data?.results?.[0];
-              return {
-                ...p,
-                product_name: first?.product_name ?? p.product_name ?? null,
-                options: first?.options ?? p.options ?? null,
-                amount: first?.amount ?? p.amount ?? null,
-                items_total:
-                  p.items_total ??
-                  ir.data?.count ??
-                  ir.data?.results?.length ??
-                  0,
-              };
-            } catch (_) {
-              return p;
-            }
-          })
-        );
-        setOrders(enriched);
-        setOrdersCount(Number(r1.data?.count || 0));
-        setShipments(r2.data?.results || []);
-      } catch (err) {
-        console.error(err);
-        if (alive) setError('데이터를 불러오지 못했습니다.');
-      } finally {
-        if (alive) setLoading(false);
-      }
-    })();
-    return () => {
-      alive = false;
-    };
-  }, []);
-
-  const kpi = {
+  const kpi = useMemo(() => ({
     orders: ordersCount,
     shipping: shipments.length,
     delivered: 0,
     canceled: 0,
-  };
+  }), [ordersCount, shipments.length]);
+
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -155,10 +93,12 @@ export default function MyPageDashboard() {
                 </a>
               </div>
 
-              {loading ? (
+              {orderLoading ? (
                 <p className="text-gray-500">불러오는 중...</p>
-              ) : error ? (
-                <p className="text-red-500">{error}</p>
+              ) : orderIsError ? (
+                <p className="text-red-500">
+                  {String(orderError?.userMessage || orderError?.message || '주문을 불러오지 못했습니다.')}
+                </p>
               ) : orders.length ? (
                 <ul className="divide-y divide-gray-200">
                   {orders.map((o) => (
@@ -216,40 +156,7 @@ export default function MyPageDashboard() {
                 <Truck />
                 <h3 className="font-bold text-gray-900">배송 진행중</h3>
               </div>
-              {loading ? (
-                <p className="text-gray-500">불러오는 중...</p>
-              ) : shipments.length ? (
-                <ul className="space-y-3">
-                  {shipments.map((s, idx) => (
-                    <li
-                      key={idx}
-                      className="border border-gray-200 rounded-xl p-3"
-                    >
-                      <div className="flex flex-wrap items-center gap-2 text-sm">
-                        <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-600">
-                          배송 중
-                        </span>
-                        <span className="text-gray-700">
-                          택배사: {txt(s.carrier)}
-                        </span>
-                        <span className="text-gray-700">
-                          송장: {txt(s.tracking_number)}
-                        </span>
-                        {s.purchase_id && (
-                          <a
-                            href={`/mypage/orders/${s.purchase_id}`}
-                            className="ml-auto text-gray-600 hover:underline"
-                          >
-                            주문 보기
-                          </a>
-                        )}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
                 <p className="text-gray-500">진행중인 배송이 없습니다.</p>
-              )}
             </section>
 
             {/* 공지사항(목업) */}
