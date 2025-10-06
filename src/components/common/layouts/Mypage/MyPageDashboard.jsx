@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import RandomProducts from '../../product/RandomProducts';
 import { useGetMyAllOrders } from '../../../../hooks/payments/useOrderPayment';
+import api from '../../../../lib/axios';
 
 export default function MyPageDashboard() {
   const {
@@ -21,6 +22,45 @@ export default function MyPageDashboard() {
   const orders = orderPage?.results ?? [];
   const ordersCount = Number(orderPage?.count || 0);
   const shipments = [];
+
+  const [enrichedOrders, setEnrichedOrders] = useState([]);
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      if (orderLoading) return;
+      if (!orders.length) {
+        if (alive) setEnrichedOrders([]);
+        return;
+      }
+      try {
+        const rows = await Promise.all(
+          orders.map(async (o) => {
+            try {
+              const r = await api.get(
+                `/v1/orders/purchases/${o.purchase_id}/items/`,
+                { params: { size: 1 } }
+              );
+              const first = r.data?.results?.[0];
+              return {
+                ...o,
+                product_name: first?.product_name ?? o.product_name ?? null,
+                options: first?.options ?? o.options ?? null,
+                amount: first?.amount ?? o.amount ?? null,
+              };
+            } catch {
+              return o;
+            }
+          })
+        );
+        if (alive) setEnrichedOrders(rows);
+      } catch {
+        if (alive) setEnrichedOrders(orders);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [orderLoading, orders]);
 
   const noticeMocks = [
     {
@@ -99,9 +139,9 @@ export default function MyPageDashboard() {
                 <p className="text-red-500">
                   {String(orderError?.userMessage || orderError?.message || '주문을 불러오지 못했습니다.')}
                 </p>
-              ) : orders.length ? (
+              ) : enrichedOrders.length ? (
                 <ul className="divide-y divide-gray-200">
-                  {orders.map((o) => (
+                  {enrichedOrders.map((o) => (
                     <li
                       key={o.purchase_id}
                       className="py-3 flex items-center justify-between"
@@ -111,7 +151,7 @@ export default function MyPageDashboard() {
                           주문번호 {o.purchase_id}
                         </p>
 
-                        {/* 상품명만 출력 (요청하신 최소 변경) */}
+                        {/* 상품명만 출력 */}
                         <p className="text-sm text-gray-800 mt-0.5 truncate">
                           {o.product_name || '상품 정보 없음'}
                         </p>
