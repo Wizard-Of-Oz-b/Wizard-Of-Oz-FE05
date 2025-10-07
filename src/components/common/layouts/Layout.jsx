@@ -10,6 +10,7 @@ export default function Layout() {
   const { pathname } = useLocation();
   const { isLoggedIn, user } = useAuth();
   const isHomepage = pathname === "/";
+  const noHeaderPad = pathname.startsWith("/mypage"); // 마이페이지일 경우에는 헤더 패딩을 다르게 변경함
 
   if (isHomepage) {
     return (
@@ -24,7 +25,7 @@ export default function Layout() {
   return (
     <div className="flex flex-col min-h-screen">
       <HeaderLight isLoggedIn={isLoggedIn} user={user} />
-      <main className="flex-1 pt-24">
+      <main className={`flex-1 ${noHeaderPad ? "pt-17" : "pt-24"}`}>
         <ScrollToTop />
         <Outlet />
       </main>

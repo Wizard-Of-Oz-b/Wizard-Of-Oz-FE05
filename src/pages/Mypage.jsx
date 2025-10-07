@@ -26,7 +26,7 @@ export default function Mypage() {
 
   return (
     <div className="min-h-screen bg-white text-neutral-900">
-      <div className="h-1 w-full bg-[linear-gradient(90deg,#7c3aed_0%,#ec4899_100%)]" />
+      <div className="h-1.5 w-full bg-[linear-gradient(90deg,#7c3aed_0%,#ec4899_100%)]" />
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
         {/* 헤더 / 브레드크럼 */}
         <div className="flex items-center justify-between mb-6">
