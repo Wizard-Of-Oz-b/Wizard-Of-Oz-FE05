@@ -119,7 +119,7 @@ export default function MyPageDashboard() {
 
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 px-3 py-5 sm:p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="bg-white rounded-2xl shadow p-5 flex flex-col items-center">
@@ -148,7 +148,7 @@ export default function MyPageDashboard() {
           {/* 좌측 메인 */}
           <div className="md:col-span-8 space-y-6">
             {/* 최근 주문 */}
-            <section className="bg-white rounded-2xl shadow p-5">
+            <section className="bg-white rounded-2xl shadow p-4 sm:p-5">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <Receipt />
@@ -176,31 +176,37 @@ export default function MyPageDashboard() {
                     <li key={o.purchase_id}>
                       <a
                         href={`/mypage/orders/${o.purchase_id}`}
-                        className="flex gap-3 py-3 items-center hover:bg-gray-50/60 px-2 rounded-xl transition"
+                        className="flex gap-3 py-3 items-start sm:items-center hover:bg-gray-50/60 px-2 rounded-xl transition"
                       >
                         <img
                           src={img}
                           alt={o.product_name ?? "상품 이미지"}
-                          className="h-20 w-16 rounded-md object-cover flex-shrink-0 border border-gray-200"
+                          className="h-16 w-16 sm:h-20 rounded-md object-cover flex-shrink-0 border border-gray-200"
                           onError={(e) => { e.currentTarget.src = FALLBACK_IMG; }}
                         />
                       <div className="min-w-0 flex-1">
-                        <p className="text-[13px] text-gray-500">
-                          주문번호 <span className="font-mono">{o.purchase_id}</span>
+                        <p className="text-[12px] sm:text-[13px] text-gray-500">
+                          주문번호{" "}
+                          <span className="font-mono sm:hidden">
+                            {String(o.purchase_id || "").slice(0, 8)}
+                          </span>
+                          <span className="font-mono hidden sm:inline">
+                            {o.purchase_id}
+                          </span>
                         </p>
 
                         {/* 상품명만 출력 */}
-                        <p className="text-sm text-gray-800 mt-0.5 truncate">
+                        <p className="text-[13px] sm:text-sm text-gray-800 mt-0.5 font-medium leading-snug break-keep line-clamp-2 sm:line-clamp-1">
                           {o.product_name || '상품 정보 없음'}
                         </p>
 
-                        <p className="text-sm text-gray-600 mt-0.5">
+                        <p className="text-[12px] sm:text-sm text-gray-600 mt-0.5">
                           {new Date(o.purchased_at).toLocaleString()} · 상태:{' '}
                           {o.status}
                         </p>
 
                         {(o.options || o.amount) && (
-                          <p className="text-xs text-gray-500 mt-0.5 truncate">
+                          <p className="hidden sm:block text-xs text-gray-500 mt-0.5 truncate">
                             {o.options ? (
                               <span className="mr-2">
                                 옵션:{' '}
@@ -224,7 +230,7 @@ export default function MyPageDashboard() {
         </section>
 
             {/* 배송 진행중 */}
-            <section className="bg-white rounded-2xl shadow p-5">
+            <section className="bg-white rounded-2xl shadow p-4 sm:p-5">
               <div className="flex items-center gap-2 mb-3">
                 <Truck />
                 <h3 className="font-bold text-gray-900">배송 진행중</h3>
@@ -233,7 +239,7 @@ export default function MyPageDashboard() {
             </section>
 
             {/* 공지사항(목업) */}
-            <section className="bg-white rounded-2xl shadow p-5">
+            <section className="bg-white rounded-2xl shadow p-4 sm:p-5">
               <div className="flex items-center gap-2 mb-3">
                 <Bell />
                 <h3 className="font-bold text-gray-900">공지사항</h3>
