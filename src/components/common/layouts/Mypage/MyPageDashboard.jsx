@@ -168,8 +168,8 @@ export default function MyPageDashboard() {
                         <img
                           src={img}
                           alt={o.product_name ?? "상품 이미지"}
-                          className="h-16 w-16 rounded-md object-cover flex-shrink-0 border border-gray-200"
-                          onError={(e) => { if (e.currentTarget.src !== location.origin + FALLBACK_IMG) e.currentTarget.src = FALLBACK_IMG; }}
+                          className="h-20 w-16 rounded-md object-cover flex-shrink-0 border border-gray-200"
+                          onError={(e) => { e.currentTarget.src = FALLBACK_IMG; }}
                         />
                       <div className="min-w-0 flex-1">
                         <p className="text-[13px] text-gray-500">
