@@ -5,6 +5,7 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import api from '../../../../../lib/axios';
+import MobileProductCard from './MobileProductCard';
 
 const FALLBACK_IMG = "/images/product-fallback.png";
 
@@ -158,7 +159,8 @@ export default function ProductTable({
   }, [idsNeedingThumb]);
 
   return (
-    <div className="relative overflow-x-auto rounded-2xl shadow-lg bg-white">
+    <>
+    <div className="relative overflow-x-auto rounded-2xl shadow-lg bg-white hidden md:block">
       <table className="w-full min-w-[1120px] table-fixed">
         <colgroup>
           {COLS.map((cls, i) => (
@@ -278,5 +280,38 @@ export default function ProductTable({
         </tbody>
       </table>
     </div>
+    <div className="md:hidden space-y-3">
+      {pageData.length === 0 ? (
+        <div className="py-10 text-center text-gray-500 bg-white rounded-2xl border">
+          등록된 상품이 없습니다.
+        </div>
+      ) : (
+        pageData.map((p, idx) => {
+          const id = safeId(p);
+          const code = shortUuid(id);
+          const inlineImg = getInlineImage(p);
+          const imgSrc = inlineImg || (id ? thumbMap[id] : null) || FALLBACK_IMG;
+          const catPath = safeCategoryPath(p, categoryMap);
+          const priceText = formatPrice(p.price);
+          const createdText = formatKST(p.created_at);
+        return (
+          <MobileProductCard
+            key={id || `m-${idx}`}
+            product={p}
+            code={code}
+            imgSrc={imgSrc}
+            categoryPath={catPath}
+            priceText={priceText}
+            createdText={createdText}
+            isActive={!!p.is_active}
+            onToggle={() => toggleAvailable(p)}
+            onEdit={() => onEdit(p)}
+            onDelete={() => onRequestDelete(p)}
+          />
+        );
+      })
+      )}
+    </div>
+    </>
   );
 }

@@ -5,17 +5,20 @@ import { Navigation, Pagination, A11y } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
+import { ProductGridSkeleton } from '../layouts/admin/common/DashboardSkeleton';
 
 const API_BASE =
   import.meta.env.VITE_API_BASE || 'http://127.0.0.1:8000/api/v1';
 
 export default function RandomProducts({ limit = 6 }) {
   const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
+        setLoading(true);
         const res = await fetch(`${API_BASE}/v1/products/`);
         if (!res.ok) throw new Error('상품 목록 불러오기 실패');
         const data = await res.json();
@@ -34,6 +37,8 @@ export default function RandomProducts({ limit = 6 }) {
         if (alive) setItems(sliced);
       } catch (err) {
         console.error(err);
+      } finally {
+        if (alive) setLoading(false);
       }
     })();
     return () => {
@@ -41,6 +46,15 @@ export default function RandomProducts({ limit = 6 }) {
     };
   }, [limit]);
 
+  if (loading) {
+    return (
+      <section className="mt-12">
+        <h3 className="text-lg font-semibold mb-4">추천 상품</h3>
+        <ProductGridSkeleton n={limit} />
+      </section>
+    );
+  }
+  
   if (!items.length) return null;
 
   return (
