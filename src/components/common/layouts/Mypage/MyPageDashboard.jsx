@@ -12,6 +12,7 @@ import RandomProducts from '../../product/RandomProducts';
 import { useGetMyAllOrders } from '../../../../hooks/payments/useOrderPayment';
 import api from '../../../../lib/axios';
 import { fetchPublicMainImageUrl } from '../../api/admin/productImagesPublic';
+import { OrderListSkeleton, ProductGridSkeleton } from '../admin/common/DashboardSkeleton';
 
 const FALLBACK_IMG = "/images/product-fallback.png";
 
@@ -27,15 +28,21 @@ export default function MyPageDashboard() {
   const shipments = [];
 
   const [enrichedOrders, setEnrichedOrders] = useState([]);
+  const [isEnriching, setIsEnriching] = useState(true); // 2차 로딩
+
   useEffect(() => {
     let alive = true;
     (async () => {
       if (orderLoading) return;
       if (!orders.length) {
-        if (alive) setEnrichedOrders([]);
+        if (alive) {
+          setEnrichedOrders([]);
+          setIsEnriching(false);
+        }
         return;
       }
       try {
+        setIsEnriching(true);
         const rows = await Promise.all(
           orders.map(async (o) => {
             try {
@@ -68,9 +75,15 @@ export default function MyPageDashboard() {
             }
           })
         );
-        if (alive) setEnrichedOrders(rows);
+        if (alive) {
+          setEnrichedOrders(rows);
+          setIsEnriching(false);
+        }
       } catch {
-        if (alive) setEnrichedOrders(orders);
+        if (alive) {
+          setEnrichedOrders(orders);
+          setIsEnriching(false);
+        }
       }
     })();
     return () => {
@@ -149,8 +162,8 @@ export default function MyPageDashboard() {
                 </a>
               </div>
 
-              {orderLoading ? (
-                <p className="text-gray-500">불러오는 중...</p>
+              {(orderLoading || isEnriching) ? (
+                <OrderListSkeleton count={3} />
               ) : orderIsError ? (
                 <p className="text-red-500">
                   {String(orderError?.userMessage || orderError?.message || '주문을 불러오지 못했습니다.')}
