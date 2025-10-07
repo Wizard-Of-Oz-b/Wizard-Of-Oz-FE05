@@ -11,6 +11,9 @@ import {
 import RandomProducts from '../../product/RandomProducts';
 import { useGetMyAllOrders } from '../../../../hooks/payments/useOrderPayment';
 import api from '../../../../lib/axios';
+import { fetchPublicMainImageUrl } from '../../api/admin/productImagesPublic';
+
+const FALLBACK_IMG = "/images/product-fallback.png";
 
 export default function MyPageDashboard() {
   const {
@@ -41,14 +44,27 @@ export default function MyPageDashboard() {
                 { params: { size: 1 } }
               );
               const first = r.data?.results?.[0];
+
+              let product_image = null;
+              try {
+                const pid = first?.product_id ?? o?.product_id ?? null;
+                product_image = pid ? await fetchPublicMainImageUrl(pid) : null;
+              } catch (_) {
+                product_image = null;
+              }
+
               return {
                 ...o,
                 product_name: first?.product_name ?? o.product_name ?? null,
                 options: first?.options ?? o.options ?? null,
                 amount: first?.amount ?? o.amount ?? null,
+                product_image: product_image || FALLBACK_IMG,
               };
             } catch {
-              return o;
+              return {
+                ...o,
+                product_image: FALLBACK_IMG,
+              };
             }
           })
         );
@@ -141,14 +157,23 @@ export default function MyPageDashboard() {
                 </p>
               ) : enrichedOrders.length ? (
                 <ul className="divide-y divide-gray-200">
-                  {enrichedOrders.map((o) => (
-                    <li
-                      key={o.purchase_id}
-                      className="py-3 flex items-center justify-between"
-                    >
-                      <div className="min-w-0">
-                        <p className="font-medium text-gray-900 truncate">
-                          주문번호 {o.purchase_id}
+                  {enrichedOrders.map((o) => {
+                    const img = o?.product_image || FALLBACK_IMG;
+                    return (
+                    <li key={o.purchase_id}>
+                      <a
+                        href={`/mypage/orders/${o.purchase_id}`}
+                        className="flex gap-3 py-3 items-center hover:bg-gray-50/60 px-2 rounded-xl transition"
+                      >
+                        <img
+                          src={img}
+                          alt={o.product_name ?? "상품 이미지"}
+                          className="h-16 w-16 rounded-md object-cover flex-shrink-0 border border-gray-200"
+                          onError={(e) => { if (e.currentTarget.src !== location.origin + FALLBACK_IMG) e.currentTarget.src = FALLBACK_IMG; }}
+                        />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[13px] text-gray-500">
+                          주문번호 <span className="font-mono">{o.purchase_id}</span>
                         </p>
 
                         {/* 상품명만 출력 */}
@@ -175,20 +200,15 @@ export default function MyPageDashboard() {
                           </p>
                         )}
                       </div>
-
-                      <a
-                        href={`/mypage/orders/${o.purchase_id}`}
-                        className="text-sm px-3 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-50"
-                      >
-                        상세
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-500">최근 주문이 없습니다.</p>
-              )}
-            </section>
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p className="text-gray-500">최근 주문이 없습니다.</p>
+          )}
+        </section>
 
             {/* 배송 진행중 */}
             <section className="bg-white rounded-2xl shadow p-5">
