@@ -126,11 +126,11 @@ export default function PaymentModal({ isOpen, onClose, paymentData }) {
     <div className="fixed inset-0 w-full h-full bg-black/50 flex justify-center items-center z-50">
 
       <div
-        className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg"
+        className="bg-white p-8 rounded-lg h-dvh lg:h-190 shadow-lg w-full max-w-lg"
         onClick={(e) => e.stopPropagation()}
         ref={modalRef}
       >
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center lg:mb-6">
           <h2 className="text-2xl font-bold">주문서</h2>
           <button onClick={onClose} className="text-2xl font-bold">
             &times;
@@ -138,12 +138,12 @@ export default function PaymentModal({ isOpen, onClose, paymentData }) {
         </div>  
 
         <div id="payment-method" className="w-full"></div>
-        <div id="agreement" className="w-full mt-4"></div>
+        <div id="agreement" className="w-full lg:mt-10"></div>
 
         <button
           onClick={handlePayment}
           disabled={!ready}
-          className="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded mt-8 disabled:bg-gray-400"
+          className="w-full bg-blue-500 text-white font-bold py-2 lg:py-3 px-4 rounded lg:mt-8 disabled:bg-gray-400"
         >
           {ready
             ? `${paymentData.amount.toLocaleString()}원 결제하기`
