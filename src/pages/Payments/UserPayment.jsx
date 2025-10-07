@@ -648,7 +648,7 @@ export default function UserPayment() {
                   className={`w-full border border-gray-400 rounded-sm px-2 py-2 ${
                     inputErrors?.address2 && "border-red-500"
                   }`}
-                  value={shippingAddress.address2.mobile}
+                  value={shippingAddress.address2}
                   onChange={handleInputChange}
                   readOnly={isDefaultAddress}
                   max={30}
