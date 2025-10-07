@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import VirtualAccountEx from "../../components/features/payment/VirtualAccountEx";
 import TossEx from "../../components/features/payment/TossEX";
 import AddressModal from "../../components/features/payment/AddressModal";
-import { useMyProfile } from "../../hooks/useUser";
+// import { useMyProfile } from "../../hooks/useUser";
 import TossModal from "../../components/features/payment/TossModal";
 import {
   useGetMyOrders,
@@ -25,6 +25,15 @@ const SECTION_TITLE_STYLE = "text-xl font-bold";
 
 export default function UserPayment() {
   // const { data: userProfile, isLoading: userLoading } = useMyProfile();
+
+  //입력값 정규식
+  const reg = {
+    recipient: /^(?:[가-힣]{2,5}|[a-zA-Z]{2,10}\s[a-zA-Z]{2,10})$/,
+    phone: /^0\d{1,2}-?\d{3,4}-?\d{4}$/,
+    address2: /^.{2,}$/,
+  };
+  const validNames = ["recipient", "phone", "address2"];
+
   const {
     data: userOrder,
     isLoading: orderLoading,
@@ -32,14 +41,14 @@ export default function UserPayment() {
     error: orderError,
   } = useGetMyOrders(); // 주문서
   const purchaseId = userOrder?.results[0]?.purchase_id;
-  console.log(userOrder?.results.length, "길이");
+
   const {
     data: items,
     isLoading: areItemsLoading,
     isError: areItemError,
     error: itemError,
   } = useGetPurchaseItems(purchaseId); // 주문 내용
-  console.log(items);
+
   const { mutateAsync: updateAddress, isPending: isAddressUpdate } =
     useUpdateShippingAddress();
 
@@ -51,8 +60,6 @@ export default function UserPayment() {
     error: MyAddressError,
   } = useGetMyAddresses();
 
-  console.log(userOrder, "주문");
-  console.log(myAddress);
   const filterOrder = filterOrders(items?.results); //ready 상태만 가져옴
   const [testPaymentInfo, setTestPaymentInfo] = useState({
     amount: 0,
@@ -69,6 +76,10 @@ export default function UserPayment() {
     address1: "", //기본주소면 여기만 출력
     address2: "", //상세 주소
   });
+
+  // 입력값 에러 메시지...
+  const [inputErrors, setInputErrors] = useState({});
+
   const [addressId, setAddressId] = useState(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false); // 주소 검색 모달
@@ -78,6 +89,21 @@ export default function UserPayment() {
   const [isTermsOpen, setTermsOpen] = useState(false);
   const [termsAgree, setTermsAgree] = useState(false);
 
+  // 입력 필드 위치 참조
+  const inputRef = {
+    recipient: {
+      pc: useRef(null),
+      mobile: useRef(null),
+    },
+    phone: {
+      pc: useRef(null),
+      mobile: useRef(null),
+    },
+    address2: {
+      pc: useRef(null),
+      mobile: useRef(null),
+    },
+  };
   // useEffect #1: 기본 유저 데이터 세팅
   // useEffect(() => {
   //   // userProfile 데이터가 있고, 그 안에 주소 정보가 있다면
@@ -118,7 +144,7 @@ export default function UserPayment() {
       const orderName = `${filterOrder[0].product_name} ${
         filterOrder.length >= 2 && "외 " + (filterOrder.length - 1) + "건"
       }`;
-      console.log(orderName);
+
       setTestPaymentInfo((prev) => ({
         ...prev,
         amount: totalPrice,
@@ -166,9 +192,24 @@ export default function UserPayment() {
       const formattedValue = value
         .replace(/[^0-9]/g, "")
         .replace(/(^02.{0}|^01.{1}|[0-9]{3})([0-9]+)([0-9]{4})/, "$1-$2-$3");
+
       setShippingAddress((prev) => ({ ...prev, [name]: formattedValue }));
-    } else {
+      if (inputErrors[name]) {
+        // 하이픈 제거
+        const newPhone = value.replaceAll("-", "")
+        if (reg[name].test(newPhone)) {
+          setInputErrors((prev) => ({ ...prev, [name]: "" }));
+        }
+      }
+    } else if (validNames.includes(name)) {
       setShippingAddress((prev) => ({ ...prev, [name]: value }));
+
+      // 에러 있으면 정규식으로 다시 체크
+      if (inputErrors[name]) {
+        if (reg[name].test(value)) {
+          setInputErrors((prev) => ({ ...prev, [name]: "" }));
+        }
+      }
     }
 
     if (isDefaultAddress) {
@@ -182,7 +223,6 @@ export default function UserPayment() {
   // };
 
   const handlePaymentBtn = (payment) => {
-    console.log(payment);
     setPayment(payment);
   };
   // 주소 모달창
@@ -204,9 +244,10 @@ export default function UserPayment() {
 
   // 주소 변경
   const handleCompleteAddress = (addressData) => {
-    console.log(addressData, "주소");
     setShippingAddress((prev) => ({
       ...prev,
+      recipient: "",
+      phone: "",
       postcode: addressData.zoneCode,
       address1: addressData.address,
       address2: "",
@@ -220,12 +261,15 @@ export default function UserPayment() {
 
   // 기본 주소 리스트 선택값 상태에 할당
   const handleSelectAddressList = (addressData) => {
-    console.log(addressData, "주소");
     setShippingAddress(() => ({
       recipient: addressData?.recipient || "",
-      phone: addressData?.phone
-        .replace(/[^0-9]/g, "")
-        .replace(/(^02.{0}|^01.{1}|[0-9]{3})([0-9]+)([0-9]{4})/, "$1-$2-$3") || 0,
+      phone:
+        addressData?.phone
+          .replace(/[^0-9]/g, "")
+          .replace(
+            /(^02.{0}|^01.{1}|[0-9]{3})([0-9]+)([0-9]{4})/,
+            "$1-$2-$3"
+          ) || 0,
       postcode: addressData?.postcode || "",
       address1: addressData?.address1 || "",
       address2: addressData?.address2 || "",
@@ -238,18 +282,15 @@ export default function UserPayment() {
   };
 
   // 약관 클릭
-  const handleCheckboxChange = (e) => {
+  const handleCheckboxChange = () => {
     //이미 동의중일때 누르면 false
-    console.log( e.target.checked,'g')
-    if(termsAgree){
-      setTermsAgree(false)
-    }else{
-      console.log('test')
-      setTermsAgree(false)
+    if (termsAgree) {
+      setTermsAgree(false);
+    } else {
+      setTermsAgree(false);
       setTermsOpen(true);
-
     }
-  }
+  };
 
   // 약관 모달 닫기
   const handleTermsClose = () => {
@@ -259,35 +300,76 @@ export default function UserPayment() {
   const handleLabelClick = (e) => {
     e.preventDefault();
     setTermsOpen(true);
-
-  }
+  };
 
   const handleSubmitPay = async (e) => {
     e.preventDefault(); // 결제중 새로고침 방지
 
     try {
-      // 주소 추가 메소드 기본 주소면 안함
-      // 기본 주소가 아니면,
-
-      // 하이픈 제거
-      setShippingAddress((prev) => ({
-        ...prev,
-        phone: prev?.phone.replaceAll("-", ""),
-      }));
-      await updateAddress({ address: shippingAddress });
-      // 주소 추가 경고창 보내고, 바로 중단할것
-
       // 현재 어떤 결제 방식 선택하는지 Toss선택하면 Toss 모달 화면 출력....
       if (payment === "toss") {
+        // Todo: 테스트로 기본 주소는 검사 안함 이후에 배송지 추가에 정규식 검사가 들어가면 제거 할것
+        if (!isDefaultAddress) {
+          // 정규식 검사
+          const newErrors = {};
+          const recipientTest = reg.recipient.test(shippingAddress.recipient);
+          const phoneTest = reg.phone.test(shippingAddress.phone);
+          const address2Test = reg.address2.test(shippingAddress.address2);
+          if (!recipientTest) {
+            newErrors.recipient = "올바른 형식의 이름을 입력해주세요.";
+          }
+          if (!phoneTest) {
+            newErrors.phone = "올바른 전화번호를 입력하세요";
+          }
+          if (!address2Test) {
+            newErrors.address2 = "상세주소는 2자리 이상 적어 주셔야 합니다.";
+          }
+
+          setInputErrors(newErrors);
+          // 유효성 검사 실패 -> 제일 위에 있는 실패한곳 으로 이동
+          if (Object.keys(newErrors).length > 0) {
+            const firstErrorField = Object.keys(newErrors)[0];
+            const isMobile = window.innerWidth < 1024; // 모바일 화면인지 체크
+            console.log(isMobile, "모바일?");
+            const targetRef = isMobile
+              ? inputRef[firstErrorField].mobile
+              : inputRef[firstErrorField].pc;
+
+            if (targetRef.current) {
+              targetRef.current.focus();
+
+              targetRef.current.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+            }
+          }
+          if (!recipientTest || !phoneTest || !address2Test) {
+            throw new Error("올바르지 않은 정보");
+          }
+        }
+        // 주소 추가 메소드 기본 주소면 안함
+        // 기본 주소가 아니면,
+        // 하이픈 제거
+        setShippingAddress((prev) => ({
+          ...prev,
+          phone: prev?.phone.replaceAll("-", ""),
+        }));
+        await updateAddress({ address: shippingAddress });
+        // 주소 추가 경고창 보내고, 바로 중단할것
         setIsPaymentModalOpen(true);
       } else if (payment === "account") {
         console.log("무통장 입금"); // 현재 구현이 안되어 있어서 임시로 체크
       }
     } catch (error) {
       console.error(error, "결제 시도중 에러"); //나중에 모달 창으로 변경 할것
+      if (error instanceof Error) {
+        throw error;
+      } else {
+        throw new Error(String(error), "에러 발생");
+      }
     }
   };
-  console.log(shippingAddress);
 
   // 초기 기본값 로딩시 스켈레톤 출력
   const isLoadingData = areMyAddressLoading || orderLoading || areItemsLoading;
@@ -296,7 +378,7 @@ export default function UserPayment() {
   const isPaymentProcessing = isAddressUpdate || false;
 
   // 주문서 에러
-  const isLoadFail = orderIsError || areItemError;
+  const isLoadFail = orderIsError || areItemError || areMyAddressError;
 
   console.log(orderError, itemError, "에러 테스트");
   if (isLoadingData) {
@@ -320,7 +402,7 @@ export default function UserPayment() {
       {isPaymentProcessing && <CartLoadingSpin />}
       <form
         onSubmit={handleSubmitPay}
-        className="w-[800px] flex flex-col justify-center items-center"
+        className="p-2 sm:p-0 w-dvw lg:w-[800px] flex flex-col justify-center items-center"
       >
         {/* 배송지 섹션 */}
         <section className={SECTION_STYLE}>
@@ -344,117 +426,263 @@ export default function UserPayment() {
               {/* 기본 배송지 */}
               배송지 선택
             </button>
-            <table className="w-full table-fixed border-spacing-y-3 border-separate">
-              <tbody>
-                {/* 받는 분 */}
-                <tr>
-                  <th className="w-20 p-2 text-left font-semibold">
-                    <label htmlFor="recipient">
-                      받는 분 <span className="text-xs text-violet-800">※</span>
-                    </label>
-                  </th>
-                  <td className="p-2">
-                    <input
-                      id="recipient"
-                      className="w-full border border-gray-400 rounded-sm px-2 py-1"
-                      name="recipient"
-                      value={shippingAddress.recipient}
-                      onChange={handleInputChange}
-                      readOnly={isDefaultAddress}
-                      required
-                    />
-                  </td>
-                </tr>
 
-                {/* 연락처 */}
-                <tr>
-                  <th className="w-20 p-2 text-left font-semibold">
-                    <label htmlFor="phone">
-                      연락처 <span className="text-xs text-violet-800">※</span>
-                    </label>
-                  </th>
-                  <td className="p-2">
-                    <input
-                      name="phone"
-                      id="phone"
-                      className="w-full border border-gray-400 rounded-sm px-2 py-1"
-                      value={shippingAddress.phone}
-                      onChange={handleInputChange}
-                      maxLength={13}
-                      readOnly={isDefaultAddress}
-                      required
-                    />
-                  </td>
-                </tr>
+            {/* 데스크톱 */}
+            <div className="hidden lg:block">
+              <table className="w-full table-fixed border-spacing-y-3 border-separate">
+                <tbody>
+                  {/* 받는 분 */}
+                  <tr>
+                    <th className="w-20 p-2 text-left font-semibold align-top">
+                      <label htmlFor="recipient">
+                        받는 분{" "}
+                        <span className="text-xs text-violet-800">※</span>
+                      </label>
+                    </th>
+                    <td className="p-2">
+                      <input
+                        id="recipient"
+                        className={`w-full border border-gray-400 rounded-sm px-2 py-1 ${
+                          inputErrors?.recipient && "border-red-500"
+                        }`}
+                        name="recipient"
+                        ref={inputRef.recipient.pc}
+                        value={shippingAddress.recipient}
+                        onChange={handleInputChange}
+                        readOnly={isDefaultAddress}
+                      />
+                      {inputErrors?.recipient && (
+                        <p className="text-sm text-red-500">
+                          {inputErrors.recipient}
+                        </p>
+                      )}
+                    </td>
+                  </tr>
 
-                {/* 주소 */}
-                <tr>
-                  <th className="w-20 p-2 text-left font-semibold">
-                    <label htmlFor="address1">
-                      주소 <span className="text-xs text-violet-800">※</span>
-                    </label>
-                  </th>
-                  <td className="p-2" colSpan={3}>
-                    <input
-                      id="address1"
-                      name="address1"
-                      className="w-full border border-gray-400 rounded-sm px-2 py-1"
-                      value={shippingAddress.address1}
-                      onChange={handleInputChange}
-                      readOnly
-                      required
-                    />
-                  </td>
-                </tr>
+                  {/* 연락처 */}
+                  <tr>
+                    <th className="w-20 p-2 text-left font-semibold align-top">
+                      <label htmlFor="phone">
+                        연락처{" "}
+                        <span className="text-xs text-violet-800">※</span>
+                      </label>
+                    </th>
+                    <td className="p-2">
+                      <input
+                        name="phone"
+                        id="phone"
+                        className={`w-full border border-gray-400 rounded-sm px-2 py-1 ${
+                          inputErrors?.phone && "border-red-500"
+                        }`}
+                        ref={inputRef.phone.pc}
+                        value={shippingAddress.phone}
+                        onChange={handleInputChange}
+                        maxLength={13}
+                        readOnly={isDefaultAddress}
+                      />
+                      {inputErrors?.phone && (
+                        <p className="text-sm text-red-500">
+                          {inputErrors.phone}
+                        </p>
+                      )}
+                    </td>
+                  </tr>
 
-                {/* 상세 주소 */}
-                <tr>
-                  <th className="w-20 p-2 text-left font-semibold">
-                    <label htmlFor="address2" className="whitespace-nowrap">
-                      상세 주소{" "}
-                      <span className="text-xs text-violet-800">※</span>
-                    </label>
-                  </th>
-                  <td className="p-2" colSpan={2}>
-                    <input
-                      id="address2"
-                      name="address2"
-                      className="w-full border border-gray-400 rounded-sm px-2 py-1"
-                      value={shippingAddress.address2}
-                      onChange={handleInputChange}
-                      readOnly={isDefaultAddress}
-                      required
-                    />
-                  </td>
-                </tr>
+                  {/* 주소 */}
+                  <tr>
+                    <th className="w-20 p-2 text-left font-semibold align-top">
+                      <label htmlFor="address1">
+                        주소 <span className="text-xs text-violet-800">※</span>
+                      </label>
+                    </th>
+                    <td className="p-2" colSpan={3}>
+                      <input
+                        id="address1"
+                        name="address1"
+                        className="w-12/13 lg:w-full border border-gray-400 rounded-sm px-2 py-1"
+                        value={shippingAddress.address1}
+                        onChange={handleInputChange}
+                        readOnly
+                        required
+                      />
+                    </td>
+                  </tr>
 
-                {/* 우편번호 */}
-                <tr>
-                  <th className="w-20 p-2 text-left font-semibold">
-                    <label htmlFor="postcode" className="whitespace-nowrap">
-                      우편 번호{" "}
-                      <span className="text-xs text-violet-800">※</span>
-                    </label>
-                  </th>
-                  <td className="p-2">
-                    <input
-                      id="postcode"
-                      name="postcode"
-                      className="w-full border border-gray-400 rounded-sm px-2 py-1"
-                      value={shippingAddress.postcode}
-                      onChange={handleInputChange}
-                      readOnly
-                      required
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                  {/* 상세 주소 */}
+                  <tr>
+                    <th className="w-20 p-2 text-left font-semibold align-top">
+                      <label htmlFor="address2" className="whitespace-nowrap">
+                        상세 주소{" "}
+                        <span className="text-xs text-violet-800">※</span>
+                      </label>
+                    </th>
+                    <td className="p-2" colSpan={2}>
+                      <input
+                        id="address2"
+                        name="address2"
+                        ref={inputRef.address2.pc}
+                        className={`w-full border border-gray-400 rounded-sm px-2 py-1 ${
+                          inputErrors?.address2 && "border-red-500"
+                        }`}
+                        value={shippingAddress.address2}
+                        onChange={handleInputChange}
+                        readOnly={isDefaultAddress}
+                        max={30}
+                      />
+                      {inputErrors?.address2 && (
+                        <p className="text-sm text-red-500">
+                          {inputErrors.address2}
+                        </p>
+                      )}
+                    </td>
+                  </tr>
+
+                  {/* 우편번호 */}
+                  <tr>
+                    <th className="w-20 p-2 text-left font-semibold align-top">
+                      <label htmlFor="postcode" className="whitespace-nowrap">
+                        우편 번호{" "}
+                        <span className="text-xs text-violet-800">※</span>
+                      </label>
+                    </th>
+                    <td className="p-2">
+                      <input
+                        id="postcode"
+                        name="postcode"
+                        className="lg:w-full border border-gray-400 rounded-sm px-2 py-1"
+                        value={shippingAddress.postcode}
+                        onChange={handleInputChange}
+                        readOnly
+                        required
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* 모바일  */}
+            <div className="block lg:hidden w-full space-y-4">
+              {/* 받는분 */}
+              <div className="mt-2">
+                <label
+                  htmlFor="recipient-mobile"
+                  className="font-semibold text-sm mb-1"
+                >
+                  받는 분 <span className="text-xs text-violet-800">※</span>
+                </label>
+                <input
+                  id="recipient-mobile"
+                  className={`w-full border border-gray-400 rounded-sm px-2 py-2 ${
+                    inputErrors?.recipient && "border-red-500"
+                  }`}
+                  name="recipient"
+                  ref={inputRef.recipient.mobile}
+                  value={shippingAddress.recipient}
+                  onChange={handleInputChange}
+                  readOnly={isDefaultAddress}
+                />
+                {inputErrors?.recipient && (
+                  <p className="text-sm text-red-500">
+                    {inputErrors.recipient}
+                  </p>
+                )}
+              </div>
+
+              {/* 연락처 */}
+              <div>
+                <label
+                  htmlFor="phone-mobile"
+                  className="font-semibold text-sm mb-1"
+                >
+                  연락 처 <span className="text-xs text-violet-800">※</span>
+                </label>
+                <input
+                  name="phone"
+                  id="phone-mobile"
+                  ref={inputRef.phone.mobile}
+                  className={`w-full border border-gray-400 rounded-sm px-2 py-2 ${
+                    inputErrors?.phone && "border-red-500"
+                  }`}
+                  value={shippingAddress.phone}
+                  onChange={handleInputChange}
+                  maxLength={13}
+                  readOnly={isDefaultAddress}
+                />
+                {inputErrors?.phone && (
+                  <p className="text-sm text-red-500">{inputErrors.phone}</p>
+                )}
+              </div>
+
+              {/* 주소 */}
+              <div>
+                <label
+                  htmlFor="address1-mobile"
+                  className="font-semibold text-sm mb-1"
+                >
+                  주소<span className="text-xs text-violet-800">※</span>
+                </label>
+                <input
+                  id="address1-mobile"
+                  name="address1"
+                  className="w-full border border-gray-400 rounded-sm px-2 py-2"
+                  value={shippingAddress.address1}
+                  onChange={handleInputChange}
+                  readOnly
+                  required
+                />
+              </div>
+
+              {/* 상세 주소 */}
+              <div>
+                <label
+                  htmlFor="address2-mobile"
+                  className="font-semibold text-sm mb-1"
+                >
+                  상세 주소<span className="text-xs text-violet-800">※</span>
+                </label>
+                <input
+                  id="address2-mobile"
+                  name="address2"
+                  ref={inputRef.address2.mobile}
+                  className={`w-full border border-gray-400 rounded-sm px-2 py-2 ${
+                    inputErrors?.address2 && "border-red-500"
+                  }`}
+                  value={shippingAddress.address2}
+                  onChange={handleInputChange}
+                  readOnly={isDefaultAddress}
+                  max={30}
+                />
+                {inputErrors?.address2 && (
+                  <p className="text-sm text-red-500">{inputErrors.address2}</p>
+                )}
+              </div>
+              {/* 우편 번호 */}
+              <div>
+                <label
+                  htmlFor="postcode-mobile"
+                  className="font-semibold text-sm mb-1"
+                >
+                  우편 번호<span className="text-xs text-violet-800">※</span>
+                </label>
+
+                <input
+                  id="postcode-mobile"
+                  name="postcode"
+                  className="w-full border border-gray-400 rounded-sm px-2 py-2"
+                  value={shippingAddress.postcode}
+                  onChange={handleInputChange}
+                  readOnly
+                  required
+                />
+              </div>
+            </div>
           </div>
         </section>
         {/* 새로운 배송지 검색 */}
         {isModalOpen && (
           <AddressModal
+            isOpen={isModalOpen}
             onClose={handleModalClose}
             onSearch={handleCompleteAddress}
           />
@@ -526,7 +754,11 @@ export default function UserPayment() {
         <section className={SECTION_STYLE}>
           <h2 className={SECTION_TITLE_STYLE}>약관</h2>
           <div>
-            <label htmlFor="agree-chk" onClick={handleLabelClick} className="select-none cursor-pointer">
+            <label
+              htmlFor="agree-chk"
+              onClick={handleLabelClick}
+              className="select-none cursor-pointer"
+            >
               [필수] 개인정보 수집 및 이용 동의
             </label>
             <input
@@ -539,19 +771,25 @@ export default function UserPayment() {
             />
           </div>
         </section>
-        
+
         {/* 결제 버튼 == 결제폼 submit 버튼 */}
         <button
           type="submit" //실 적용시
           // type="button" //테스트
-          className="w-100 border rounded-sm bg-violet-700 text-white py-1 cursor-pointer transition delay-75 hover:bg-violet-800"
+          className="w-full  lg:w-100 border rounded-sm bg-violet-700 text-white py-1 cursor-pointer transition delay-75 hover:bg-violet-800"
           // onClick={handlePurchase}
           disabled={isPaymentProcessing} // 결제 진행중에는 두번 요청 X
         >
           {testPaymentInfo.amount.toLocaleString()}원 결제
         </button>
       </form>
-    {isTermsOpen && <TermsModal onClose={handleTermsClose} setAgree={setTermsAgree} />}
+      {isTermsOpen && (
+        <TermsModal
+          isOpen={isTermsOpen}
+          onClose={handleTermsClose}
+          setAgree={setTermsAgree}
+        />
+      )}
 
       <TossModal
         isOpen={isPaymentModalOpen}

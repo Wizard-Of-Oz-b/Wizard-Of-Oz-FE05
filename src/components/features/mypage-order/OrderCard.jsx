@@ -87,7 +87,7 @@ export default function OrderCard({ order }) {
       setOrderStatus(statusInfo?.name);
       setOrderStyle(statusInfo?.style);
     }
-  }, [shipment, orderData]);
+  }, [shipment, orderData, order]);
   //order 없으면 얼리 리턴
   if (!order) {
     return;

@@ -1,20 +1,30 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { termsText } from "../../../constants/terms";
 import useOnClickOutside from "../../../hooks/payments/useOnclickOutside";
 
-export default function TermsModal({ onClose, setAgree }) {
+export default function TermsModal({ isOpen, onClose, setAgree }) {
   const modalRef = useRef(null);
   useOnClickOutside(modalRef, onClose);
   const terms = termsText;
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    }
+
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
 
   const onClickAgree = () => {
     setAgree(true);
     onClose();
   };
   return (
-    <div className="flex flex-col justify-center items-center fixed inset-0 w-full h-full backdrop-blur-xs z-50">
+    <div className="flex flex-col justify-center items-center fixed inset-0 w-full p-2 lg:p-0 h-full backdrop-blur-xs z-50">
       <div
-        className="flex flex-col border shadow-2xl rounded-lg py-3 items-center  w-full max-w-xl h-[600px] bg-white"
+        className="flex flex-col border shadow-2xl rounded-lg py-3 items-center  w-full  max-w-xl h-[600px] bg-white"
         ref={modalRef}
       >
         <div className="flex w-full justify-between items-center px-4 py-2 border-b border-gray-200 shadow-md">
@@ -23,7 +33,7 @@ export default function TermsModal({ onClose, setAgree }) {
             &times;
           </button>
         </div>
-        <div className="flex-grow overflow-y-auto p-4 space-y-3 payment-address">
+        <div className="flex-grow overflow-y-auto p-4 space-y-3 payment-address whitespace-pre-line">
           {terms}
         </div>
 

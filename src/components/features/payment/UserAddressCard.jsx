@@ -10,7 +10,7 @@ export default function UserAddressCard({ data, onSelect, select }) {
   const isSelect = select === data?.address_id
   const selectStyle =
     isSelect
-      ? "border-2 border-violet-200 bg-violet-100 shadow-xl"
+      ? "border border-violet-200 bg-violet-100 shadow-xl"
       : "border border-neutral-300 bg-white hover:shadow-[inset_0_6px_10px_0_rgba(0,0,0,0.1)]";
   console.log(select);
   return (
