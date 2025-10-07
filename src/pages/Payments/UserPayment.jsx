@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import VirtualAccountEx from "../../components/features/payment/VirtualAccountEx";
 import TossEx from "../../components/features/payment/TossEX";
 import AddressModal from "../../components/features/payment/AddressModal";
-import { useMyProfile } from "../../hooks/useUser";
+// import { useMyProfile } from "../../hooks/useUser";
 import TossModal from "../../components/features/payment/TossModal";
 import {
   useGetMyOrders,
@@ -78,9 +78,7 @@ export default function UserPayment() {
   });
 
   // 입력값 에러 메시지...
-  const [recipientError, setRecipientError] = useState("");
-  const [phoneError, setPhoneError] = useState("");
-  const [address2Error, setAddress2Error] = useState("");
+  const [inputErrors, setInputErrors] = useState({});
 
   const [addressId, setAddressId] = useState(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -91,6 +89,21 @@ export default function UserPayment() {
   const [isTermsOpen, setTermsOpen] = useState(false);
   const [termsAgree, setTermsAgree] = useState(false);
 
+  // 입력 필드 위치 참조
+  const inputRef = {
+    recipient: {
+      pc: useRef(null),
+      mobile: useRef(null),
+    },
+    phone: {
+      pc: useRef(null),
+      mobile: useRef(null),
+    },
+    address2: {
+      pc: useRef(null),
+      mobile: useRef(null),
+    },
+  };
   // useEffect #1: 기본 유저 데이터 세팅
   // useEffect(() => {
   //   // userProfile 데이터가 있고, 그 안에 주소 정보가 있다면
@@ -181,9 +194,24 @@ export default function UserPayment() {
         .replace(/(^02.{0}|^01.{1}|[0-9]{3})([0-9]+)([0-9]{4})/, "$1-$2-$3");
 
       setShippingAddress((prev) => ({ ...prev, [name]: formattedValue }));
+      if (inputErrors[name]) {
+        // 하이픈 제거
+        const newPhone = value.replaceAll("-", "")
+        if (reg[name].test(newPhone)) {
+          setInputErrors((prev) => ({ ...prev, [name]: "" }));
+        }
+      }
     } else if (validNames.includes(name)) {
       setShippingAddress((prev) => ({ ...prev, [name]: value }));
+
+      // 에러 있으면 정규식으로 다시 체크
+      if (inputErrors[name]) {
+        if (reg[name].test(value)) {
+          setInputErrors((prev) => ({ ...prev, [name]: "" }));
+        }
+      }
     }
+
     if (isDefaultAddress) {
       setIsDefaultAddress(false);
     }
@@ -280,23 +308,43 @@ export default function UserPayment() {
     try {
       // 현재 어떤 결제 방식 선택하는지 Toss선택하면 Toss 모달 화면 출력....
       if (payment === "toss") {
-
         // Todo: 테스트로 기본 주소는 검사 안함 이후에 배송지 추가에 정규식 검사가 들어가면 제거 할것
-        if(!isDefaultAddress){
+        if (!isDefaultAddress) {
           // 정규식 검사
+          const newErrors = {};
           const recipientTest = reg.recipient.test(shippingAddress.recipient);
           const phoneTest = reg.phone.test(shippingAddress.phone);
           const address2Test = reg.address2.test(shippingAddress.address2);
           if (!recipientTest) {
-            setRecipientError("올바른 형식의 이름을 입력해주세요.");
+            newErrors.recipient = "올바른 형식의 이름을 입력해주세요.";
           }
           if (!phoneTest) {
-            setPhoneError("올바른 전화번호를 입력하세요");
+            newErrors.phone = "올바른 전화번호를 입력하세요";
           }
           if (!address2Test) {
-            setAddress2Error("상세주소는 2자리 이상 적어 주셔야 합니다.");
+            newErrors.address2 = "상세주소는 2자리 이상 적어 주셔야 합니다.";
           }
-          if (recipientTest || phoneTest || address2Test) {
+
+          setInputErrors(newErrors);
+          // 유효성 검사 실패 -> 제일 위에 있는 실패한곳 으로 이동
+          if (Object.keys(newErrors).length > 0) {
+            const firstErrorField = Object.keys(newErrors)[0];
+            const isMobile = window.innerWidth < 1024; // 모바일 화면인지 체크
+            console.log(isMobile, "모바일?");
+            const targetRef = isMobile
+              ? inputRef[firstErrorField].mobile
+              : inputRef[firstErrorField].pc;
+
+            if (targetRef.current) {
+              targetRef.current.focus();
+
+              targetRef.current.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+            }
+          }
+          if (!recipientTest || !phoneTest || !address2Test) {
             throw new Error("올바르지 않은 정보");
           }
         }
@@ -395,16 +443,18 @@ export default function UserPayment() {
                       <input
                         id="recipient"
                         className={`w-full border border-gray-400 rounded-sm px-2 py-1 ${
-                          recipientError && "border-red-500"
+                          inputErrors?.recipient && "border-red-500"
                         }`}
                         name="recipient"
+                        ref={inputRef.recipient.pc}
                         value={shippingAddress.recipient}
                         onChange={handleInputChange}
                         readOnly={isDefaultAddress}
-                        required
                       />
-                      {recipientError && (
-                        <p className="text-sm text-red-500">{recipientError}</p>
+                      {inputErrors?.recipient && (
+                        <p className="text-sm text-red-500">
+                          {inputErrors.recipient}
+                        </p>
                       )}
                     </td>
                   </tr>
@@ -422,16 +472,18 @@ export default function UserPayment() {
                         name="phone"
                         id="phone"
                         className={`w-full border border-gray-400 rounded-sm px-2 py-1 ${
-                          phoneError && "border-red-500"
+                          inputErrors?.phone && "border-red-500"
                         }`}
+                        ref={inputRef.phone.pc}
                         value={shippingAddress.phone}
                         onChange={handleInputChange}
                         maxLength={13}
                         readOnly={isDefaultAddress}
-                        required
                       />
-                      {phoneError && (
-                        <p className="text-sm text-red-500">{phoneError}</p>
+                      {inputErrors?.phone && (
+                        <p className="text-sm text-red-500">
+                          {inputErrors.phone}
+                        </p>
                       )}
                     </td>
                   </tr>
@@ -468,17 +520,19 @@ export default function UserPayment() {
                       <input
                         id="address2"
                         name="address2"
+                        ref={inputRef.address2.pc}
                         className={`w-full border border-gray-400 rounded-sm px-2 py-1 ${
-                          address2Error && "border-red-500"
+                          inputErrors?.address2 && "border-red-500"
                         }`}
                         value={shippingAddress.address2}
                         onChange={handleInputChange}
                         readOnly={isDefaultAddress}
                         max={30}
-                        required
                       />
-                      {address2Error && (
-                        <p className="text-sm text-red-500">{address2Error}</p>
+                      {inputErrors?.address2 && (
+                        <p className="text-sm text-red-500">
+                          {inputErrors.address2}
+                        </p>
                       )}
                     </td>
                   </tr>
@@ -520,16 +574,18 @@ export default function UserPayment() {
                 <input
                   id="recipient-mobile"
                   className={`w-full border border-gray-400 rounded-sm px-2 py-2 ${
-                    recipientError && "border-red-500"
+                    inputErrors?.recipient && "border-red-500"
                   }`}
                   name="recipient"
+                  ref={inputRef.recipient.mobile}
                   value={shippingAddress.recipient}
                   onChange={handleInputChange}
                   readOnly={isDefaultAddress}
-                  required
                 />
-                {recipientError && (
-                  <p className="text-sm text-red-500">{recipientError}</p>
+                {inputErrors?.recipient && (
+                  <p className="text-sm text-red-500">
+                    {inputErrors.recipient}
+                  </p>
                 )}
               </div>
 
@@ -544,17 +600,17 @@ export default function UserPayment() {
                 <input
                   name="phone"
                   id="phone-mobile"
+                  ref={inputRef.phone.mobile}
                   className={`w-full border border-gray-400 rounded-sm px-2 py-2 ${
-                    phoneError && "border-red-500"
+                    inputErrors?.phone && "border-red-500"
                   }`}
                   value={shippingAddress.phone}
                   onChange={handleInputChange}
                   maxLength={13}
                   readOnly={isDefaultAddress}
-                  required
                 />
-                {phoneError && (
-                  <p className="text-sm text-red-500">{phoneError}</p>
+                {inputErrors?.phone && (
+                  <p className="text-sm text-red-500">{inputErrors.phone}</p>
                 )}
               </div>
 
@@ -588,17 +644,17 @@ export default function UserPayment() {
                 <input
                   id="address2-mobile"
                   name="address2"
+                  ref={inputRef.address2.mobile}
                   className={`w-full border border-gray-400 rounded-sm px-2 py-2 ${
-                    address2Error && "border-red-500"
+                    inputErrors?.address2 && "border-red-500"
                   }`}
-                  value={shippingAddress.address2}
+                  value={shippingAddress.address2.mobile}
                   onChange={handleInputChange}
                   readOnly={isDefaultAddress}
                   max={30}
-                  required
                 />
-                {address2Error && (
-                  <p className="text-sm text-red-500">{address2Error}</p>
+                {inputErrors?.address2 && (
+                  <p className="text-sm text-red-500">{inputErrors.address2}</p>
                 )}
               </div>
               {/* 우편 번호 */}
