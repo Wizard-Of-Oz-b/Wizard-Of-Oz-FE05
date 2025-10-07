@@ -14,6 +14,7 @@ const menuItems = [
   { name: "배송지 관리", path: "shipping", icon: MapPin },
   { name: "비밀번호 변경", path: "password", icon: Lock },
   { name: "내가 작성한 리뷰", path: "reviews", icon: Star },
+  { name: "회원 등급 안내", path: "members", icon: Star },
 ];
 
 export default function Mypage() {
