@@ -50,6 +50,7 @@ import ShippingAddressManager from "./components/common/layouts/Mypage/ShippingA
 import OrderList from "./components/common/layouts/Mypage/OrderList.jsx";
 import StoreIntro from "./pages/StoreInfo.jsx";
 import MyPageDashboard from "./components/common/layouts/Mypage/MyPageDashboard.jsx";
+import MembershipTiers from "./components/common/layouts/Mypage/MembershipTiers.jsx";
 
 
 const queryClient = new QueryClient();
@@ -85,6 +86,7 @@ export default function App() {
                 <Route path="withdrawal" element={<MemberWithdrawal />} />
                 <Route path="reviews" element={<MyReviewsPage />} />
                 <Route path="orderlist" element={<OrderList />} />
+                <Route path="members" element={<MembershipTiers />} />
               </Route>
             </Route>
             <Route path="/auth/callback/:provider" element={<OAuthCallback />} />

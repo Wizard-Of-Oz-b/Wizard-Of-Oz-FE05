@@ -1,19 +1,20 @@
 import { Outlet, NavLink } from "react-router-dom";
 import {
   Package, UserCog, MapPin, Lock, UserX, Star, ChevronRight,
-  ChevronDown, Headphones, Gift, BadgeCheck
+  ChevronDown, Headphones, Gift, BadgeCheck, Award, LayoutGrid,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
 // 조미현멘토님 피드백 반영, 회원탈퇴를 회원정보 관리 내 자그마하게 ...
 const menuItems = [
-  { name: "대시보드", path: "/mypage", icon: Gift, end: true },
+  { name: "대시보드", path: "/mypage", icon: LayoutGrid, end: true },
   { name: "주문내역", path: "orderlist", icon: Package },
   { name: "회원정보 관리", path: "memberinfo", icon: UserCog },
   { name: "배송지 관리", path: "shipping", icon: MapPin },
   { name: "비밀번호 변경", path: "password", icon: Lock },
   { name: "내가 작성한 리뷰", path: "reviews", icon: Star },
+  { name: "회원 등급 안내", path: "members", icon: Award },
 ];
 
 export default function Mypage() {
