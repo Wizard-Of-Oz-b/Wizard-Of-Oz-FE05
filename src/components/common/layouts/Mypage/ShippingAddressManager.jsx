@@ -145,14 +145,14 @@ export default function ShippingAddressManager() {
 
     {/* 기본 배송지 카드 */}
     {defaultAddress && (
-      <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-        <div className="flex items-start justify-between">
+      <div className="rounded-2xl border border-neutral-200 bg-white p-4 sm:p-5 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-pink-500 text-white flex items-center justify-center">
+            <div className="h-10 w-10 shrink-0 rounded-xl bg-gradient-to-br from-violet-500 to-pink-500 text-white flex items-center justify-center text-[13px]">
               {/* <Home className="h-5 w-5" /> */}
               기본
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="inline-flex items-center gap-2">
                 <p className="text-base font-semibold text-neutral-900">기본 배송지</p>
                 <span className="inline-flex items-center gap-1 rounded-full bg-violet-50 px-2 py-[2px] border border-violet-200 text-[11px] text-violet-700">
@@ -161,17 +161,19 @@ export default function ShippingAddressManager() {
                 </span>
               </div>
               <div className="mt-1 text-sm text-neutral-700">
-                <span className="font-medium">{defaultAddress.recipient}</span>
+                <span className="font-medium truncate inline-block max-w-[60vw] sm:max-w-none align-bottom">
+                  {defaultAddress.recipient}
+                </span>
                 <span className="text-neutral-400"> · </span>
-                <span>{defaultAddress.phone}</span>
+                <span className="align-bottom">{defaultAddress.phone}</span>
               </div>
-              <div className="mt-0.5 text-sm text-neutral-600">
+              <div className="mt-0.5 text-sm text-neutral-600 line-clamp-2">
                 {defaultAddress.postcode} {defaultAddress.address1} {defaultAddress.address2}
               </div>
             </div>
           </div>
           {/* 기본 배송지는 액션 제거/비활성 처리 or 안내만 */}
-          <div className="text-xs text-neutral-400">대표 배송지는 변경만 가능합니다.</div>
+          <div className="text-xs text-neutral-400 sm:pt-1">대표 배송지는 변경만 가능합니다.</div>
         </div>
       </div>
     )}
@@ -181,21 +183,23 @@ export default function ShippingAddressManager() {
       {otherAddresses.map((addr) => (
         <div
           key={addr.address_id}
-          className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm hover:shadow-md transition"
+          className="rounded-2xl border border-neutral-200 bg-white p-4 sm:p-5 shadow-sm hover:shadow-md transition"
         >
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl border border-neutral-200 bg-neutral-50 text-neutral-500 flex items-center justify-center">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="flex items-start gap-3 flex-1 min-w-0">
+              <div className="h-10 w-10 shrink-0 rounded-xl border border-neutral-200 bg-neutral-50 text-neutral-500 flex items-center justify-center text-[13px]">
                 {/* <MapPin className="h-5 w-5" /> */}
                 서브
               </div>
-              <div>
+              <div className="min-w-0">
                 <div className="text-sm text-neutral-700">
-                  <span className="font-medium text-neutral-900">{addr.recipient}</span>
+                  <span className="font-medium text-neutral-900 truncate inline-block max-w-[60vw] sm:max-w-none align-bottom">
+                    {addr.recipient}
+                  </span>
                   <span className="text-neutral-400"> · </span>
-                  <span>{addr.phone}</span>
+                  <span className="align-bottom">{addr.phone}</span>
                 </div>
-                <div className="mt-0.5 text-sm text-neutral-600">
+                <div className="mt-0.5 text-sm text-neutral-600 line-clamp-2">
                   {addr.postcode} {addr.address1} {addr.address2}
                 </div>
 
@@ -209,18 +213,18 @@ export default function ShippingAddressManager() {
               </div>
             </div>
 
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="mt-2 sm:mt-0 grid grid-cols-2 gap-2 w-full sm:w-auto sm:flex sm:items-center sm:gap-2">
               <button
                 onClick={() => handleSetDefault(addr.address_id)}
-                className="px-3.5 h-9 rounded-full text-xs font-medium text-white
+                className="w-full sm:w-auto px-3.5 h-10 rounded-full text-xs font-medium text-white
                            bg-[linear-gradient(90deg,#7c3aed_0%,#ec4899_100%)]
-                           shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition"
+                           shadow-sm hover:shadow-md active:opacity-95 transition"
               >
                 기본으로 설정
               </button>
               <button
                 onClick={() => handleDelete(addr.address_id)}
-                className="px-3.5 h-9 rounded-full text-xs font-medium border border-neutral-300 text-neutral-700 hover:bg-neutral-50 transition"
+                className="w-full sm:w-auto px-3.5 h-10 rounded-full text-xs font-medium border border-neutral-300 text-neutral-700 hover:bg-neutral-50 transition"
               >
                 {/* <Trash2 className="mr-1 inline-block h-4 w-4" /> */}
                 삭제
