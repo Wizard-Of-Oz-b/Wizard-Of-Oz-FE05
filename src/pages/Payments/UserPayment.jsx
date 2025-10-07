@@ -203,8 +203,8 @@ export default function UserPayment() {
   const handleCompleteAddress = (addressData) => {
     setShippingAddress((prev) => ({
       ...prev,
-      recipient: '',
-      phone: '',
+      recipient: "",
+      phone: "",
       postcode: addressData.zoneCode,
       address1: addressData.address,
       address2: "",
@@ -220,9 +220,13 @@ export default function UserPayment() {
   const handleSelectAddressList = (addressData) => {
     setShippingAddress(() => ({
       recipient: addressData?.recipient || "",
-      phone: addressData?.phone
-        .replace(/[^0-9]/g, "")
-        .replace(/(^02.{0}|^01.{1}|[0-9]{3})([0-9]+)([0-9]{4})/, "$1-$2-$3") || 0,
+      phone:
+        addressData?.phone
+          .replace(/[^0-9]/g, "")
+          .replace(
+            /(^02.{0}|^01.{1}|[0-9]{3})([0-9]+)([0-9]{4})/,
+            "$1-$2-$3"
+          ) || 0,
       postcode: addressData?.postcode || "",
       address1: addressData?.address1 || "",
       address2: addressData?.address2 || "",
@@ -237,14 +241,13 @@ export default function UserPayment() {
   // 약관 클릭
   const handleCheckboxChange = () => {
     //이미 동의중일때 누르면 false
-    if(termsAgree){
-      setTermsAgree(false)
-    }else{
-      setTermsAgree(false)
+    if (termsAgree) {
+      setTermsAgree(false);
+    } else {
+      setTermsAgree(false);
       setTermsOpen(true);
-
     }
-  }
+  };
 
   // 약관 모달 닫기
   const handleTermsClose = () => {
@@ -254,8 +257,7 @@ export default function UserPayment() {
   const handleLabelClick = (e) => {
     e.preventDefault();
     setTermsOpen(true);
-
-  }
+  };
 
   const handleSubmitPay = async (e) => {
     e.preventDefault(); // 결제중 새로고침 방지
@@ -338,113 +340,219 @@ export default function UserPayment() {
               {/* 기본 배송지 */}
               배송지 선택
             </button>
-            <table className="w-full table-fixed border-spacing-y-3 border-separate">
-              <tbody>
-                {/* 받는 분 */}
-                <tr>
-                  <th className="w-20 p-2 text-left font-semibold">
-                    <label htmlFor="recipient">
-                      받는 분 <span className="text-xs text-violet-800">※</span>
-                    </label>
-                  </th>
-                  <td className="p-2">
-                    <input
-                      id="recipient"
-                      className="lg:w-full border border-gray-400 rounded-sm px-2 py-1"
-                      name="recipient"
-                      value={shippingAddress.recipient}
-                      onChange={handleInputChange}
-                      readOnly={isDefaultAddress}
-                      required
-                    />
-                  </td>
-                </tr>
 
-                {/* 연락처 */}
-                <tr>
-                  <th className="w-20 p-2 text-left font-semibold">
-                    <label htmlFor="phone">
-                      연락처 <span className="text-xs text-violet-800">※</span>
-                    </label>
-                  </th>
-                  <td className="p-2">
-                    <input
-                      name="phone"
-                      id="phone"
-                      className="lg:w-full border border-gray-400 rounded-sm px-2 py-1"
-                      value={shippingAddress.phone}
-                      onChange={handleInputChange}
-                      maxLength={13}
-                      readOnly={isDefaultAddress}
-                      required
-                    />
-                  </td>
-                </tr>
+            {/* 데스크톱 */}
+            <div className="hidden lg:block">
+              <table className="w-full table-fixed border-spacing-y-3 border-separate">
+                <tbody>
+                  {/* 받는 분 */}
+                  <tr>
+                    <th className="w-20 p-2 text-left font-semibold">
+                      <label htmlFor="recipient">
+                        받는 분{" "}
+                        <span className="text-xs text-violet-800">※</span>
+                      </label>
+                    </th>
+                    <td className="p-2">
+                      <input
+                        id="recipient"
+                        className="lg:w-full border border-gray-400 rounded-sm px-2 py-1"
+                        name="recipient"
+                        value={shippingAddress.recipient}
+                        onChange={handleInputChange}
+                        readOnly={isDefaultAddress}
+                        required
+                      />
+                    </td>
+                  </tr>
 
-                {/* 주소 */}
-                <tr>
-                  <th className="w-20 p-2 text-left font-semibold">
-                    <label htmlFor="address1">
-                      주소 <span className="text-xs text-violet-800">※</span>
-                    </label>
-                  </th>
-                  <td className="p-2" colSpan={3}>
-                    <input
-                      id="address1"
-                      name="address1"
-                      className="lg:w-full border border-gray-400 rounded-sm px-2 py-1"
-                      value={shippingAddress.address1}
-                      onChange={handleInputChange}
-                      readOnly
-                      required
-                    />
-                  </td>
-                </tr>
+                  {/* 연락처 */}
+                  <tr>
+                    <th className="w-20 p-2 text-left font-semibold">
+                      <label htmlFor="phone">
+                        연락처{" "}
+                        <span className="text-xs text-violet-800">※</span>
+                      </label>
+                    </th>
+                    <td className="p-2">
+                      <input
+                        name="phone"
+                        id="phone"
+                        className="lg:w-full border border-gray-400 rounded-sm px-2 py-1"
+                        value={shippingAddress.phone}
+                        onChange={handleInputChange}
+                        maxLength={13}
+                        readOnly={isDefaultAddress}
+                        required
+                      />
+                    </td>
+                  </tr>
 
-                {/* 상세 주소 */}
-                <tr>
-                  <th className="w-20 p-2 text-left font-semibold">
-                    <label htmlFor="address2" className="whitespace-nowrap">
-                      상세 주소{" "}
-                      <span className="text-xs text-violet-800">※</span>
-                    </label>
-                  </th>
-                  <td className="p-2" colSpan={2}>
-                    <input
-                      id="address2"
-                      name="address2"
-                      className="lg:w-full border border-gray-400 rounded-sm px-2 py-1"
-                      value={shippingAddress.address2}
-                      onChange={handleInputChange}
-                      readOnly={isDefaultAddress}
-                      max={30}
-                      required
-                    />
-                  </td>
-                </tr>
+                  {/* 주소 */}
+                  <tr>
+                    <th className="w-20 p-2 text-left font-semibold">
+                      <label htmlFor="address1">
+                        주소 <span className="text-xs text-violet-800">※</span>
+                      </label>
+                    </th>
+                    <td className="p-2" colSpan={3}>
+                      <input
+                        id="address1"
+                        name="address1"
+                        className="w-12/13 lg:w-full border border-gray-400 rounded-sm px-2 py-1"
+                        value={shippingAddress.address1}
+                        onChange={handleInputChange}
+                        readOnly
+                        required
+                      />
+                    </td>
+                  </tr>
 
-                {/* 우편번호 */}
-                <tr>
-                  <th className="w-20 p-2 text-left font-semibold">
-                    <label htmlFor="postcode" className="whitespace-nowrap">
-                      우편 번호{" "}
-                      <span className="text-xs text-violet-800">※</span>
-                    </label>
-                  </th>
-                  <td className="p-2">
-                    <input
-                      id="postcode"
-                      name="postcode"
-                      className="lg:w-full border border-gray-400 rounded-sm px-2 py-1"
-                      value={shippingAddress.postcode}
-                      onChange={handleInputChange}
-                      readOnly
-                      required
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                  {/* 상세 주소 */}
+                  <tr>
+                    <th className="w-20 p-2 text-left font-semibold">
+                      <label htmlFor="address2" className="whitespace-nowrap">
+                        상세 주소{" "}
+                        <span className="text-xs text-violet-800">※</span>
+                      </label>
+                    </th>
+                    <td className="p-2" colSpan={2}>
+                      <input
+                        id="address2"
+                        name="address2"
+                        className="w-[calc(100dvw/1.625)] lg:w-full border border-gray-400 rounded-sm px-2 py-1"
+                        value={shippingAddress.address2}
+                        onChange={handleInputChange}
+                        readOnly={isDefaultAddress}
+                        max={30}
+                        required
+                      />
+                    </td>
+                  </tr>
+
+                  {/* 우편번호 */}
+                  <tr>
+                    <th className="w-20 p-2 text-left font-semibold">
+                      <label htmlFor="postcode" className="whitespace-nowrap">
+                        우편 번호{" "}
+                        <span className="text-xs text-violet-800">※</span>
+                      </label>
+                    </th>
+                    <td className="p-2">
+                      <input
+                        id="postcode"
+                        name="postcode"
+                        className="lg:w-full border border-gray-400 rounded-sm px-2 py-1"
+                        value={shippingAddress.postcode}
+                        onChange={handleInputChange}
+                        readOnly
+                        required
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* 모바일  */}
+            <div className="block lg:hidden w-full space-y-4">
+              {/* 받는분 */}
+              <div className="mt-2">
+                <label
+                  htmlFor="recipient-mobile"
+                  className="font-semibold text-sm mb-1"
+                >
+                  받는 분 <span className="text-xs text-violet-800">※</span>
+                </label>
+                <input
+                  id="recipient-mobile"
+                  className="w-full border border-gray-400 rounded-sm px-2 py-2"
+                  name="recipient"
+                  value={shippingAddress.recipient}
+                  onChange={handleInputChange}
+                  readOnly={isDefaultAddress}
+                  required
+                />
+              </div>
+
+              {/* 연락처 */}
+              <div>
+                <label
+                  htmlFor="phone-mobile"
+                  className="font-semibold text-sm mb-1"
+                >
+                  연락 처 <span className="text-xs text-violet-800">※</span>
+                </label>
+                <input
+                  name="phone"
+                  id="phone-mobile"
+                  className="w-full border border-gray-400 rounded-sm px-2 py-2"
+                  value={shippingAddress.phone}
+                  onChange={handleInputChange}
+                  maxLength={13}
+                  readOnly={isDefaultAddress}
+                  required
+                />
+              </div>
+
+              {/* 주소 */}
+              <div>
+                <label
+                  htmlFor="address1-mobile"
+                  className="font-semibold text-sm mb-1"
+                >
+                  주소<span className="text-xs text-violet-800">※</span>
+                </label>
+                <input
+                  id="address1-mobile"
+                  name="address1"
+                  className="w-full border border-gray-400 rounded-sm px-2 py-2"
+                  value={shippingAddress.address1}
+                  onChange={handleInputChange}
+                  readOnly
+                  required
+                />
+              </div>
+
+              {/* 상세 주소 */}
+              <div>
+                <label
+                  htmlFor="address2-mobile"
+                  className="font-semibold text-sm mb-1"
+                >
+                  상세 주소<span className="text-xs text-violet-800">※</span>
+                </label>
+                <input
+                  id="address2-mobile"
+                  name="address2"
+                  className="w-full border border-gray-400 rounded-sm px-2 py-2"
+                  value={shippingAddress.address2}
+                  onChange={handleInputChange}
+                  readOnly={isDefaultAddress}
+                  max={30}
+                  required
+                />
+              </div>
+              {/* 우편 번호 */}
+              <div>
+                <label
+                  htmlFor="postcode-mobile"
+                  className="font-semibold text-sm mb-1"
+                >
+                  우편 번호<span className="text-xs text-violet-800">※</span>
+                </label>
+
+                <input
+                  id="postcode-mobile"
+                  name="postcode"
+                  className="w-full border border-gray-400 rounded-sm px-2 py-2"
+                  value={shippingAddress.postcode}
+                  onChange={handleInputChange}
+                  readOnly
+                  required
+                />
+              </div>
+            </div>
           </div>
         </section>
         {/* 새로운 배송지 검색 */}
@@ -522,7 +630,11 @@ export default function UserPayment() {
         <section className={SECTION_STYLE}>
           <h2 className={SECTION_TITLE_STYLE}>약관</h2>
           <div>
-            <label htmlFor="agree-chk" onClick={handleLabelClick} className="select-none cursor-pointer">
+            <label
+              htmlFor="agree-chk"
+              onClick={handleLabelClick}
+              className="select-none cursor-pointer"
+            >
               [필수] 개인정보 수집 및 이용 동의
             </label>
             <input
@@ -535,7 +647,7 @@ export default function UserPayment() {
             />
           </div>
         </section>
-        
+
         {/* 결제 버튼 == 결제폼 submit 버튼 */}
         <button
           type="submit" //실 적용시
@@ -547,7 +659,13 @@ export default function UserPayment() {
           {testPaymentInfo.amount.toLocaleString()}원 결제
         </button>
       </form>
-    {isTermsOpen && <TermsModal isOpen={isTermsOpen} onClose={handleTermsClose} setAgree={setTermsAgree} />}
+      {isTermsOpen && (
+        <TermsModal
+          isOpen={isTermsOpen}
+          onClose={handleTermsClose}
+          setAgree={setTermsAgree}
+        />
+      )}
 
       <TossModal
         isOpen={isPaymentModalOpen}
