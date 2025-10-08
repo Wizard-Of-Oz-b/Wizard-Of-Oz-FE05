@@ -7,7 +7,7 @@ import api, { loginAndStore } from "../lib/axios";
 import { FcGoogle } from "react-icons/fc";
 import { SiNaver } from "react-icons/si";
 import { RiKakaoTalkFill } from "react-icons/ri";
-
+import CartLoadingSpin from "../components/features/cart/CartLoadingSpin";  // 로딩스핀 추가
 
 export default function Login() {
   const navigate = useNavigate();
@@ -63,6 +63,7 @@ export default function Login() {
 
   // ── 소셜 로그인: 백엔드가 프로바이더로 302 리다이렉트 ──
   const handleSocialLogin = (provider) => {
+    setLoading(true);
     sessionStorage.setItem("oauth_provider", provider); // 콜백에서 복구용
     const API = (api.defaults.baseURL || "").replace(/\/+$/, "");
     window.location.href = `${API}/v1/auth/social/${provider}/authorize/`;
@@ -266,6 +267,7 @@ return (
       </div>
 
       {ModalComponent}
+      {loading && <CartLoadingSpin />}
     </div>
   );
 }
