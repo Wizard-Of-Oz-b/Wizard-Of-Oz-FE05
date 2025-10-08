@@ -12,7 +12,7 @@ export default function LightboxModal({
   onPrev, 
   onNext 
 }) {
-  const len = images.length;
+  const len = images?.length;
 
   if (!len) return null;
   const clamp = (i) => (i + len) % len;
