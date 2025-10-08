@@ -21,10 +21,10 @@ export default function Row({
     <motion.li
       variants={rowVariants}
       exit="exit"
-      layout
-      className={`group grid grid-cols-12 items-center gap-4 px-4 py-4 transition ${
-        active ? "bg-neutral-50 ring-1 ring-neutral-200 rounded-xl mx-2 my-2" : "hover:bg-neutral-50"
-      }`}
+      layout="position"
+      transition={{ layout: { duration: 0.18, ease: "easeOut" } }}
+      className={`group grid grid-cols-12 items-center gap-4 px-4 py-4 mx-2 my-2 rounded-xl transition
+        ${active ? "bg-neutral-50 ring-1 ring-neutral-200" : "hover:bg-neutral-50"}`}      
     >
       {/* 체크박스 */}
       <div className="col-span-1 flex items-center">
