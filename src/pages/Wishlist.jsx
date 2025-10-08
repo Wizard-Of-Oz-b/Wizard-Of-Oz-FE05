@@ -14,10 +14,16 @@ import {
   moveWishlistToCart,
   removeWishlist,
 } from "../components/common/api/public/wishlist";
+import { useAuth } from "../context/AuthContext";
+import { useLocation, useNavigate } from "react-router-dom";
+import CartLoadingSpin from "../components/features/cart/CartLoadingSpin";
 
 export default function Wishlist() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { isLoggedIn, bootstrapping } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const [selected, setSelected] = useState(new Set());
   const [cartCount, setCartCount] = useState(0);
@@ -31,7 +37,17 @@ export default function Wishlist() {
   const indeterminate = selected.size > 0 && !allChecked;
   const isEmpty = !loading && items.length === 0;
 
+  // 사용자가 로그인되었는지 확인 -> 아닐경우 로그인페이지로 바로 리다이렉트
   useEffect(() => {
+    if (bootstrapping) return;
+    if (!isLoggedIn) {
+      navigate("/login", { replace: true, state: { from: location.pathname } });
+    }
+  }, [bootstrapping, isLoggedIn, navigate, location.pathname]);
+
+  // 로그인했을 경우 이동시킴, 에러는 토스트알람으로 확인될 수 있게 설정
+  useEffect(() => {
+    if (bootstrapping || !isLoggedIn) return;
     let mounted = true;
     (async () => {
       try {
@@ -46,10 +62,8 @@ export default function Wishlist() {
         setLoading(false);
       }
     })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+    return () => { mounted = false; };
+  }, [bootstrapping, isLoggedIn]);
 
   const toggleAll = () => {
     if (allChecked) setSelected(new Set());
@@ -146,6 +160,8 @@ export default function Wishlist() {
       pushToast("일부 항목 담기에 실패했어요.");
     }
   };
+  // 로딩스피너 사용하여 진행중이라는걸 보여주기.
+  const showOverlayLoading = bootstrapping || (loading && items.length === 0);
 
   return (
     <motion.div
@@ -202,6 +218,7 @@ export default function Wishlist() {
 
       {/* 토스트 */}
       <Toasts toasts={toasts} />
-    </motion.div>
+      {showOverlayLoading && <CartLoadingSpin />}
+    </motion.div>    
   );
 }

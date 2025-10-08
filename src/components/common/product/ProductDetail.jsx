@@ -36,6 +36,8 @@ export default function ProductDetail({ product, onAddToCart, onToast }) {
   const navigate = useNavigate();
   const { showModal, ModalComponent } = useAlertModal();
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
+  const [index, setIndex] = useState(0);
+  const imgs = product?.gallery ?? [];
 
   useEffect(() => {
     const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)');
@@ -55,19 +57,12 @@ Object.fromEntries(
  ).toString();
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const openLightbox = (i) => {
-    setLightboxIndex(i);
+    setIndex(i);
     setLightboxOpen(true);
   };
   const closeLightbox = () => setLightboxOpen(false);
-  const prevLightbox = () =>
-    setLightboxIndex(
-      (i) => (i - 1 + product.gallery.length) % product.gallery.length
-    );
-  const nextLightbox = () =>
-    setLightboxIndex((i) => (i + 1) % product.gallery.length);
 
   useEffect(() => {
     try {
@@ -86,6 +81,13 @@ Object.fromEntries(
 
   useEffect(() => {
     let mounted = true;
+
+    if (!isLoggedIn) {
+      setWish(false);
+      setWishId(null);
+      return;
+    }
+
     (async () => {
       try {
         const rows = await listWishlist();
@@ -202,7 +204,7 @@ Object.fromEntries(
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-10">
         <div className="order-1 lg:order-1 lg:col-span-8">
           <ProductGallery
-            images={product.gallery}
+            images={imgs}
             onOpenLightbox={openLightbox}
           />
         </div>
@@ -326,13 +328,12 @@ Object.fromEntries(
       </section>
 
       {/* 라이트박스 */}
-      {lightboxOpen && (
+      {lightboxOpen && imgs.length > 0 && (
         <LightboxModal
-          images={product.gallery}
-          index={lightboxIndex}
+          images={imgs}
+          index={index}
+          onChange={setIndex}
           onClose={closeLightbox}
-          onPrev={prevLightbox}
-          onNext={nextLightbox}
         />
       )}
 
