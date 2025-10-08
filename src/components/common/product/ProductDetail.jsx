@@ -57,19 +57,12 @@ Object.fromEntries(
  ).toString();
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const openLightbox = (i) => {
     setIndex(i);
     setLightboxOpen(true);
   };
   const closeLightbox = () => setLightboxOpen(false);
-  const prevLightbox = () =>
-    setLightboxIndex(
-      (i) => (i - 1 + product.gallery.length) % product.gallery.length
-    );
-  const nextLightbox = () =>
-    setLightboxIndex((i) => (i + 1) % product.gallery.length);
 
   useEffect(() => {
     try {
@@ -88,6 +81,13 @@ Object.fromEntries(
 
   useEffect(() => {
     let mounted = true;
+
+    if (!isLoggedIn) {
+      setWish(false);
+      setWishId(null);
+      return;
+    }
+
     (async () => {
       try {
         const rows = await listWishlist();
@@ -328,7 +328,7 @@ Object.fromEntries(
       </section>
 
       {/* 라이트박스 */}
-      {lightboxOpen && (
+      {lightboxOpen && imgs.length > 0 && (
         <LightboxModal
           images={imgs}
           index={index}
