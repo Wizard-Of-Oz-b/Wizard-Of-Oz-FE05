@@ -54,51 +54,10 @@ export default function CategoryResultsHeader({
             {item || primary || "전체 상품"}
           </h1>
           <p className="mt-1 text-xs text-gray-500">
-            {`결과: ${Number(total).toLocaleString()}개`}
             {categoryId ? (
-              <span className="ml-2 rounded bg-gray-100 text-gray-600 px-2 py-0.5 text-[11px]">카테고리ID: {String(categoryId).slice(0, 8)}…</span>
+              <span className="ml-2 rounded bg-gray-100 text-gray-600 px-2 py-0.5 text-[11px]">카테고리ID: {String(categoryId).slice(0, 8)}</span>
             ) : null}
           </p>
-        </div>
-
-        {/* View toggle + sort */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => onToggleView?.(view === "grid" ? "list" : "grid")}
-            className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
-            title={view === "grid" ? "리스트 보기" : "그리드 보기"}
-            aria-label={view === "grid" ? "리스트 보기" : "그리드 보기"}
-            type="button"
-          >
-            {view === "grid" ? (
-              <>
-                <Rows2 className="h-4 w-4" />
-                리스트
-              </>
-            ) : (
-              <>
-                <Grid2X2 className="h-4 w-4" />
-                그리드
-              </>
-            )}
-          </button>
-
-          <div className="relative">
-            <select
-              value={sortValue}
-              onChange={(e) => onChangeSort?.(e.target.value)}
-              className="h-10 appearance-none rounded-xl border border-gray-200 bg-white px-3 pr-9 text-sm shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
-              aria-label="정렬 순서"
-            >
-              {sortOptions.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-            {/* caret */}
-            <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">▾</span>
-          </div>
         </div>
       </div>
 

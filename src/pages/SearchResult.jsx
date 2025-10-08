@@ -72,9 +72,6 @@ export default function SearchResult() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
-              <h1 className="text-lg sm:text-xl font-semibold tracking-tight">
-                검색 결과
-              </h1>
               <div className="mt-1 flex flex-wrap items-center gap-2">
                 {query.q ? (
                   <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-700">
@@ -108,29 +105,6 @@ export default function SearchResult() {
                     초기화
                   </button>
                 )}
-              </div>
-            </div>
-
-            {/* 정렬 선택 */}
-            <div className="shrink-0">
-              <label className="sr-only" htmlFor="sort">정렬</label>
-              <div className="relative">
-                <select
-                  id="sort"
-                  value={query.sort}
-                  onChange={(e) => handleSortChange(e.target.value)}
-                  className="block w-40 rounded-lg border border-gray-200 bg-white py-2 pl-3 pr-8 text-sm text-gray-700 shadow-sm focus:border-gray-300 focus:outline-none"
-                >
-                  <option value="-created_at">최신순</option>
-                  <option value="created_at">등록 오래된순</option>
-                  <option value="price">가격 낮은순</option>
-                  <option value="-price">가격 높은순</option>
-                  <option value="name">이름 오름차순</option>
-                  <option value="-name">이름 내림차순</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400">
-                  ▼
-                </div>
               </div>
             </div>
           </div>

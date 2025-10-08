@@ -117,7 +117,7 @@ export default function CategoryProductList() {
 
   return (
     <>
-      <div className="sticky top-0 z-10 bg-white/80 backdrop-blur border-b border-gray-100">
+      <div className="sticky top-0 z-10 bg-white/80 backdrop-blur border-gray-100">
         <CategoryResultsHeader
           primary={primaryParam}
           item={itemParam}
