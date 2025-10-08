@@ -1,8 +1,21 @@
+/**
+ * 관리자페이지 인증/권한 처리 원칙
+ * - 401 Unauthorized: 토큰이 만료/무효일 수 있습니다.
+ *   브라우저에 남은 토큰 때문에 재접속 시 401이 반복될 수 있으므로
+ *   clearToken()으로 토큰을 정리하고 로그인 화면으로 안내합니다.
+ *
+ * - 403 Forbidden: 토큰은 유효하지만 권한이 부족한 상태입니다.
+ *   세션은 유지해야 하므로 토큰은 그대로 두고 접근 제한 페이지로 안내합니다.
+ *
+ * 이 페이지는 위 원칙을 기준으로 작성되었습니다.
+ */
+
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 import api from '../lib/axios';
 import Cookies from 'js-cookie';
 import { clearToken } from '../lib/auth';
+import LoadingOverlay from '../components/common/layouts/admin/LoadingOverlay';
 
 const ADMIN_API_BASE_RAW = import.meta?.env?.VITE_ADMIN_API_BASE ?? '/v1/admin';
 const ACCESS_KEY = 'accessToken';
@@ -90,7 +103,7 @@ export default function AdminProtectedRoute({ allowRoles = ['admin', 'manager', 
     };
   }, [location.pathname, allowed.join('|')]);
 
-  if (status === 'loading')   return <div className="p-6 text-sm text-gray-600">권한 확인 중…</div>;
+  if (status === 'loading')   return <LoadingOverlay message="권한 확인 중…" subtext="잠시만 기다려주세요" />;
   if (status === 'unauthed')  return <Navigate to="/admin/login" replace state={{ from: location }} />;
   if (status === 'forbidden') return <Navigate to="/errors/403" replace />;
   return <Outlet />;

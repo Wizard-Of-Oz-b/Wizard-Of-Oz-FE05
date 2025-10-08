@@ -84,7 +84,7 @@ export default function RightIcons({ isLight, onOpenSearch }) {
     logoutLocal();
     setUser(null);
     setOpenMenu(false);
-    navigate("/", { replace: true });
+    navigate("/login", { replace: true });
   }
 
   return (
