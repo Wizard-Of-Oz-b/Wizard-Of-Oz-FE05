@@ -1,37 +1,45 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { getAccessToken } from "../../utils/cookie";
+import userApi from "../../lib/api/userAxios";
 
-const BASE_URL = "/api/v1";
+// const BASE_URL = "/api/v1";
 
-const orderApi = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE + "/v1", // 차후 실제 연결 할때 사용
-  // baseURL: BASE_URL,
-});
-orderApi.interceptors.request.use(
-  (config) => {
-    // 쿠키에서 accessToken을 가져옵니다.
-    const accessToken = getAccessToken();
+// const orderApi = axios.create({
+//   baseURL: import.meta.env.VITE_API_BASE + "/v1", // 차후 실제 연결 할때 사용
+//   // baseURL: BASE_URL,
+// });
+// orderApi.interceptors.request.use(
+//   (config) => {
+//     // 쿠키에서 accessToken을 가져옵니다.
+//     const accessToken = getAccessToken();
 
-    // 토큰이 존재하면 Authorization 헤더에 추가합니다.
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
-    }
+//     // 토큰이 존재하면 Authorization 헤더에 추가합니다.
+//     if (accessToken) {
+//       config.headers.Authorization = `Bearer ${accessToken}`;
+//     }
 
-    return config;
-  },
-  (error) => {
-    // 요청 에러 처리
-    return Promise.reject(error);
-  }
-);
+//     return config;
+//   },
+//   (error) => {
+//     // 요청 에러 처리
+//     return Promise.reject(error);
+//   }
+// );
 
 // 백엔드의 주문 생성 API를 호출하는 함수
 const createPurchaseAPI = async () => {
-  const response = await orderApi.post("/orders/checkout/");
+  const response = await userApi.post("/orders/checkout/");
   return response.data;
 };
+
+
+// 주문 요청 합치기
+
+const mergeOrderAPI = async (payload) => {
+  const response = await userApi.post('/orders/merge/', payload);
+  return response.data;
+}
 
 /**
  * '배송 준비중' 상태인 모든 주문의 배송지를 일괄 업데이트하는 API 함수
@@ -39,7 +47,7 @@ const createPurchaseAPI = async () => {
  * @param {object} payload.address - 새로운 주소 정보 객체
  */
 const updateAllReadyShippingAddressAPI = async (payload) => {
-  const response = await orderApi.patch(
+  const response = await userApi.patch(
     "/orders/purchases/update-all-ready-shipping-address/",
     payload
   );
@@ -71,7 +79,6 @@ export const useUpdateShippingAddress = () => {
 
 export const useCreatePurchase = () => {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   return useMutation({
     mutationFn: createPurchaseAPI,
@@ -82,8 +89,6 @@ export const useCreatePurchase = () => {
 
       // 예시: 성공 후 장바구니 데이터를 새로고침
       queryClient.invalidateQueries({ queryKey: ["userCart"] });
-      // 성공 하면 결제선택창으로 이동한다.
-      navigate(`/payment`);
     },
 
     onError: (error) => {
@@ -100,12 +105,28 @@ export const useCreatePurchase = () => {
       console.error("주문 실패:", errorData);
       alert(errorMessage); // 사용자에게 에러 메시지 나중에 모달창을 교체
 
-      // 인증 에러(401)인 경우, 로그인 페이지로 보내는 등의 추가 처리도 가능
-      if (error.response?.status === 401) {
-        //로그인 으로 이동
-        //차후 모달 창 추가 하기
-        navigate("/login");
-      }
+      // // 인증 에러(401)인 경우, 로그인 페이지로 보내는 등의 추가 처리도 가능
+      // if (error.response?.status === 401) {
+      //   //로그인 으로 이동
+      //   //차후 모달 창 추가 하기
+      //   navigate("/login");
+      // }
     },
   });
 };
+
+// 주문 merge
+export const useMergeOrder = () =>{
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: mergeOrderAPI,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['userCart'] });
+    },
+    onError: (error) => {
+      console.error("주문 머지 실패:", error);
+    }
+  })
+
+}

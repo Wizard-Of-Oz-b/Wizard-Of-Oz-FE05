@@ -7,7 +7,7 @@ import OrderSummary from "../components/features/cart/OrderSummary";
 import { useCart, useClearCart } from "../hooks/cart/useCart";
 import CartSkeleton from "../components/skeletons/CartSkeleton";
 import CartLoadingSpin from "../components/features/cart/CartLoadingSpin";
-import { useCreatePurchase } from "../hooks/cart/useOrder";
+import { useCreatePurchase, useMergeOrder } from "../hooks/cart/useOrder";
 import { useNavigate } from "react-router-dom";
 import CartEmpty from "../components/features/cart/CartEmpty";
 import CartError from "../components/features/cart/CartError";
@@ -31,6 +31,7 @@ export default function UserCart() {
   } = useGetMyOrders();
 
   const purchaseMutation = useCreatePurchase();
+  const mergeMutation = useMergeOrder();
   const clearCartMutation = useClearCart();
   const navigate = useNavigate();
   console.log(cart, "카트");
@@ -42,10 +43,42 @@ export default function UserCart() {
   }, [cart]);
   console.log(cartList, "정렬");
   const [isClearAllModalOpen, setIsClearAllModalOpen] = useState(false);
-  const handlePurchaseClick = () => {
-    console.log("결제하기 버튼 클릭! API 요청을 보냅니다.");
-    purchaseMutation.mutate();
+  // const handlePurchaseClick = () => {
+  //   console.log("결제하기 버튼 클릭! API 요청을 보냅니다.");
+  //   purchaseMutation.mutate();
+  // };
+
+  const handlePurchaseClick = async () => {
+    //전체 상품 주문
+    if (userOrder?.results.length === 0) {
+      try {
+        await purchaseMutation.mutateAsync();
+        navigate(`/payment`);
+      } catch (error) {
+        console.error("주문 처리 중 에러 발생:", error);
+      }
+    }
+    // 기존 결제에 상품 추가
+    else {
+      try {
+        const newOrder = await purchaseMutation.mutateAsync();
+
+        const orderList = userOrder.results.map((el) => el.order_id);
+        const mergePayload = { order_ids: [...orderList] };
+
+        await mergeMutation.mutateAsync(mergePayload);
+
+        navigate(`/payment`);
+
+        if (!newOrder) {
+          throw new Error("주문 실패");
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
   };
+
   const OnClickShopping = () => {
     navigate(`/`);
   };
