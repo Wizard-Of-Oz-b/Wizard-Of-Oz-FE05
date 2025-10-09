@@ -6,6 +6,7 @@ import { clean } from "../../../../utils/mypage/sanitize";
 import { UserRound, AtSign, Phone, Sparkles, ShieldCheck, Smartphone, ArrowLeft } from "lucide-react";
 import { FiCheckCircle } from "react-icons/fi"
 import { useNavigate } from "react-router-dom";
+import CartLoadingSpin from "../../../features/cart/CartLoadingSpin";
 
 export default function MemberInfo() {
   const { user, setUser, bootstrapping} = useAuth();
@@ -19,6 +20,7 @@ export default function MemberInfo() {
   const [address, setAddress] = useState(""); // 주소
   const [confirmationMessage, setConfirmationMessage] = useState(""); // 확인 메시지
   const navigate = useNavigate(""); // 회원 탈퇴페이지로 이동 = 1001 복
+  const [loading, setLoading] = useState(false);
 
   const carrierOptions = ["SK", "KT", "LG", "알뜰폰SK", "알뜰폰KT", "알뜰폰LG"];
 
@@ -40,6 +42,7 @@ export default function MemberInfo() {
 
     (async () => {
       try{
+        setLoading(true);
         const { data } = await getMyProfile();
         setName(clean(data.name));
         setNickname(clean(data.nickname));
@@ -54,12 +57,15 @@ export default function MemberInfo() {
         setCarrier(clean(data.carrier) || "SK");
       } catch (err) {
         console.error("내 정보 조회에 실패하였습니다", err);
+      } finally {
+        setLoading(false);
       }
     })();
   }, [user]);
 
   const handleConfirm = async () => {
     try {
+      setLoading(true);
       const { data: updated } = await updateMyProfile({
         name,
         nickname,
@@ -87,6 +93,8 @@ export default function MemberInfo() {
       }));
     } catch {
       setConfirmationMessage("정보 수정 실패");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -254,6 +262,11 @@ export default function MemberInfo() {
       <div className="mt-3 flex items-center gap-2 text-sm text-green-700 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
         <FiCheckCircle className="text-emerald-500" />
         {confirmationMessage}
+      </div>
+    )}
+    {loading && (
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/10 backdrop-blur-[1px]">
+        <CartLoadingSpin />
       </div>
     )}
   </div>
