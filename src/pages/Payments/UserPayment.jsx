@@ -10,7 +10,7 @@ import {
   useGetPurchaseItems,
 } from "../../hooks/payments/useOrderPayment";
 import Ordercard from "../../components/features/payment/OrderCard";
-import { filterOrders } from "../../utils/filterOrders";
+import { filterOrders, mergeDuplicateOrders } from "../../utils/filterOrders";
 import { useUpdateShippingAddress } from "../../hooks/cart/useOrder";
 import CartLoadingSpin from "../../components/features/cart/CartLoadingSpin";
 import EmptyPayment from "../../components/features/payment/EmptyPayment";
@@ -63,7 +63,7 @@ export default function UserPayment() {
     error: MyAddressError,
   } = useGetMyAddresses();
 
-  const filterOrder = filterOrders(items?.results); //ready 상태만 가져옴
+  const filterOrder = mergeDuplicateOrders(filterOrders(items?.results)); //ready 상태만 가져옴
   const [testPaymentInfo, setTestPaymentInfo] = useState({
     amount: 0,
     customerKey: "",
