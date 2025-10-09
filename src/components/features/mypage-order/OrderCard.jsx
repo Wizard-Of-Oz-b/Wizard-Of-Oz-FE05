@@ -13,6 +13,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import ConfirmModal from "../../common/ConfirmModal";
 import { useNavigate } from "react-router-dom";
 import { useCancelOrderMutation } from "../../../hooks/payments/useOrderPayment";
+import { mergeDuplicateOrders } from "../../../utils/filterOrders";
 
 // 주문 페이지 에서 출력
 // 상태는 주문처리(ready), 주문완료(paid)로 구분해서 작성한다.
@@ -83,7 +84,8 @@ export default function OrderCard({ order }) {
   // 화면상에서는 구매목록을 2개까지만 출력
   useEffect(() => {
     if (orderData) {
-      const cutList = orderData?.results.slice(0, 2);
+      const filterDuplicate = mergeDuplicateOrders(orderData?.results)
+      const cutList = filterDuplicate.slice(0, 2);
       setCutOrderList(cutList);
     }
   }, [orderData]);
@@ -135,7 +137,7 @@ export default function OrderCard({ order }) {
           <DetailModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
-            data={orderData?.results}
+            data={mergeDuplicateOrders(orderData?.results)}
           />
         )}
         {isConfirmModalOpen && (
