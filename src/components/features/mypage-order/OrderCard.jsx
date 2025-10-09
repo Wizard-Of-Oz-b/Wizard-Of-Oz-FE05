@@ -12,6 +12,8 @@ import { DEFAULT_STATUS, STATUS_MAP } from "../../../constants/orderStatus";
 import { AnimatePresence, motion } from "framer-motion";
 import ConfirmModal from "../../common/ConfirmModal";
 import { useNavigate } from "react-router-dom";
+import { useCancelOrderMutation } from "../../../hooks/payments/useOrderPayment";
+import { mergeDuplicateOrders } from "../../../utils/filterOrders";
 
 // 주문 페이지 에서 출력
 // 상태는 주문처리(ready), 주문완료(paid)로 구분해서 작성한다.
@@ -33,8 +35,9 @@ export default function OrderCard({ order }) {
     isError: isShipError,
     error: shipError,
   } = useGetShipmentInfo(order?.purchase_id);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const cancelPurchaseMutation = useCancelPurchase();
+  const cancelOrderMutation = useCancelOrderMutation();
   // 로딩
   const Loading = isLoading || isShipLoading;
   // 에러
@@ -48,31 +51,41 @@ export default function OrderCard({ order }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [cutOrderList, setCutOrderList] = useState([]); // 카드 하나에는 두개의 상품만 출력한다.
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
 
   const onClickMovePay = () => {
-    navigate('/payment')
-  }
+    navigate("/payment");
+  };
   const onClickDetail = () => {
     setDetail((prev) => !prev);
   };
 
-  const onClickcancled = () => {
+  const onClickcancledPay = () => {
     console.log("캔슬 모달 열기");
     setIsConfirmModalOpen(true);
   };
 
-  const handleConfirmCancel = () => {
+  const onClickcancelOrder = () => {
+    setIsCancelModalOpen(true);
+  };
+
+  const handleConfirmCancelPay = () => {
     // 취소 후 모달 닫기
     cancelPurchaseMutation.mutate(order.purchase_id);
     setIsConfirmModalOpen(false);
   };
 
+  const handleConfirmCancelOrder = () => {
+    cancelOrderMutation.mutate(order.purchase_id);
+    setIsCancelModalOpen(false);
+  };
   console.log(shipment?.results, "test");
 
   // 화면상에서는 구매목록을 2개까지만 출력
   useEffect(() => {
     if (orderData) {
-      const cutList = orderData?.results.slice(0, 2);
+      const filterDuplicate = mergeDuplicateOrders(orderData?.results)
+      const cutList = filterDuplicate.slice(0, 2);
       setCutOrderList(cutList);
     }
   }, [orderData]);
@@ -124,17 +137,29 @@ export default function OrderCard({ order }) {
           <DetailModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
-            data={orderData?.results}
+            data={mergeDuplicateOrders(orderData?.results)}
           />
         )}
         {isConfirmModalOpen && (
           <ConfirmModal
             isOpen={isConfirmModalOpen}
             onClose={() => setIsConfirmModalOpen(false)}
-            onConfirm={handleConfirmCancel}
+            onConfirm={handleConfirmCancelPay}
+            title="결제 취소"
+            message="정말로 결제를 취소 하시겠습니까?"
+            confirmText="결제 취소"
+            cancelText="돌아가기"
+          />
+        )}
+        {isCancelModalOpen && (
+          <ConfirmModal
+            isOpen={isCancelModalOpen}
+            onClose={() => setIsCancelModalOpen(false)}
+            onConfirm={handleConfirmCancelOrder}
             title="주문 취소"
             message="정말로 주문을 취소 하시겠습니까?"
-            confirmText="결제 취소"
+            confirmText="주문 취소"
+            cancelText="돌아가기"
           />
         )}
         {/* 데스크톱 */}
@@ -163,6 +188,16 @@ export default function OrderCard({ order }) {
                       className="text-sm text-blue-600 hover:underline cursor-pointer"
                     >
                       {detail ? "배송 정보 숨기기" : "배송 정보 보기"}
+                    </button>
+                  </th>
+                ) : null}
+                {order?.status === "ready" && shipment?.total === 0 ? (
+                  <th className="p-4 text-right font-normal">
+                    <button
+                      onClick={onClickcancelOrder}
+                      className="text-sm text-gray-600 hover:underline cursor-pointer"
+                    >
+                      주문 취소
                     </button>
                   </th>
                 ) : null}
@@ -207,7 +242,7 @@ export default function OrderCard({ order }) {
                     ) : null}
                     {order?.status === "paid" && shipment?.total === 0 ? (
                       <button
-                        onClick={onClickcancled}
+                        onClick={onClickcancledPay}
                         className="border border-gray-300 rounded-2xl px-2 py-0.5 mt-1 cursor-pointer bg-red-400 hover:bg-red-600 text-white"
                       >
                         주문 취소
@@ -291,6 +326,17 @@ export default function OrderCard({ order }) {
               )}
             </div>
           )}
+          {/* 주문 취소 버튼 */}
+          {order?.status === "ready" && shipment?.total === 0 ? (
+            <div className="py-3 border-t">
+              <button
+                onClick={onClickcancelOrder}
+                className="text-sm text-gray-600 hover:underline cursor-pointer"
+              >
+                주문 취소
+              </button>
+            </div>
+          ) : null}
 
           {/* 총액 및 버튼 */}
           <div className="pt-4 border-t">
@@ -307,7 +353,6 @@ export default function OrderCard({ order }) {
               >
                 결제 하러가기
               </button>
-
             )}
             {order?.status === "paid" && shipment?.total === 0 && (
               <button
