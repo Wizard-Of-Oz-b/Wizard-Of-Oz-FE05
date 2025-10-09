@@ -8,9 +8,12 @@ import {
 import {
   MapPin, Home, CheckCircle2, Star, Trash2, Plus, Search
 } from "lucide-react";
+import CartLoadingSpin from "../../../features/cart/CartLoadingSpin";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function ShippingAddressManager() {
   const [shippingAddresses, setShippingAddresses] = useState([]);
+  const [loading, setLoading] = useState(false);  // 로딩스피너 추가하기
   const [newRecipient, setNewRecipient] = useState("");
   const [newPhoneNumber, setNewPhoneNumber] = useState("");
   const [newZipCode, setNewZipCode] = useState("");
@@ -39,6 +42,7 @@ export default function ShippingAddressManager() {
       return;
     }
     try {
+      setLoading(true);
       await addMyAddress({
         recipient: newRecipient,
         phone: newPhoneNumber,
@@ -59,28 +63,36 @@ export default function ShippingAddressManager() {
     } catch (err) {
       console.error("배송지 추가 실패", err);
       setMessage("배송지 추가 실패");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = async (address_id) => {
     try {
+      setLoading(true);
       await deleteMyAddress(address_id);
       await loadAddresses();
       setMessage("배송지가 삭제되었습니다.");
     } catch (err) {
       console.error("배송지 삭제 실패", err);
       setMessage("배송지 삭제 실패");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSetDefault = async (address_id) => {
     try {
+      setLoading(true);
       await setMyDefaultAddress(address_id);
       await loadAddresses();
       setMessage("기본 배송지가 변경되었습니다.");
     } catch (err) {
       console.error("기본 배송지 변경 실패", err);
       setMessage("기본 배송지 변경 실패");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -143,9 +155,22 @@ export default function ShippingAddressManager() {
       </div>
     )}
 
+    <motion.div
+      layout
+      className="space-y-3"
+      transition={{ type: "spring", stiffness: 420, damping: 42 }}
+    >
     {/* 기본 배송지 카드 */}
+    <AnimatePresence mode="wait">
     {defaultAddress && (
-      <div className="rounded-2xl border border-neutral-200 bg-white p-4 sm:p-5 shadow-sm">
+      <motion.div 
+        key={defaultAddress.address_id}
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" } }}
+        exit={{ opacity: 0, y: 10, transition: { duration: 0.2 } }}
+        layout
+        className="rounded-2xl border border-neutral-200 bg-white p-4 sm:p-5 shadow-sm"
+      >
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 shrink-0 rounded-xl bg-gradient-to-br from-violet-500 to-pink-500 text-white flex items-center justify-center text-[13px]">
@@ -175,14 +200,18 @@ export default function ShippingAddressManager() {
           {/* 기본 배송지는 액션 제거/비활성 처리 or 안내만 */}
           <div className="text-xs text-neutral-400 sm:pt-1">대표 배송지는 변경만 가능합니다.</div>
         </div>
-      </div>
+      </motion.div>
     )}
 
     {/* 기타 배송지 목록 */}
-    <div className="space-y-3">
       {otherAddresses.map((addr) => (
-        <div
+        <motion.div
           key={addr.address_id}
+          layout
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -12 }}
+          transition={{ duration: 0.24, ease: "easeOut" }}
           className="rounded-2xl border border-neutral-200 bg-white p-4 sm:p-5 shadow-sm hover:shadow-md transition"
         >
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -231,21 +260,27 @@ export default function ShippingAddressManager() {
               </button>
             </div>
           </div>
-        </div>
+        </motion.div>
       ))}
 
       {/* 아무 주소도 없을 때의 빈 상태 */}
       {!defaultAddress && otherAddresses.length === 0 && (
-        <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-8 text-center">
+        <motion.div 
+          layout
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="rounded-2xl border border-dashed border-neutral-300 bg-white p-8 text-center">
           <div className="mx-auto h-12 w-12 rounded-full bg-neutral-100 text-neutral-500 flex items-center justify-center">
             {/* <MapPin className="h-6 w-6" /> */}
             주소
           </div>
           <p className="mt-3 text-sm font-medium text-neutral-900">등록된 배송지가 없습니다</p>
           <p className="mt-1 text-sm text-neutral-600">아래에서 새 배송지를 추가해 주세요.</p>
-        </div>
+        </motion.div>
       )}
-    </div>
+      </AnimatePresence>
+    </motion.div>
 
     {/* 구분선 */}
     <div className="h-px w-full bg-neutral-200" />
@@ -378,6 +413,13 @@ export default function ShippingAddressManager() {
         </div>
       </div>
     )}
+
+    {loading && (
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/10 backdrop-blur-[1px]">
+        <CartLoadingSpin />
+      </div>
+    )}
+
   </div>
 );
 }
