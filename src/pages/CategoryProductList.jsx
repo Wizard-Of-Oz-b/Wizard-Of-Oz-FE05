@@ -6,6 +6,7 @@ import ProductList from "../components/common/product/ProductList";
 import CategoryResultsHeader from "../components/common/product/category/CategoryResultsHeader";
 import CategoryEmptyState from "../components/common/product/category/CategoryEmptyState";
 import ProductGridSkeleton from "../components/common/product/category/ProductGridSkeleton";
+import ProductPagination from "../components/common/product/ProductPagination";
 
 const shallowEqual = (a, b) => {
   if (a === b) return true;
@@ -114,6 +115,8 @@ export default function CategoryProductList() {
   );
 
   const total = products?.count ?? 0;
+  const pageSize = Number(query?.size) > 0 ? Number(query.size) : 20;
+  const totalPage = Math.max(1, Math.ceil(total / pageSize));
 
   return (
     <>
@@ -148,7 +151,8 @@ export default function CategoryProductList() {
           />
         )}
 
-        {/* 리스트 */}
+        {/* 리스트: 결과가 있을 때만 렌더 */}
+        {(products?.results?.length ?? 0) > 0 && (
         <ProductList
           datas={products}
           isLoading={isLoading}
@@ -156,6 +160,16 @@ export default function CategoryProductList() {
           onSortChange={handleSortChange}
           onPageChange={handlePageChange}
         />
+        )}
+        {!isLoading && (products?.results?.length ?? 0) === 0 && (
+        <div className="mt-6 flex justify-center">
+          <ProductPagination
+            currentPage={query?.page ?? 1}
+            totalPage={totalPage}
+            onPageChange={handlePageChange}
+          />
+        </div>
+        )}
       </div>
     </>
   );

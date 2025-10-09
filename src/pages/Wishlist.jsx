@@ -99,12 +99,15 @@ export default function Wishlist() {
     const backup = items;
     removeOneLocal(id);
     try {
+      setLoading(true);
       await removeWishlist(id);
       pushToast("삭제했어요.");
     } catch (e) {
       console.error(e);
       setItems(backup);
       pushToast("삭제 중 오류가 발생했어요.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -114,17 +117,21 @@ export default function Wishlist() {
     const backup = items;
     removeSelectedLocal();
     try {
+      setLoading(true);
       await Promise.all(ids.map((id) => removeWishlist(id)));
       pushToast("선택 항목을 삭제했어요.");
     } catch (e) {
       console.error(e);
       setItems(backup);
       pushToast("일부 항목 삭제에 실패했어요.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const addOneToCart = async (id) => {
     try {
+      setLoading(true);
       await moveWishlistToCart(id, { quantity: 1, remove_from_wishlist: true });
       const img = imgRefs.current[id];
       if (img) flyToCart(img);
@@ -134,6 +141,8 @@ export default function Wishlist() {
     } catch (e) {
       console.error(e);
       pushToast("장바구니 담기 중 오류가 발생했어요.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -141,6 +150,7 @@ export default function Wishlist() {
     if (!selected.size) return;
     const ids = [...selected];
     try {
+      setLoading(true);
       const first = ids[0];
       const firstImg = imgRefs.current[first];
       if (firstImg) flyToCart(firstImg);
@@ -158,10 +168,12 @@ export default function Wishlist() {
     } catch (e) {
       console.error(e);
       pushToast("일부 항목 담기에 실패했어요.");
+    } finally {
+      setLoading(false);
     }
   };
   // 로딩스피너 사용하여 진행중이라는걸 보여주기.
-  const showOverlayLoading = bootstrapping || (loading && items.length === 0);
+  const showOverlayLoading = bootstrapping || loading;
 
   return (
     <motion.div
@@ -218,7 +230,11 @@ export default function Wishlist() {
 
       {/* 토스트 */}
       <Toasts toasts={toasts} />
-      {showOverlayLoading && <CartLoadingSpin />}
+      {showOverlayLoading && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/10 backdrop-blur-[1px]">
+          <CartLoadingSpin />
+        </div>
+      )}
     </motion.div>    
   );
 }

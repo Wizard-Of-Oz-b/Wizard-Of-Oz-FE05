@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAlertModal } from "../components/common/layouts/common/modal/useAlertModal";
 import { useAuth } from "../context/AuthContext";
 import api, { loginAndStore } from "../lib/axios";
@@ -11,13 +11,21 @@ import CartLoadingSpin from "../components/features/cart/CartLoadingSpin";  // ë
 
 export default function Login() {
   const navigate = useNavigate();
-  const { setUser } = useAuth();
+  const { setUser, isLoggedIn, bootstrapping } = useAuth();
 
   const [formData, setFormData] = useState({ email: "", password: "", saveId: false });
   const [showPassword, setShowPassword] = useState(false);
   const [showSocialModal, setShowSocialModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const { showModal, ModalComponent } = useAlertModal();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!bootstrapping && isLoggedIn) {
+      const from = location.state?.from || "/mypage";
+      navigate(from, { replace: true });
+    }
+  }, [bootstrapping, isLoggedIn, navigate, location.state]);
 
   useEffect(() => {
     const savedEmail = localStorage.getItem("savedEmail");
@@ -68,6 +76,14 @@ export default function Login() {
     const API = (api.defaults.baseURL || "").replace(/\/+$/, "");
     window.location.href = `${API}/v1/auth/social/${provider}/authorize/`;
   };
+
+  if (bootstrapping) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <CartLoadingSpin />
+      </div>
+    );
+  }
 
 return (
   <div className="min-h-screen bg-white flex items-center justify-center px-3 sm:px-4 lg:px-6 py-2">

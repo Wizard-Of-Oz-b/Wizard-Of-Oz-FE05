@@ -131,6 +131,38 @@ export default function MobileMenu({
               </button>
             </div>
 
+            {/* 10/8 멘토링 피드백 반영 */}
+            {isLoggedIn && (
+              <div className="px-5 py-2 bg-white/95 backdrop-blur shadow-[0_1px_10px_rgba(0,0,0,0.04)]">
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    className="flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 py-2.5 hover:bg-gray-50 active:scale-[0.99] transition px-3 cursor-pointer"
+                    onClick={() => { onClose(); navigate("/mypage"); }}
+                  >
+                    <User className="w-4 h-4 shrink-0" aria-hidden="true" />
+                    <span className="text-[12px] font-medium whitespace-nowrap tracking-tight leading-none">마이페이지</span> 
+                  </button>
+                  <button
+                    type="button"
+                    className="flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 py-2.5 hover:bg-gray-50 active:scale-[0.99] transition px-3 cursor-pointer"
+                    onClick={() => { onClose(); navigate("/cart"); }}
+                  >
+                    <ShoppingCart className="w-4 h-4 shrink-0" aria-hidden="true" />
+                    <span className="text-[12px] font-medium whitespace-nowrap tracking-tight leading-none">장바구니</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 py-2.5 hover:bg-gray-50 active:scale-[0.99] transition px-3 cursor-pointer"
+                    onClick={() => { onClose(); navigate("/wishlist"); }}
+                  >
+                    <Heart className="w-4 h-4 shrink-0" aria-hidden="true" />
+                    <span className="text-[12px] font-medium whitespace-nowrap tracking-tight leading-none">위시리스트</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -301,32 +333,6 @@ export default function MobileMenu({
                     <span className="text-sm font-medium text-amber-700">관리자 페이지로 이동하기</span>
                   </button>
                 )}
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    className="flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 py-2.5 hover:bg-gray-50 active:scale-[0.99] transition px-3 cursor-pointer"
-                    onClick={() => { onClose(); navigate("/mypage"); }}
-                  >
-                    <User className="w-4 h-4 shrink-0" aria-hidden="true" />
-                    <span className="text-[12px] font-medium whitespace-nowrap tracking-tight leading-none">마이페이지</span>
-                  </button>
-                  <button
-                    type="button"
-                    className="flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 py-2.5 hover:bg-gray-50 active:scale-[0.99] transition px-3 cursor-pointer"
-                    onClick={() => { onClose(); navigate("/cart"); }}
-                  >
-                    <ShoppingCart className="w-4 h-4 shrink-0" aria-hidden="true" />
-                    <span className="text-[12px] font-medium whitespace-nowrap tracking-tight leading-none">장바구니</span>
-                  </button>
-                  <button
-                    type="button"
-                    className="flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 py-2.5 hover:bg-gray-50 active:scale-[0.99] transition px-3 cursor-pointer"
-                    onClick={() => { onClose(); navigate("/wishlist"); }}
-                  >
-                    <Heart className="w-4 h-4 shrink-0" aria-hidden="true" />
-                    <span className="text-[12px] font-medium whitespace-nowrap tracking-tight leading-none">위시리스트</span>
-                  </button>
-                </div>
                   <button
                     type="button"
                     className="mt-2 w-full flex items-center justify-center gap-2 rounded-xl border text-white py-2.5 bg-black active:scale-[0.99] transition cursor-pointer"
