@@ -5,6 +5,7 @@ import AddressModal from "../../components/features/payment/AddressModal";
 // import { useMyProfile } from "../../hooks/useUser";
 import TossModal from "../../components/features/payment/TossModal";
 import {
+  useCancelOrderMutation,
   useGetMyOrders,
   useGetPurchaseItems,
 } from "../../hooks/payments/useOrderPayment";
@@ -17,6 +18,8 @@ import PaymentSkeleton from "../../components/skeletons/PaymentSkeleton";
 import { useGetMyAddresses } from "../../hooks/payments/useAddress";
 import UserAddressModal from "../../components/features/payment/UserAddressModal";
 import TermsModal from "../../components/features/payment/TermsModal";
+import ConfirmModal from "../../components/common/ConfirmModal";
+import { useNavigate } from "react-router-dom";
 
 const SECTION_STYLE =
   "w-full border border-gray-200 rounded-2xl px-4 py-5 shadow-sm mb-2";
@@ -33,7 +36,7 @@ export default function UserPayment() {
     address2: /^.{2,}$/,
   };
   const validNames = ["recipient", "phone", "address2"];
-
+  const navigate = useNavigate();
   const {
     data: userOrder,
     isLoading: orderLoading,
@@ -68,6 +71,8 @@ export default function UserPayment() {
     orderName: "",
   });
 
+  const cancelOrder = useCancelOrderMutation();
+
   // Todo : 현재 주소 지정 기본 주소 하나만 가져옴 => 기본 주소 리스트 가져와서 선택 할 수 있을것, 기본주소 선택해도 주소변경 전달 할것
   const [shippingAddress, setShippingAddress] = useState({
     recipient: "", //주문자
@@ -84,6 +89,7 @@ export default function UserPayment() {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false); // 주소 검색 모달
   const [isAddressListModalOpen, setIsAddressListModalOpen] = useState(false); // 사용자 주소 리스트 모달
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [payment, setPayment] = useState("");
   const [isDefaultAddress, setIsDefaultAddress] = useState(true);
   const [isTermsOpen, setTermsOpen] = useState(false);
@@ -196,7 +202,7 @@ export default function UserPayment() {
       setShippingAddress((prev) => ({ ...prev, [name]: formattedValue }));
       if (inputErrors[name]) {
         // 하이픈 제거
-        const newPhone = value.replaceAll("-", "")
+        const newPhone = value.replaceAll("-", "");
         if (reg[name].test(newPhone)) {
           setInputErrors((prev) => ({ ...prev, [name]: "" }));
         }
@@ -302,6 +308,18 @@ export default function UserPayment() {
     setTermsOpen(true);
   };
 
+  const onClickCancelBtn = () => {
+    setIsCancelModalOpen(true);
+  }
+
+  // 주문 취소
+  const handleCancelConfirm = async () => {
+    await cancelOrder.mutateAsync({ order_id: purchaseId });
+    setIsCancelModalOpen(false);
+    // 홈으로 이동
+    navigate("/");
+  };
+
   const handleSubmitPay = async (e) => {
     e.preventDefault(); // 결제중 새로고침 방지
 
@@ -394,12 +412,25 @@ export default function UserPayment() {
 
   // 불러올 정보가 없다면 빈페이지 출력
   if (userOrder?.results.length === 0) {
+    // 홈으로 이동
+    navigate('/')
     return <EmptyPayment />;
   }
 
   return (
     <div className="flex w-full items-center justify-center">
       {isPaymentProcessing && <CartLoadingSpin />}
+      {isCancelModalOpen && (
+        <ConfirmModal
+          isOpen={isCancelModalOpen}
+          onClose={() => setIsCancelModalOpen(false)}
+          title="주문 취소"
+          onConfirm={handleCancelConfirm}
+          message="정말로 주문을 취소 하시겠습니까?"
+          confirmText="주문 취소"
+          cancelText="주문으로 돌아가기"
+        />
+      )}
       <form
         onSubmit={handleSubmitPay}
         className="p-2 sm:p-0 w-dvw lg:w-[800px] flex flex-col justify-center items-center"
@@ -781,6 +812,13 @@ export default function UserPayment() {
           disabled={isPaymentProcessing} // 결제 진행중에는 두번 요청 X
         >
           {testPaymentInfo.amount.toLocaleString()}원 결제
+        </button>
+        <button
+          type="button"
+          onClick={onClickCancelBtn}
+          className="text-sm text-gray-500 hover:underline cursor-pointer mt-10"
+        >
+          주문 취소하기
         </button>
       </form>
       {isTermsOpen && (
