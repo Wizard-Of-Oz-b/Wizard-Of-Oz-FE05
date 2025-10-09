@@ -64,8 +64,8 @@ export default function UserCart() {
         const newOrder = await purchaseMutation.mutateAsync();
 
         const orderList = userOrder.results.map((el) => el.order_id);
-        const mergePayload = { order_ids: [...orderList] };
-
+        const mergePayload = { order_ids: [...orderList, newOrder.order_id] };
+        console.log(mergePayload, 'payload')
         await mergeMutation.mutateAsync(mergePayload);
 
         navigate(`/payment`);
