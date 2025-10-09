@@ -62,11 +62,12 @@ export default function CategoryResultsHeader({
       </div>
 
       {/* Active filter chips */}
-      <div className="mt-3 flex flex-wrap gap-2">
+      {/* 우선은 비활성화하겠습니다. */}
+      {/* <div className="mt-3 flex flex-wrap gap-2">
         {primary && <Chip label={`대상: ${primary}`} onRemove={() => onRemoveChip?.("primary")} />}
         {item && <Chip label={`분류: ${item}`} onRemove={() => onRemoveChip?.("item")} />}
         {keyword && <Chip label={`키워드: ${keyword}`} onRemove={() => onRemoveChip?.("q")} />}
-      </div>
+      </div> */}
     </div>
   );
 }

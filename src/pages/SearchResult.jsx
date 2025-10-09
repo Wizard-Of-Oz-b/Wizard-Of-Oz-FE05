@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useProducts } from "../hooks/useProducts";
 import ProductList from "../components/common/product/ProductList";
+import CategoryEmptyState from "../components/common/product/category/CategoryEmptyState";
 
 export default function SearchResult() {
   const [params, setParams] = useSearchParams();
@@ -63,6 +64,7 @@ export default function SearchResult() {
   }
 
   const total = data?.count ?? 0;
+  const resultsLen = data?.results?.length ?? 0;
   const hasFilters = Boolean(query.q || query.category_id);
 
   return (
@@ -127,28 +129,24 @@ export default function SearchResult() {
         )}
 
         {/* 빈 상태 */}
-        {!isLoading && (data?.results?.length ?? 0) === 0 && (
-          <div className="flex flex-col items-center justify-center py-16 text-center rounded-2xl border border-dashed border-gray-200">
-            <div className="text-base font-medium text-gray-800">조건에 맞는 상품이 없어요.</div>
-            <div className="mt-1 text-sm text-gray-500">
-              필터를 조정하거나 다른 키워드로 다시 시도해 보세요.
-            </div>
-            {hasFilters && (
-              <button
-                type="button"
-                className="mt-4 inline-flex items-center rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                onClick={() => {
+        {!isLoading && resultsLen === 0 && (
+          <CategoryEmptyState
+            title="조건에 맞는 상품이 없어요."
+            hint={hasFilters ? "다른 키워드로 다시 검색해 보세요." : "아직 상품이 없거나 검색 조건이 비어있어요."}
+            actions={[
+              hasFilters && {
+                label: "필터 초기화",
+                onClick: () => {
                   setQuery((prev) => ({ ...prev, q: "", category_id: null, page: 1 }));
                   updateURL({ q: "", category_id: null, page: 1 });
-                }}
-              >
-                필터 초기화
-              </button>
-            )}
-          </div>
+                },
+              },
+            ].filter(Boolean)}
+          />
         )}
 
-        {/* 실제 리스트 (기존 컴포넌트 그대로 사용) */}
+      {/* 실제 리스트는 결과가 있을때만 렌더링됩니당. */}
+      {resultsLen > 0 && (
         <ProductList
           datas={data}
           isLoading={isLoading}
@@ -156,6 +154,7 @@ export default function SearchResult() {
           onSortChange={handleSortChange}
           onPageChange={handlePageChange}
         />
+      )}
       </div>
     </>
   );
