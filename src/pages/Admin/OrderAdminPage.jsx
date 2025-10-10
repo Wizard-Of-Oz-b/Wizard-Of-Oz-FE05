@@ -25,6 +25,7 @@ import OrderFilters from '../../components/common/layouts/admin/orders/OrderFilt
 import ExportExcelButton from '../../components/common/layouts/admin/orders/ExportExcelButton';
 import Toast from '../../components/common/layouts/admin/common/Toast';
 import { getShipment, normalizeShipmentStatus } from '../../components/common/api/common/shipments';
+import { useAdminOrderActions } from '../../hooks/useAdminOrderActions';
 
 function toStartOfDayISO(ymd) {
   if (!ymd) return undefined;
@@ -68,6 +69,12 @@ export default function OrderAdminPage() {
   const selectedOrder = orders.find((o) => o.id === selectedOrderId) || null;
   const statusTarget = orders.find((o) => o.id === statusTargetId) || null;
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  const { adminCancel, adminRefund } = useAdminOrderActions({
+    orders,
+    setOrders,
+    pushToast,
+  });
 
   // 페이지 이동
   const goFirst = () => setPage(1);
@@ -426,6 +433,8 @@ export default function OrderAdminPage() {
           setStatusTargetId(id);
           setStatusOpen(true);
         }}
+        onAdminCancel={adminCancel}
+        onAdminRefund={adminRefund}
       />
 
       {/* 페이지네이션 */}
