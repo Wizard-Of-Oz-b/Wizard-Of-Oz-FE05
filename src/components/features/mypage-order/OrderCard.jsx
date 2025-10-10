@@ -75,8 +75,8 @@ export default function OrderCard({ order }) {
     setIsConfirmModalOpen(false);
   };
 
-  const handleConfirmCancelOrder = () => {
-    cancelOrderMutation.mutate(order.purchase_id);
+  const handleConfirmCancelOrder = async () => {
+    await cancelOrderMutation.mutateAsync({order_id: order.purchase_id});
     setIsCancelModalOpen(false);
   };
   console.log(shipment?.results, "test");
@@ -101,6 +101,8 @@ export default function OrderCard({ order }) {
       setOrderStyle(statusInfo?.style);
     }
   }, [shipment, orderData, order]);
+
+  
   //order 없으면 얼리 리턴
   if (!order) {
     return;
@@ -356,7 +358,7 @@ export default function OrderCard({ order }) {
             )}
             {order?.status === "paid" && shipment?.total === 0 && (
               <button
-                onClick={onClickcancled}
+                onClick={onClickcancelOrder}
                 className="w-full text-center mt-3 rounded-md px-2 py-2 bg-red-500 text-white font-semibold"
               >
                 주문 취소
