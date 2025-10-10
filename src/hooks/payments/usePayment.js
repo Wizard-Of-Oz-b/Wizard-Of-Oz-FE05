@@ -30,7 +30,7 @@ export const useConfirmTossPayment = () => {
     onSuccess: (data) => {
       // 최종 승인 성공 시 실행
       console.log("결제 최종 승인 성공:", data);
-      alert("결제가 성공적으로 완료되었습니다.");
+      // alert("결제가 성공적으로 완료되었습니다.");
       // 여기서 추가적으로 필요한 로직을 실행할 수 있습니다.
       // 예: queryClient.invalidateQueries(...)
     },
@@ -42,10 +42,10 @@ export const useConfirmTossPayment = () => {
         errorData?.message ||
         errorData?.detail ||
         "결제 승인 중 오류가 발생했습니다.";
-
-      console.error("결제 최종 승인 실패:", errorData);
+      throw new Error(errorMessage)
+      // console.error("결제 최종 승인 실패:", errorMessage);
       //추후에 공용 모달창으로 변경 해야 한다.
-      alert(errorMessage);
+      // alert(errorMessage);
     },
   });
 };
