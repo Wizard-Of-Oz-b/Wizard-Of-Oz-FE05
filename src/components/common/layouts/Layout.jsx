@@ -10,7 +10,7 @@ export default function Layout() {
   const { pathname } = useLocation();
   const { isLoggedIn, user } = useAuth();
   const isHomepage = pathname === "/";
-  const noHeaderPadPages = ["/mypage", "/info", "/login", "/signup"];
+  const noHeaderPadPages = ["/mypage", "/info", "/login", "/signup", "/brand"];
    // 위 배열에 포함된 페이지일 경우 레이아웃 기본 패딩값을 받지 않음.
   const noHeaderPad = noHeaderPadPages.some(path => pathname.startsWith(path));
 
