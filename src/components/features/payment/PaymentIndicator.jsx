@@ -10,22 +10,20 @@ export default function PaymentIndicator({ status = "loading" }) {
   const isSuccess = status === "success";
   const isFail = status === "fail";
 
-  const indicatorStyle = `relative inline-block w-16 h-16 rounded-full border-[5px] ${
+  const indicatorStyle = `relative inline-block w-16 h-16 rounded-full border-[5px] transition-colors duration-500 ${
     isLoading &&
-    "border-blue-500 border-t-transparent animate-[loader_spin_1s_linear_infinite]"
+    "border-violet-500 border-t-transparent animate-spin"
   }
   ${
     isSuccess &&
-    "border-green-500 animate-[fade_in_bck_0.6s_cubic-bezier(0.390,0.575,0.565,1.000)_both]"
+    "border-violet-500"
   }
   ${
     isFail &&
-    "border-red-500 animate-[fade_in_bck_0.6s_cubic-bezier(0.390,0.575,0.565,1.000)_both]"
+    "border-red-500"
   }`;
 
-  const iconStyle = `absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10`;
-
-  const iconAnimation = `animate-[scale_in_center_0.5s_cubic-bezier(0.250,0.460,0.450,0.940)_both]`;
+  const iconStyle = `absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 transition-all duration-500 transform`;
 
   return (
     <div className={indicatorStyle}>
@@ -33,7 +31,7 @@ export default function PaymentIndicator({ status = "loading" }) {
       {/* 성공 아이콘 */}
       <svg
         className={`${iconStyle} text-violet-500 ${
-          isSuccess ? `block ${iconAnimation}` : "hidden"
+          isSuccess ? `opacity-100 scale-100` : "hidden"
         }`}
         fill="none"
         stroke="currentColor"
@@ -50,7 +48,7 @@ export default function PaymentIndicator({ status = "loading" }) {
       {/* 실패 아이콘 */}
       <svg
         className={`${iconStyle} text-red-500 ${
-          isFail? `block ${iconAnimation}` : "hidden"
+          isFail? `opacity-100 scale-100` : "hidden"
         }`}
         fill="none"
         stroke="currentColor"
