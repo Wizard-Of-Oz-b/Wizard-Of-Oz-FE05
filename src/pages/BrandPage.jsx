@@ -16,7 +16,7 @@ export default function BrandPage() {
     aria-hidden
     className="absolute inset-0 bg-center bg-cover"
     style={{
-      backgroundImage: "url('/images/brandhero.jpg')",
+      backgroundImage: "url('https://vteallasuiryfibljlww.supabase.co/storage/v1/object/public/s/brandhero.jpg')",
       filter: "brightness(0.9)",
     }}
   />
