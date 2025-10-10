@@ -1,6 +1,6 @@
 import { StatusBadge } from ".";
+import { mapStatusToKorean } from "../../../api/admin/adminOrders.adapters";
 import { normalizeShipmentStatus, SHIPMENT_STATUS_LABEL } from "../../../api/common/shipments";
-
 const TERMINALS = new Set(["취소완료", "환불완료"]);
 
 function calcTotalKRW(o) {
@@ -128,7 +128,7 @@ export default function OrderTable({ orders = [], onOpenDetails, onOpenRequest, 
                         </button>
                       )}
                       {(() => {
-                        const koStatus = o?.status;
+                        const koStatus = mapStatusToKorean(o?.status);
                         if (TERMINALS.has(koStatus)) return <span className="text-xs text-gray-400">—</span>;
                         return (
                           <>

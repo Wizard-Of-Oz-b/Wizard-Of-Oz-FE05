@@ -70,17 +70,17 @@ export default function OrderAdminPage() {
   const statusTarget = orders.find((o) => o.id === statusTargetId) || null;
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-  const { adminCancel, adminRefund } = useAdminOrderActions({
-    orders,
-    setOrders,
-    pushToast,
-  });
-
   // 페이지 이동
   const goFirst = () => setPage(1);
   const goPrev = () => setPage((p) => Math.max(1, p - 1));
   const goNext = () => setPage((p) => Math.min(pageCount, p + 1));
   const goLast = () => setPage(pageCount);
+
+  const { adminCancel, adminRefund } = useAdminOrderActions({
+    orders,
+    setOrders,
+    pushToast,
+  });
 
   // 날짜 빠른 선택
   const setToday = () => {
