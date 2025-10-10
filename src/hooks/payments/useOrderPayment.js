@@ -108,6 +108,7 @@ export const useCancelOrderMutation = () => {
 
     onSuccess: ()=> {
       queryClient.invalidateQueries({ queryKey: ['purchaseItems'] });
+      queryClient.invalidateQueries({ queryKey: ['mypageOrder'] });
     },
     onError: (error) => {
       console.error("주문 삭제 실패:", error);
