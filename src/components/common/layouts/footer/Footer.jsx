@@ -14,7 +14,7 @@ const CONFIG = {
   ],
   linkColumns: [
   [
-    { label: "브랜드소개", href: "#" },
+    { label: "브랜드소개", href: "/brand" },
     { label: "오프라인 매장안내", href: "/info" },
     { label: "윤리경영", href: "#" },
   ],

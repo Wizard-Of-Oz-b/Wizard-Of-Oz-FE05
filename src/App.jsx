@@ -51,7 +51,7 @@ import OrderList from "./components/common/layouts/Mypage/OrderList.jsx";
 import StoreIntro from "./pages/StoreInfo.jsx";
 import MyPageDashboard from "./components/common/layouts/Mypage/MyPageDashboard.jsx";
 import MembershipTiers from "./components/common/layouts/Mypage/MembershipTiers.jsx";
-
+import BrandPage from "./pages/BrandPage.jsx";
 
 const queryClient = new QueryClient();
 
@@ -76,6 +76,7 @@ export default function App() {
               <Route path='/payment/success' element={<PaySuccess />} />
               <Route path='/payment/fail' element={<PayFail />} />
               <Route path="info" element={<StoreIntro />} />
+              <Route path="brand" element={<BrandPage />} />
 
               {/* 마이페이지 (이중 중첩 라우팅) */}
               <Route path="/mypage" element={<Mypage />}>

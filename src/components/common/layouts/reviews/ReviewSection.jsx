@@ -10,6 +10,8 @@ import {
 import { useAuth } from "../../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useAlertModal } from "../common/modal/useAlertModal";
+import { useReviewEligibility } from "./hooks/useReviewEligibility";
+import CartLoadingSpin from "../../../features/cart/CartLoadingSpin";
 
 export default function ReviewSection({
   productId,
@@ -27,6 +29,12 @@ export default function ReviewSection({
 
   const { showModal, ModalComponent } = useAlertModal();
   const effectiveIsAdmin = isAdmin || adminFromContext;
+
+  const {
+    data: elig,
+    isLoading: eligLoading,
+    isError: eligError,
+  } = useReviewEligibility(productId);
 
   const authedUserId = useMemo(
     () => currentUserId ?? user?.user_id ?? user?.id ?? null,
@@ -75,6 +83,7 @@ export default function ReviewSection({
   const [rating, setRating] = useState(0);
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const canCreateUI = enableCreate && isLoggedIn && (elig?.eligible === true);
 
   const canCreate = enableCreate && !!authedUserId;
 
@@ -95,7 +104,10 @@ export default function ReviewSection({
       requireLogin();
       return;
     }
-
+    if (!(elig?.eligible)) {
+      toast("error", "구매 이력이 있는 회원만 리뷰를 작성할 수 있어요.");
+      return;
+    }
     if (!productId) return;
     if (!authedUserId) {
       toast("error", "리뷰를 작성하려면 로그인하세요.");
@@ -150,6 +162,12 @@ export default function ReviewSection({
 
       {/* 작성 폼 */}
       {enableCreate && (
+        (isLoggedIn && eligLoading) ? (
+          <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4 flex items-center gap-2 text-sm text-gray-600">
+            <div className="w-4 h-4 border-2 border-t-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+            리뷰 작성 가능 여부를 확인 중입니다.
+          </div>
+        ) : (canCreateUI ? (
         <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
           <div className="flex items-center justify-between gap-3">
             <StarRating
@@ -205,11 +223,18 @@ export default function ReviewSection({
             />
           </div>
         </div>
+        ) : null)
       )}
 
       {/* 목록 */}
       {loading ? (
-        <div className="py-10 text-center text-sm text-gray-500">불러오는 중…</div>
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+        <div 
+          className="w-4 h-4 border-2 border-t-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"
+          aria-hidden="true"
+        />
+          <span role="status" aria-live="polite">리뷰 목록을 불러오고 있습니다.</span>
+        </div>
       ) : loadError ? (
         <div className="py-8 text-center text-sm text-red-600">
           리뷰를 불러오지 못했습니다.{" "}
@@ -269,6 +294,7 @@ export default function ReviewSection({
       )}
     </section>
 
+    {submitting && <CartLoadingSpin />}
     {ModalComponent}    
     </>
   );
