@@ -1,4 +1,5 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
+import PaymentIndicator from "../../components/features/payment/PaymentIndicator";
 
 export default function PayFail() {
   const [searchParams] = useSearchParams();
@@ -6,30 +7,46 @@ export default function PayFail() {
 
   const errorCode = searchParams.get("code");
   const errorMessage = searchParams.get("message");
-
+  const orderId = searchParams.get("orderId");
   const onClickHomeBtn = () => {
     navigate("/");
   };
+  const onClickpayment = () => {
+    navigate("/payment");
+  };
 
   return (
-    <div className="w-full flex flex-col items-center justify-center">
-      <div className="flex flex-col items-center justify-around border border-gray-300 w-200 h-50">
-        <h2 className="text-2xl">결제 실패</h2>
-        <div className="w-full h-0.5 bg-gray-300"></div>
-        <div className="flex flex-col w-full ml-5">
+    <div className="flex flex-col items-center justify-center">
+      <div className="flex flex-col items-center border border-neutral-300 shadow-xl w-150 py-10 px-2">
+        <PaymentIndicator status={"fail"} />
+        {/* {confirmPaymentMutation.isPending && <PaymentResultSkeleton />} */}
+        <>
+          <h1 className="text-2xl mb-5">토스 결제 실패</h1>
           <p>
-            결제에 실패했습니다. 문제가 지속될 경우 고객센터로 문의해주세요.
+            토스 결제에 실패 했습니다. 문제가 지속될 경우 고객센터로
+            문의해주세요.
           </p>
-          <p>{`에러 코드: ${errorCode}`}</p>
-          <p>{`실패 사유: ${errorMessage}`}</p>
-        </div>
+          <div className="bg-neutral-100 px-14 py-8">
+            <p>{`주문 번호: ${orderId}`}</p>
+            <p>{`실패 코드: ${errorCode}`}</p>
+            <p>{`실패 사유: ${errorMessage}`}</p>
+          </div>
+          <div className="mt-10 flex justify-between gap-1.5 w-full ">
+            <button
+              className="border flex-1 h-8 border-gray-400 px-1 rounded cursor-pointer"
+              onClick={onClickHomeBtn}
+            >
+              메인 화면으로 돌아가기
+            </button>
+            <button
+              className="border flex-1 h-8 border-gray-400 px-1 text-white rounded  bg-red-500 cursor-pointer"
+              onClick={onClickpayment}
+            >
+              결제로 돌아가기
+            </button>
+          </div>
+        </>
       </div>
-      <button
-        onClick={onClickHomeBtn}
-        className="mt-2 border border-gray-300 px-2 py-0.5 text-white bg-black rounded-sm"
-      >
-        홈페이지로 돌아가기
-      </button>
     </div>
   );
 }

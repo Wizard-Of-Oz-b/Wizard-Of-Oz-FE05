@@ -69,48 +69,51 @@ export default function PaySuccess() {
         {/* <FaCheckCircle size={60} color="black" /> */}
         <PaymentIndicator status={status} />
         {confirmPaymentMutation.isPending && <PaymentResultSkeleton />}
-        <>
-          <h1 className="text-2xl mb-5">
-            {status === "success"
-              ? "결제가 완료 되었습니다."
-              : "결제 승인 실패"}
-          </h1>
-          <p>
-            {status === "fail"
-              ? "주문이 처리되지 않아 결제가 완료되지 않았습니다. 지속적으로 문제가 발생하면 고객센터로 문의 주세요."
-              : "주문이 정상적으로 처리되었습니다."}
-          </p>
-          <div className="bg-neutral-100 px-14 py-8">
-            <p>{`주문 번호: ${searchParams.get("orderId")}`}</p>
+        {!confirmPaymentMutation.isPending && 
+          <>
+            <h1 className="text-2xl mb-5">
+              {status === "success"
+                ? "결제가 완료 되었습니다."
+                : "결제 승인 실패"}
+            </h1>
+            <p>
+              {status === "fail"
+                ? "주문이 처리되지 않아 결제가 완료되지 않았습니다."
+                : "주문이 정상적으로 처리되었습니다."}
+            </p>
+            <div className="bg-neutral-100 px-14 py-8">
+              <p>{`주문 번호: ${searchParams.get("orderId")}`}</p>
 
-            <p>{`결제 금액: ${Number(
-              searchParams.get("amount")
-            ).toLocaleString()}원`}</p>
-          </div>
-          <div className="mt-10 flex justify-between gap-1.5 w-full ">
-            <button
-              className="border flex-1 h-8 border-gray-400 px-1 rounded cursor-pointer"
-              onClick={onClickMypage}
-            >
-              마이페이지
-            </button>
-            {status === "success" ? (
+              <p>{`결제 금액: ${Number(
+                searchParams.get("amount")
+              ).toLocaleString()}원`}</p>
+            </div>
+            <div className="mt-10 flex justify-between gap-1.5 w-full ">
               <button
-                className="border flex-1 h-8 border-gray-400 px-1 text-white rounded  bg-admintheme-violet cursor-pointer"
-                onClick={onClickHompage}
+                className="border flex-1 h-8 border-gray-400 px-1 rounded cursor-pointer"
+                onClick={onClickMypage}
               >
-                쇼핑 계속하기
+                마이페이지
               </button>
-            ) : (
-              <button
-                className="border flex-1 h-8 border-gray-400 px-1 text-white rounded  bg-red-500 cursor-pointer"
-                onClick={handleConfirmToss}
-              >
-                다시 시도하기
-              </button>
-            )}
-          </div>
-        </>
+              {status === "success" ? (
+                <button
+                  className="border flex-1 h-8 border-gray-400 px-1 text-white rounded  bg-admintheme-violet cursor-pointer"
+                  onClick={onClickHompage}
+                >
+                  쇼핑 계속하기
+                </button>
+              ) : (
+                <button
+                  className="border flex-1 h-8 border-gray-400 px-1 text-white rounded  bg-red-500 cursor-pointer"
+                  onClick={handleConfirmToss}
+                >
+                  다시 시도하기
+                </button>
+              )}
+            </div>
+          </>
+        
+        }
       </div>
     </div>
   );
