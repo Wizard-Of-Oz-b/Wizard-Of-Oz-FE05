@@ -17,6 +17,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import CartLoadingSpin from "../components/features/cart/CartLoadingSpin";
+import WishlistCardSkeleton from "../components/common/layouts/wishlist/components/WishlistCardSkeleton";
 
 export default function Wishlist() {
   const [items, setItems] = useState([]);
@@ -36,6 +37,8 @@ export default function Wishlist() {
   const allChecked = selected.size === items.length && items.length > 0;
   const indeterminate = selected.size > 0 && !allChecked;
   const isEmpty = !loading && items.length === 0;
+  const isFetchingInitial = loading && items.length === 0;
+  const isMutating = loading && items.length > 0;
 
   // 사용자가 로그인되었는지 확인 -> 아닐경우 로그인페이지로 바로 리다이렉트
   useEffect(() => {
@@ -173,7 +176,7 @@ export default function Wishlist() {
     }
   };
   // 로딩스피너 사용하여 진행중이라는걸 보여주기.
-  const showOverlayLoading = bootstrapping || loading;
+  const showOverlayLoading = bootstrapping || isMutating;
 
   return (
     <motion.div
@@ -188,7 +191,7 @@ export default function Wishlist() {
           <div>
             <h1 className="text-3xl font-semibold tracking-tight">위시리스트</h1>
             <p className="mt-1 text-sm text-neutral-500">
-              {loading ? "불러오는 중…" : `총 ${items.length}개`}
+              {isFetchingInitial ? "불러오는 중…" : `총 ${items.length}개`}
             </p>
           </div>
           <CartDock ref={cartDockRef} count={cartCount} />
@@ -206,7 +209,13 @@ export default function Wishlist() {
         />
 
         {/* 리스트 / 빈 상태 */}
-        {isEmpty ? (
+        {isFetchingInitial ? (
+          <ul className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <WishlistCardSkeleton key={i} />
+            ))}
+          </ul>
+        ) : isEmpty ? (
           <EmptyState />
         ) : (
           <List
