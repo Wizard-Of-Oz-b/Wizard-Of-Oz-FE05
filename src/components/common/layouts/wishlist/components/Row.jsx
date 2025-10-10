@@ -24,7 +24,7 @@ export default function Row({
       animate="animate"
       exit="exit"
       layout="position"
-      transition={{ layout: { duration: 0.18, ease: "easeOut" } }}
+      transition={{ layout: { type: "tween", duration: 0, ease: "easeOut" } }}
       className={`group px-3 sm:px-4 py-4 mx-2 my-2 rounded-xl transition
         ${active ? "bg-neutral-50 ring-1 ring-neutral-200" : "hover:bg-neutral-50"}`}
     >
