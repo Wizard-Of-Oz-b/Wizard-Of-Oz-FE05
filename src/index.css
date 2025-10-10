@@ -1,4 +1,6 @@
-html, body, #root {
+html,
+body,
+#root {
   min-height: 100%;
   height: auto;
 }
@@ -81,13 +83,46 @@ body {
 @utility border-admintheme-violet-light {
   border-color: var(--color-admintheme-violet-light);
 }
+
+/* 결제 로딩 */
+@layer utilities {
+  @keyframes loader_spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes scale_in_center {
+    from {
+      transform: scale(0);
+      opacity: 1;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  @keyframes fade_in_bck {
+    from {
+      transform: translateZ(80px);
+      opacity: 0;
+    }
+    to {
+      transform: translateZ(0);
+      opacity: 1;
+    }
+  }
+}
+
 /* 관리자 페이지 커스텀 팔레트 끝 */
 /* 관리자페이지 전용 스크롤바 테마 - 복 */
 .admin-layout::-webkit-scrollbar {
   width: 16px;
 }
 .admin-layout::-webkit-scrollbar-track {
-  background: #0b0b0f; 
+  background: #0b0b0f;
 }
 .admin-layout::-webkit-scrollbar-thumb {
   background-color: #4c1d95;
@@ -130,12 +165,11 @@ body {
   line-height: 36px;
 }
 
-
 // 마이페이지 구매 목록 상품 모달 스크롤 설정
 .mypage-detail-modal::-webkit-scrollbar {
-  display:none
+  display: none;
 }
 
-.payment-address::-webkit-scrollbar{
-  display:none
+.payment-address::-webkit-scrollbar {
+  display: none;
 }
