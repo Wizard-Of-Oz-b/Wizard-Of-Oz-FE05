@@ -1,4 +1,5 @@
 import { StatusBadge } from ".";
+import { mapStatusToKorean } from "../../../api/admin/adminOrders.adapters";
 import { normalizeShipmentStatus, SHIPMENT_STATUS_LABEL } from "../../../api/common/shipments";
 
 const TERMINALS = new Set(["취소완료", "환불완료"]);
@@ -100,14 +101,23 @@ export default function OrderTable({ orders = [], onOpenDetails, onOpenRequest, 
                   </td>
 
                   <td className="px-4 py-4 text-center">
-                    {(() => {
-                      let sKey = normalizeShipmentStatus(o?.shipment?.status);
-                      if (!sKey && (o?.shipmentId || o?.trackingNo || o?.shipment?.tracking_number)) {
-                      sKey = '-';
-                      }
-                      const label = SHIPMENT_STATUS_LABEL[sKey] || (sKey ? sKey : '—');
-                      return <StatusBadge status={label} />;
-                    })()}
+                    <div className="flex flex-col items-center gap-1">
+                      <StatusBadge
+                        status={mapStatusToKorean(o?.status) || "—"}
+                      />
+                      {(() => {
+                        const sKey = normalizeShipmentStatus(o?.shipment?.status);
+                        if (!sKey && !(o?.shipmentId || o?.trackingNo || o?.shipment?.tracking_number)) {
+                          return null;
+                        }
+                        const label = SHIPMENT_STATUS_LABEL[sKey] || (sKey ? sKey : "—");
+                        return (
+                          <span className="text-[11px] text-gray-500">
+                            배송: {label}
+                          </span>
+                        );
+                      })()}
+                    </div>
                   </td>
 
                   <td className="px-4 py-4 text-center">

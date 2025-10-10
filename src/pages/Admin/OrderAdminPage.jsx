@@ -106,13 +106,32 @@ export default function OrderAdminPage() {
         page,
         size: PAGE_SIZE,
         search: q || undefined,
-        status: statusFilter || undefined,
         ordering: '-purchased_at',
         created_from: toStartOfDayISO(startDate),
         created_to: toEndOfDayISO(endDate),
       };
 
-      const list = await fetchAdminOrders(params);
+      // const list = await fetchAdminOrders(params);
+      const statuses = (statusFilter || "")
+        .split(",")
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      let list;
+      if (statuses.length <= 1) {
+        list = await fetchAdminOrders({ ...params, status: statuses[0] || undefined });
+      } else {
+        const chunks = await Promise.all(
+          statuses.map(s => fetchAdminOrders({ ...params, status: s }))
+        );
+        const merged = chunks.flatMap(c => c.results || c || []);
+        const unique = new Map();
+        merged.forEach(row => {
+          const id = row.purchase_id || row.id;
+          if (!unique.has(id)) unique.set(id, row);
+        });
+        list = { results: Array.from(unique.values()), count: merged.length };
+      }
       const headers = (list.results || []).map(adaptAdminOrderHeader);
 
       const withItems = await Promise.all(
