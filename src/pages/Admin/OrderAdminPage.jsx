@@ -26,6 +26,7 @@ import ExportExcelButton from '../../components/common/layouts/admin/orders/Expo
 import Toast from '../../components/common/layouts/admin/common/Toast';
 import { getShipment, normalizeShipmentStatus } from '../../components/common/api/common/shipments';
 import { useAdminOrderActions } from '../../hooks/useAdminOrderActions';
+import ConfirmModal from '../../components/common/layouts/admin/common/ConfirmModal';
 
 function toStartOfDayISO(ymd) {
   if (!ymd) return undefined;
@@ -55,6 +56,12 @@ export default function OrderAdminPage() {
   const [requestOpen, setRequestOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
   const [statusTargetId, setStatusTargetId] = useState(null);
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmKind, setConfirmKind] = useState(null);
+  const [confirmOrderId, setConfirmOrderId] = useState(null);
+  const [confirmTitle, setConfirmTitle] = useState('알림');
+  const [confirmMessage, setConfirmMessage] = useState('');
 
   // 토스트 
   const [toasts, setToasts] = useState([]);
@@ -433,8 +440,22 @@ export default function OrderAdminPage() {
           setStatusTargetId(id);
           setStatusOpen(true);
         }}
-        onAdminCancel={adminCancel}
-        onAdminRefund={adminRefund}
+        // onAdminCancel={adminCancel}
+        // onAdminRefund={adminRefund}
+        onAdminCancel={(id) => {
+          setConfirmKind('cancel');
+          setConfirmOrderId(id);
+          setConfirmTitle('관리자 취소 처리');
+          setConfirmMessage('이 주문을 관리자 권한으로 취소 처리할까요?\n결제 취소/재고/정산 영향을 확인했는지 점검해주세요.');
+          setConfirmOpen(true);
+        }}
+        onAdminRefund={(id) => {
+          setConfirmKind('refund');
+          setConfirmOrderId(id);
+          setConfirmTitle('관리자 환불 처리');
+          setConfirmMessage('이 주문을 관리자 권한으로 환불 처리할까요?\nPG 환불/정산/재고 회수 절차를 확인했는지 점검해주세요.');
+          setConfirmOpen(true);
+        }}
       />
 
       {/* 페이지네이션 */}
@@ -475,6 +496,30 @@ export default function OrderAdminPage() {
         onConfirm={(next) => {
           if (statusTarget) onChangeStatus(statusTarget.id, next);
           setStatusOpen(false);
+        }}
+      />
+
+      <ConfirmModal
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        title={confirmTitle}
+        message={confirmMessage}
+        confirmText="확인"
+        cancelText="닫기"
+        danger={confirmKind === 'cancel' || confirmKind === 'refund'}
+        onConfirm={async () => {
+          try {
+            if (!confirmOrderId || !confirmKind) return;
+            if (confirmKind === 'cancel') {
+              await adminCancel(confirmOrderId, { skipConfirm: true });
+            } else {
+              await adminRefund(confirmOrderId, { skipConfirm: true });
+            }
+          } finally {
+            setConfirmOpen(false);
+            setConfirmKind(null);
+            setConfirmOrderId(null);
+          }
         }}
       />
 

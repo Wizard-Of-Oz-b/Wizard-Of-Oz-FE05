@@ -14,7 +14,7 @@ export function useAdminOrderActions({ orders, setOrders, pushToast }) {
     const orderIdForAPI = pickOrderIdFromItems(target.items) || orderId;
 
     try {
-      if (!skipConfirm && !window.confirm("이 주문을 관리자 권한으로 '취소' 처리할까요?")) return;
+      if (!skipConfirm && !window.confirm("이 주문을 '취소' 할까요?")) return;
 
       const resp = await cancelAdminOrder(orderIdForAPI, target.items || []);
       const next = mapStatusToKorean(resp?.status) || "취소완료";
@@ -23,7 +23,7 @@ export function useAdminOrderActions({ orders, setOrders, pushToast }) {
         prev.map((o) => (o.id === orderId ? { ...o, status: next, request: null } : o))
       );
 
-      pushToast?.("관리자 권한으로 취소 처리했습니다.", { type: "success" });
+      pushToast?.("취소가 완료되었습니다.", { type: "success" });
     } catch (e) {
       console.error("adminCancel failed", e);
       const backendMsg =
@@ -48,7 +48,7 @@ export function useAdminOrderActions({ orders, setOrders, pushToast }) {
     const orderIdForAPI = pickOrderIdFromItems(target.items) || orderId;
 
     try {
-      if (!skipConfirm && !window.confirm("이 주문을 관리자 권한으로 '환불완료' 처리할까요?")) return;
+      if (!skipConfirm && !window.confirm("이 주문을 '환불' 처리할까요?")) return;
 
       const resp = await refundAdminOrder(orderIdForAPI, target.items || []);
       const next = mapStatusToKorean(resp?.status) || "환불완료";
@@ -57,7 +57,7 @@ export function useAdminOrderActions({ orders, setOrders, pushToast }) {
         prev.map((o) => (o.id === orderId ? { ...o, status: next, request: null } : o))
       );
 
-      pushToast?.("관리자 권한으로 환불 처리했습니다.", { type: "success" });
+      pushToast?.("환불 처리가 완료되었습니다.", { type: "success" });
     } catch (e) {
       console.error("adminRefund failed", e);
       const backendMsg =
