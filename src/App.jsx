@@ -52,6 +52,7 @@ import StoreIntro from "./pages/StoreInfo.jsx";
 import MyPageDashboard from "./components/common/layouts/Mypage/MyPageDashboard.jsx";
 import MembershipTiers from "./components/common/layouts/Mypage/MembershipTiers.jsx";
 import BrandPage from "./pages/BrandPage.jsx";
+import SocialUnlinkPage from "./components/common/layouts/Mypage/SocialUnlinkPage.jsx";
 
 const queryClient = new QueryClient();
 
@@ -88,6 +89,8 @@ export default function App() {
                 <Route path="reviews" element={<MyReviewsPage />} />
                 <Route path="orderlist" element={<OrderList />} />
                 <Route path="members" element={<MembershipTiers />} />
+                <Route path="social-unlink" element={<SocialUnlinkPage />} />
+                <Route path="social-unlink/:provider" element={<SocialUnlinkPage />} />
               </Route>
             </Route>
             <Route path="/auth/callback/:provider" element={<OAuthCallback />} />
