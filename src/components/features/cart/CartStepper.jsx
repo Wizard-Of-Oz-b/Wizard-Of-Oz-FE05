@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useAlertModal } from "../../common/layouts/common/modal/useAlertModal";
 
 export default function CartStepper({
   value,
@@ -6,9 +7,10 @@ export default function CartStepper({
   option,
   onChageValue,
   min = 1,
-  max = 999,
+  max = 50,
 }) {
   const [inputValue, setInputValue] = useState(value.toString());
+  const { showModal, ModalComponent } = useAlertModal();
 
   useEffect(() => {
     setInputValue(value.toString());
@@ -17,11 +19,23 @@ export default function CartStepper({
   const handleDecrement = () => {
     if (value > min) {
       onChageValue(itemId, option, value - 1);
+    }else{
+      showModal({
+        type: 'warning',
+        title: '적은 값 입력',
+        message: '1 이상의 숫자를 입력해 주세요.'
+      })
     }
   };
   const handleIncrement = () => {
     if (value < max) {
       onChageValue(itemId, option, value + 1);
+    }else{
+      showModal({
+        type: 'warning',
+        title: '재고 부족',
+        message: `현 상품은${max} 이하로 보유 하고있어 ${max}로 변경 하겠습니다.`
+      })
     }
   };
 
@@ -37,8 +51,18 @@ export default function CartStepper({
     const parsedValue = parseInt(inputValue, 10);
 
     if (isNaN(parsedValue) || parsedValue < min) {
+      showModal({
+        type: 'warning',
+        title: '적은 값 입력',
+        message: '1 이상의 숫자를 입력해 주세요.'
+      })
       onChageValue(itemId, option, min);
     } else if (parsedValue > max) {
+      showModal({
+        type: 'warning',
+        title: '재고 부족',
+        message: `현 상품은${max} 이하로 보유 하고있어 ${max}(으)로 변경 하겠습니다.`
+      })
       onChageValue(itemId, option, max);
     } else {
       onChageValue(itemId, option, parsedValue);
@@ -73,6 +97,7 @@ export default function CartStepper({
       >
         +
       </button>
+      {ModalComponent}
     </div>
   );
 }

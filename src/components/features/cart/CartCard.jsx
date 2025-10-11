@@ -6,6 +6,7 @@ import CartLoadingSpin from "./CartLoadingSpin";
 import CartStepper from "./CartStepper";
 import { AnimatePresence, motion } from "framer-motion";
 
+const FALLBACK_IMG = 'public/images/product-fallback.png'
 //각 주문 카트 onChangeSelect, checkItems제거
 export default function CartCard({ data, view = "pc" }) {
   // 최대 수량인지 확인
@@ -19,6 +20,7 @@ export default function CartCard({ data, view = "pc" }) {
   const productsImg = fetchPublicMainImageUrl(data.product);
   const option = formatOptionKey(data.option_key);
 
+  // #1 이미지 가져오기
   useEffect(() => {
     const loadImage = async () => {
       setIsLoading(true);
@@ -27,7 +29,7 @@ export default function CartCard({ data, view = "pc" }) {
         setImageUrl(url);
       } catch (error) {
         console.error("이미지 URL을 가져오는 데 실패했습니다:", error);
-        setImageUrl("https://picsum.photos/id/1/160/225");
+        setImageUrl(FALLBACK_IMG);
       } finally {
         setIsLoading(false);
       }
@@ -78,7 +80,7 @@ export default function CartCard({ data, view = "pc" }) {
                   alt="상품 이미지"
                   className="w-16 h-23 object-cover rounded-md mr-3 flex-shrink-0"
                   onError={(e) => {
-                    e.target.src = "https://picsum.photos/id/1/160/225";
+                    e.target.src = {FALLBACK_IMG};
                   }}
                 />
               )}
