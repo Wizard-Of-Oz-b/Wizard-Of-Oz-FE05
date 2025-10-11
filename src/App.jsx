@@ -53,6 +53,7 @@ import MyPageDashboard from "./components/common/layouts/Mypage/MyPageDashboard.
 import MembershipTiers from "./components/common/layouts/Mypage/MembershipTiers.jsx";
 import BrandPage from "./pages/BrandPage.jsx";
 import SocialUnlinkPage from "./components/common/layouts/Mypage/SocialUnlinkPage.jsx";
+import ToastList from "./components/common/ToastList.jsx";
 
 const queryClient = new QueryClient();
 
@@ -128,6 +129,7 @@ export default function App() {
             {/* 404 */}
             <Route path="*" element={<Error404 />} />
           </Routes>
+          <ToastList />
         </Suspense>
       </ErrorBoundary>
     </QueryClientProvider>
