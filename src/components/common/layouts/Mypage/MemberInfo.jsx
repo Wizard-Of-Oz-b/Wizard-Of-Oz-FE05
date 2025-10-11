@@ -21,13 +21,23 @@ export default function MemberInfo() {
   const [confirmationMessage, setConfirmationMessage] = useState(""); // 확인 메시지
   const navigate = useNavigate(""); // 회원 탈퇴페이지로 이동 = 1001 복
   const [loading, setLoading] = useState(false);
+  // 소셜 관련 추가
+  const [profileAuthProvider, setProfileAuthProvider] = useState(null);
+  const [profileSocialProviders, setProfileSocialProviders] = useState([]);
 
   const carrierOptions = ["SK", "KT", "LG", "알뜰폰SK", "알뜰폰KT", "알뜰폰LG"];
 
+  const isSocial = (prov) => prov && prov !== "email" && prov !== "local";
   const isSocialMember = useMemo(() => {
-    const arr = Array.isArray(user?.social_providers) ? user.social_providers : [];
-    return !!user?.auth_provider || arr.length > 0;
-  }, [user]);
+    const uList = Array.isArray(user?.social_providers) ? user.social_providers : [];
+    const pList = Array.isArray(profileSocialProviders) ? profileSocialProviders : [];
+    return (
+      uList.length > 0 ||
+      pList.length > 0 ||
+      isSocial(user?.auth_provider) ||
+      isSocial(profileAuthProvider)
+    );
+  }, [user, profileAuthProvider, profileSocialProviders]);
 
   useEffect(() => {
     if (user) {
@@ -35,6 +45,10 @@ export default function MemberInfo() {
       setNickname(clean(user.nickname));
       setEmail(clean(user.email));
       setAddress(clean(user.address));
+      setProfileAuthProvider(clean(user.auth_provider));
+      setProfileSocialProviders(
+        Array.isArray(user.social_providers) ? user.social_providers : []
+      );
       const pn = clean(user.phone_number);
       if (pn && pn.includes("-")) {
         const [, mid = "", last = ""] = pn.split("-");
@@ -53,6 +67,10 @@ export default function MemberInfo() {
         setNickname(clean(data.nickname));
         setEmail(clean(data.email));
         setAddress(clean(data.address));
+        setProfileAuthProvider(clean(data.auth_provider));
+        setProfileSocialProviders(
+          Array.isArray(data.social_providers) ? data.social_providers : []
+        );
         const pn = clean(data.phone_number);
         if (pn && pn.includes("-")) {
           const [, mid = "", last = ""] = pn.split("-");
