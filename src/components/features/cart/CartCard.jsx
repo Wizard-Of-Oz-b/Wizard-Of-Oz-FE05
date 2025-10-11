@@ -23,7 +23,7 @@ export default function CartCard({ data, view = "pc" }) {
     usePatchCart();
   const productsImg = fetchPublicMainImageUrl(data.product);
   const option = formatOptionKey(data.option_key);
-  const { toasts, pushToast } = useToasts();
+  // const { toasts, pushToast } = useToasts();
   const { addToastList } = useToastStore()
   // #1 이미지 가져오기
   useEffect(() => {
@@ -154,7 +154,7 @@ export default function CartCard({ data, view = "pc" }) {
               </span>
             </div>
           </div>
-          <Toasts toasts={toasts} />
+          {/* <Toasts toasts={toasts} /> */}
         </motion.div>
       </AnimatePresence>
     );
@@ -221,7 +221,7 @@ export default function CartCard({ data, view = "pc" }) {
             삭제
           </button>
         </td>
-        <Toasts toasts={toasts} />
+        {/* <Toasts toasts={toasts} /> */}
 
         {isCartCardLoading && <CartLoadingSpin />}
       </motion.tr>

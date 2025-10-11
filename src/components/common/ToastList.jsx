@@ -16,7 +16,7 @@ export default function ToastList() {
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: -10, opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.18 }}
-            className="pointer-events-auto inline-flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm shadow-sm"
+            className="pointer-events-auto flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm shadow-sm"
           >
             <Check className="h-4 w-4" />
             {t.message}
