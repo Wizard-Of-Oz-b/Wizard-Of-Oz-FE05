@@ -316,8 +316,8 @@ export default function UserPayment() {
   const handleCancelConfirm = async () => {
     await cancelOrder.mutateAsync({ order_id: purchaseId });
     setIsCancelModalOpen(false);
-    // 홈으로 이동
-    navigate("/");
+    // 마이페이지로 이동
+    navigate("/mypage");
   };
 
   const handleSubmitPay = async (e) => {
