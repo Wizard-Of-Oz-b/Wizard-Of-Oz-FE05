@@ -333,7 +333,7 @@ export default function SocialUnlinkPage() {
         </AnimatePresence>
       </div>
 
-      {/* 확인 모달: (문구는 그대로) 살짝 감성 강조는 배경에서 */}
+      {/* 확인 모달 */}
       <ConfirmModal
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
