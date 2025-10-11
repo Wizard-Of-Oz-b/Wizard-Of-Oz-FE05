@@ -5,10 +5,10 @@ import { fetchPublicMainImageUrl } from "../../common/api/admin/productImagesPub
 import CartLoadingSpin from "./CartLoadingSpin";
 import CartStepper from "./CartStepper";
 import { AnimatePresence, motion } from "framer-motion";
-import axios from "axios";
 // import { useToasts } from "../../common/layouts/wishlist/hooks/useToasts";
 import Toasts from "../../common/layouts/wishlist/components/Toasts";
 import { useToastStore } from "../../../store/toast";
+import userApi from "../../../lib/api/userAxios";
 
 const FALLBACK_IMG = "public/images/product-fallback.png";
 //각 주문 카트 onChangeSelect, checkItems제거
@@ -51,7 +51,7 @@ export default function CartCard({ data, view = "pc" }) {
   useEffect(() => {
     const stockCheck = async () => {
       try {
-        const stock = await axios.get("/api/v1/product-stocks/", {
+        const stock = await userApi.get("/product-stocks/", {
           params: {
             option_key: data.option_key,
             product_id: data.product,
