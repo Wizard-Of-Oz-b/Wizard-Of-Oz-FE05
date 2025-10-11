@@ -7,6 +7,7 @@ import { UserRound, AtSign, Phone, Sparkles, ShieldCheck, Smartphone, ArrowLeft 
 import { FiCheckCircle } from "react-icons/fi"
 import { useNavigate } from "react-router-dom";
 import CartLoadingSpin from "../../../features/cart/CartLoadingSpin";
+import { fetchMySocialAccounts } from "../../../../lib/social";
 
 export default function MemberInfo() {
   const { user, setUser, bootstrapping} = useAuth();
@@ -24,11 +25,14 @@ export default function MemberInfo() {
   // 소셜 관련 추가
   const [profileAuthProvider, setProfileAuthProvider] = useState(null);
   const [profileSocialProviders, setProfileSocialProviders] = useState([]);
+  const [socialAccounts, setSocialAccounts] = useState([]);
+  const [socialLoading, setSocialLoading] = useState(false);
 
   const carrierOptions = ["SK", "KT", "LG", "알뜰폰SK", "알뜰폰KT", "알뜰폰LG"];
 
   const isSocial = (prov) => prov && prov !== "email" && prov !== "local";
   const isSocialMember = useMemo(() => {
+    if (socialAccounts.length > 0) return true;
     const uList = Array.isArray(user?.social_providers) ? user.social_providers : [];
     const pList = Array.isArray(profileSocialProviders) ? profileSocialProviders : [];
     return (
@@ -37,7 +41,7 @@ export default function MemberInfo() {
       isSocial(user?.auth_provider) ||
       isSocial(profileAuthProvider)
     );
-  }, [user, profileAuthProvider, profileSocialProviders]);
+  }, [socialAccounts, user, profileAuthProvider, profileSocialProviders]);
 
   useEffect(() => {
     if (user) {
@@ -56,7 +60,6 @@ export default function MemberInfo() {
         setPhoneLast(last);
       }
       setCarrier(clean(user.carrier) || "SK");
-      return;
     }
 
     (async () => {
@@ -85,6 +88,23 @@ export default function MemberInfo() {
       }
     })();
   }, [user]);
+
+  // 소셜 계정인지 아닌지 불러옴
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        setSocialLoading(true);
+        const list = await fetchMySocialAccounts();
+        if (alive) setSocialAccounts(Array.isArray(list) ? list : []);
+      } catch (e) {
+        console.error("소셜 연동 목록 불러오기 실패:", e);
+      } finally {
+        if (alive) setSocialLoading(false);
+      }
+    })();
+    return () => { alive = false };
+  }, []);
 
   const handleConfirm = async () => {
     try {
