@@ -5,20 +5,28 @@ import { fetchPublicMainImageUrl } from "../../common/api/admin/productImagesPub
 import CartLoadingSpin from "./CartLoadingSpin";
 import CartStepper from "./CartStepper";
 import { AnimatePresence, motion } from "framer-motion";
+import axios from "axios";
+// import { useToasts } from "../../common/layouts/wishlist/hooks/useToasts";
+import Toasts from "../../common/layouts/wishlist/components/Toasts";
+import { useToastStore } from "../../../store/toast";
 
+const FALLBACK_IMG = "public/images/product-fallback.png";
 //각 주문 카트 onChangeSelect, checkItems제거
 export default function CartCard({ data, view = "pc" }) {
   // 최대 수량인지 확인
   // console.log(data.count, data.product);
   const [imageUrl, setImageUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-
+  const [checkLoading, setCheckLoading] = useState(false); //재고 체크
+  const [itemCount, setItemCount] = useState(1);        // 실제 재고담기
   const { mutate: deleteMutaition, isPending } = useDeleteCartItem();
   const { mutate: updateCartQuantity, isPending: patchPending } =
     usePatchCart();
   const productsImg = fetchPublicMainImageUrl(data.product);
   const option = formatOptionKey(data.option_key);
-
+  // const { toasts, pushToast } = useToasts();
+  const { addToastList } = useToastStore();
+  // #1 이미지 가져오기
   useEffect(() => {
     const loadImage = async () => {
       setIsLoading(true);
@@ -27,7 +35,7 @@ export default function CartCard({ data, view = "pc" }) {
         setImageUrl(url);
       } catch (error) {
         console.error("이미지 URL을 가져오는 데 실패했습니다:", error);
-        setImageUrl("https://picsum.photos/id/1/160/225");
+        setImageUrl(FALLBACK_IMG);
       } finally {
         setIsLoading(false);
       }
@@ -37,6 +45,38 @@ export default function CartCard({ data, view = "pc" }) {
       loadImage();
     } else {
       setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const stockCheck = async () => {
+      try {
+        const stock = await axios.get("/api/v1/product-stocks/", {
+          params: {
+            option_key: data.option_key,
+            product_id: data.product,
+          },
+        });
+        if (stock.data.length === 0 || stock.data[0]?.stock_quantity === 0) {
+          //삭제 코드 넣기
+          //토스트 출력
+          deleteMutaition({
+            productId: data.product,
+            optionKey: data.option_key,
+          });
+          addToastList(`${data?.product_name} 재고가 없습니다.`);
+          return;
+        }
+        console.log(stock.data[0].stock_quantity, '재고')
+        setItemCount(stock.data[0].stock_quantity)
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setCheckLoading(false);
+      }
+    };
+    if (data) {
+      stockCheck();
     }
   }, []);
 
@@ -56,8 +96,9 @@ export default function CartCard({ data, view = "pc" }) {
       },
     });
   };
-  console.log(productsImg.result);
 
+  const isCartCardLoading = isPending || patchPending || checkLoading;
+  console.log(itemCount, '아이템 카운트')
   if (view === "card") {
     return (
       <AnimatePresence>
@@ -67,7 +108,7 @@ export default function CartCard({ data, view = "pc" }) {
           exit={{ x: -300, opacity: 0 }}
           className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm relative"
         >
-          {(isPending || patchPending) && <CartLoadingSpin />}
+          {isCartCardLoading && <CartLoadingSpin />}
           <div className="flex items-start justify-between">
             <div className="flex items-center min-w-0">
               {isLoading ? (
@@ -78,7 +119,7 @@ export default function CartCard({ data, view = "pc" }) {
                   alt="상품 이미지"
                   className="w-16 h-23 object-cover rounded-md mr-3 flex-shrink-0"
                   onError={(e) => {
-                    e.target.src = "https://picsum.photos/id/1/160/225";
+                    e.target.src = { FALLBACK_IMG };
                   }}
                 />
               )}
@@ -104,6 +145,7 @@ export default function CartCard({ data, view = "pc" }) {
                 itemId={data?.id}
                 option={data?.option_key}
                 onChageValue={onClickPatch}
+                max={itemCount}
               />
             </div>
             <div className="flex justify-between items-center">
@@ -117,6 +159,7 @@ export default function CartCard({ data, view = "pc" }) {
               </span>
             </div>
           </div>
+          {/* <Toasts toasts={toasts} /> */}
         </motion.div>
       </AnimatePresence>
     );
@@ -158,6 +201,7 @@ export default function CartCard({ data, view = "pc" }) {
             itemId={data?.id}
             option={data?.option_key}
             onChageValue={onClickPatch}
+            max={itemCount}
           />
         </td>
 
@@ -183,7 +227,9 @@ export default function CartCard({ data, view = "pc" }) {
             삭제
           </button>
         </td>
-        {(isPending || patchPending) && <CartLoadingSpin />}
+        {/* <Toasts toasts={toasts} /> */}
+
+        {isCartCardLoading && <CartLoadingSpin />}
       </motion.tr>
     </AnimatePresence>
   );
