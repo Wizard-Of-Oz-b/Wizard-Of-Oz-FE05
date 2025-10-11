@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { getMyProfile, updateMyProfile } from "../../api/Mypage/member";
 import { useAuth } from "../../../../context/AuthContext";
 import { clean } from "../../../../utils/mypage/sanitize";
@@ -23,6 +23,11 @@ export default function MemberInfo() {
   const [loading, setLoading] = useState(false);
 
   const carrierOptions = ["SK", "KT", "LG", "알뜰폰SK", "알뜰폰KT", "알뜰폰LG"];
+
+  const isSocialMember = useMemo(() => {
+    const arr = Array.isArray(user?.social_providers) ? user.social_providers : [];
+    return !!user?.auth_provider || arr.length > 0;
+  }, [user]);
 
   useEffect(() => {
     if (user) {
@@ -248,12 +253,21 @@ export default function MemberInfo() {
     </div>
     {/* 회원정보 관리 본문 끝부분 */}
     <div className="mt-8 border-t border-neutral-200 pt-6">
+    {isSocialMember ? (
+      <button
+        onClick={() => navigate("/mypage/social-unlink")}
+        className="text-xs text-neutral-400 hover:text-violet-600 hover:underline transition"
+      >
+        소셜 연동 해제
+      </button>
+    ) : (
       <button
         onClick={() => navigate("/mypage/withdrawal")}
         className="text-xs text-neutral-400 hover:text-red-500 hover:underline transition"
       >
         회원 탈퇴
       </button>
+    )}
     </div>
 
 

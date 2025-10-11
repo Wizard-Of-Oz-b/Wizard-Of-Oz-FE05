@@ -40,7 +40,7 @@ export default function ConfirmModal({
   return (
     <AnimatePresence>
       {open && (
-        <Modal open onClose={onClose} maxWidth="max-w-md">
+        <Modal open={open} onClose={onClose} maxWidth="max-w-md">
           <motion.div
             className="p-0"
             variants={backdropVariants}

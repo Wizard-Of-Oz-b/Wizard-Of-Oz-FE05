@@ -1,6 +1,6 @@
 import { StatusBadge } from ".";
+import { mapStatusToKorean } from "../../../api/admin/adminOrders.adapters";
 import { normalizeShipmentStatus, SHIPMENT_STATUS_LABEL } from "../../../api/common/shipments";
-
 const TERMINALS = new Set(["취소완료", "환불완료"]);
 
 function calcTotalKRW(o) {
@@ -44,7 +44,7 @@ function fmtDate(value) {
   }
 }
 
-export default function OrderTable({ orders = [], onOpenDetails, onOpenRequest, onOpenStatus }) {
+export default function OrderTable({ orders = [], onOpenDetails, onOpenRequest, onOpenStatus, onAdminCancel, onAdminRefund,  }) {
   return (
     <div className="relative overflow-x-auto rounded-2xl shadow-lg bg-white">
       <table className="min-w-[980px] w-full">
@@ -100,24 +100,54 @@ export default function OrderTable({ orders = [], onOpenDetails, onOpenRequest, 
                   </td>
 
                   <td className="px-4 py-4 text-center">
-                    {(() => {
-                      let sKey = normalizeShipmentStatus(o?.shipment?.status);
-                      if (!sKey && (o?.shipmentId || o?.trackingNo || o?.shipment?.tracking_number)) {
-                      sKey = '-';
-                      }
-                      const label = SHIPMENT_STATUS_LABEL[sKey] || (sKey ? sKey : '—');
-                      return <StatusBadge status={label} />;
-                    })()}
+                    <div className="flex flex-col items-center gap-1">
+                      <StatusBadge status={o?.status || "—"} />
+                      {(() => {
+                        const sKey = normalizeShipmentStatus(o?.shipment?.status);
+                        if (!sKey && !(o?.shipmentId || o?.trackingNo || o?.shipment?.tracking_number)) {
+                          return null;
+                        }
+                        const label = SHIPMENT_STATUS_LABEL[sKey] || (sKey ? sKey : "—");
+                        return (
+                          <span className="text-[11px] text-gray-500">
+                            배송: {label}
+                          </span>
+                        );
+                      })()}
+                    </div>
                   </td>
 
                   <td className="px-4 py-4 text-center">
-                    {o.request ? (
-                      <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                        {o.request.type === "cancel" ? "취소요청" : "환불요청"}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-gray-400">-</span>
-                    )}
+                    <div className="flex items-center justify-center gap-2 flex-wrap">
+                      {o.request && (
+                        <button
+                          onClick={() => onOpenRequest?.(o.id ?? o.purchase_id)}
+                          className="inline-flex items-center gap-1 rounded-lg bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-200"
+                        >
+                          {o.request.type === "cancel" ? "취소요청 처리" : "환불요청 처리"}
+                        </button>
+                      )}
+                      {(() => {
+                        const koStatus = mapStatusToKorean(o?.status);
+                        if (TERMINALS.has(koStatus)) return <span className="text-xs text-gray-400">—</span>;
+                        return (
+                          <>
+                            <button onClick={() => onAdminCancel?.(o.id ?? o.purchase_id)}
+                                    className="inline-flex items-center gap-1 rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-50">
+                              취소
+                            </button>
+                            <button onClick={() => onAdminRefund?.(o.id ?? o.purchase_id)}
+                                    className="inline-flex items-center gap-1 rounded-lg border border-sky-200 px-3 py-1.5 text-xs font-semibold text-sky-700 hover:bg-sky-50">
+                              환불
+                            </button>
+                            <button onClick={() => onOpenStatus?.(o.id ?? o.purchase_id)}
+                                    className="inline-flex items-center gap-1 rounded-lg border border-violet-200 px-3 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-50">
+                              상태 변경
+                            </button>
+                          </>
+                        );
+                      })()}
+                    </div>
                   </td>
 
                   <td className="px-4 py-4 text-center text-gray-600">
