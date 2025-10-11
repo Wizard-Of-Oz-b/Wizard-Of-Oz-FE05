@@ -35,6 +35,7 @@ export default function SocialUnlinkPage() {
   const [resultMsg, setResultMsg] = useState("");
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState("");
 
   const [toasts, setToasts] = useState([]);
   const pushToast = (message, { type = "info", description, duration = 2600 } = {}) => {
@@ -58,10 +59,19 @@ export default function SocialUnlinkPage() {
     (async () => {
       try {
         setLoading(true);
+        setLoadError("");
         const rows = await fetchMySocialAccounts();
         if (alive) setAccounts(rows);
       } catch (e) {
         console.debug("social accounts fetch failed", e);
+        if (alive) {
+          setLoadError("연동된 소셜 정보를 불러오지 못했어요.");
+          pushToast("소셜 계정 불러오기 실패", {
+            type: "error",
+            description: "네트워크 상태를 확인 후 다시 시도해 주세요.",
+            duration: 3500,
+          });
+        }
       } finally {
         if (alive) setLoading(false);
       }
@@ -226,7 +236,22 @@ export default function SocialUnlinkPage() {
                 </div>
               ) : providers.length === 0 ? (
                 <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200 text-sm text-neutral-700">
-                  연동된 소셜 계정이 없습니다.
+                  {loadError || "연동된 소셜 계정이 없습니다."}
+                  {loadError && (
+                    <button
+                      className="ml-3 inline-flex items-center px-2 py-1 text-xs rounded border border-neutral-300 hover:bg-neutral-50"
+                      onClick={() => {
+                        setLoading(true);
+                        setLoadError("");
+                        fetchMySocialAccounts()
+                          .then(rows => setAccounts(rows))
+                          .catch(() => setLoadError("잠시 후 재시도해 주세요."))
+                          .finally(() => setLoading(false));
+                      }}
+                    >
+                        다시 시도
+                    </button>
+                  )}
                 </div>
               ) : (
                 <>
@@ -269,6 +294,7 @@ export default function SocialUnlinkPage() {
                       whileTap={{ scale: 0.98 }}
                       className="px-5 h-10 rounded-full border border-neutral-300 text-sm text-neutral-700 hover:bg-neutral-50 transition inline-flex items-center gap-1.5"
                       onClick={() => navigate(-1)}
+                      disabled={loading}
                     >
                       <ChevronLeft className="h-4 w-4" />
                       돌아가기
@@ -286,6 +312,7 @@ export default function SocialUnlinkPage() {
                         setStep(2);
                         setConfirmOpen(true);
                       }}
+                      disabled={loading}
                     >
                       다음 <ChevronRight className="h-4 w-4" />
                     </motion.button>
