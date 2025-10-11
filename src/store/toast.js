@@ -16,11 +16,11 @@ export const useToastStore = create((set, get) => ({
       const currentToasts = Array.isArray(state?.toastList) ? state?.toastList : [];
       return { toastList: [...currentToasts, toast] };
     });
-    // 1.5초 뒤에 사라지도록 설정
+    // 3초 뒤에 사라지도록 설정
     setTimeout(() => {
       set((state) => ({
         toastList: state.toasts?.filter((t) => t.id !== id),
       }));
-    }, 1500);
+    }, 3000);
   },
 }));

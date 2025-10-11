@@ -18,6 +18,7 @@ export default function CartCard({ data, view = "pc" }) {
   const [imageUrl, setImageUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [checkLoading, setCheckLoading] = useState(false); //재고 체크
+  const [itemCount, setItemCount] = useState(1);        // 실제 재고담기
   const { mutate: deleteMutaition, isPending } = useDeleteCartItem();
   const { mutate: updateCartQuantity, isPending: patchPending } =
     usePatchCart();
@@ -56,7 +57,6 @@ export default function CartCard({ data, view = "pc" }) {
             product_id: data.product,
           },
         });
-        console.log(stock.data, "재고");
         if (stock.data.length === 0 || stock.data[0]?.stock_quantity === 0) {
           //삭제 코드 넣기
           //토스트 출력
@@ -65,12 +65,10 @@ export default function CartCard({ data, view = "pc" }) {
             optionKey: data.option_key,
           });
           addToastList(`${data?.product_name} 재고가 없습니다.`);
-          console.log(
-            data?.product_name,
-            stock.data[0]?.stock_quantity,
-            "재고 없음"
-          );
+          return;
         }
+        console.log(stock.data[0].stock_quantity, '재고')
+        setItemCount(stock.data[0].stock_quantity)
       } catch (error) {
         console.error(error);
       } finally {
@@ -98,10 +96,9 @@ export default function CartCard({ data, view = "pc" }) {
       },
     });
   };
-  console.log(productsImg.result);
 
   const isCartCardLoading = isPending || patchPending || checkLoading;
-
+  console.log(itemCount, '아이템 카운트')
   if (view === "card") {
     return (
       <AnimatePresence>
@@ -148,6 +145,7 @@ export default function CartCard({ data, view = "pc" }) {
                 itemId={data?.id}
                 option={data?.option_key}
                 onChageValue={onClickPatch}
+                max={itemCount}
               />
             </div>
             <div className="flex justify-between items-center">
@@ -203,6 +201,7 @@ export default function CartCard({ data, view = "pc" }) {
             itemId={data?.id}
             option={data?.option_key}
             onChageValue={onClickPatch}
+            max={itemCount}
           />
         </td>
 

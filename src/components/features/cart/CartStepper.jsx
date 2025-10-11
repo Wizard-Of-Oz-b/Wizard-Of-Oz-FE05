@@ -63,6 +63,7 @@ export default function CartStepper({
         title: '재고 부족',
         message: `현 상품은${max} 이하로 보유 하고있어 ${max}(으)로 변경 하겠습니다.`
       })
+      setInputValue(max)
       onChageValue(itemId, option, max);
     } else {
       onChageValue(itemId, option, parsedValue);
