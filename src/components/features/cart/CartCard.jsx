@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import axios from "axios";
 import { useToasts } from "../../common/layouts/wishlist/hooks/useToasts";
 import Toasts from "../../common/layouts/wishlist/components/Toasts";
+import { useToastStore } from "../../../store/toast";
 
 const FALLBACK_IMG = "public/images/product-fallback.png";
 //각 주문 카트 onChangeSelect, checkItems제거
@@ -23,7 +24,7 @@ export default function CartCard({ data, view = "pc" }) {
   const productsImg = fetchPublicMainImageUrl(data.product);
   const option = formatOptionKey(data.option_key);
   const { toasts, pushToast } = useToasts();
-
+  const { addToastList } = useToastStore()
   // #1 이미지 가져오기
   useEffect(() => {
     const loadImage = async () => {
@@ -59,7 +60,8 @@ export default function CartCard({ data, view = "pc" }) {
         if (stock.data.length === 0 || stock.data[0]?.stock_quantity ===0) {
           //삭제 코드 넣기
           //토스트 출력
-          pushToast(`${data?.product_name} 재고가 없습니다.`)
+          // pushToast(`${data?.product_name} 재고가 없습니다.`)
+          addToastList(`${data?.product_name} 재고가 없습니다.`)
           console.log(data?.product_name,stock.data[0]?.stock_quantity, '재고 없음')
         }
       } catch (error) {
