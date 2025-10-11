@@ -21,6 +21,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useAlertModal } from '../layouts/common/modal/useAlertModal';  // 모달 컴포넌트 변경
 import SizeGuideModal from './SizeGuideModal';
+import { useProductOptionStock } from '../../../hooks/useProductOptionStock';
 
 export default function ProductDetail({ product, onAddToCart, onToast }) {
   const [color, setColor] = useState(product.colors?.[0]?.code);
@@ -38,6 +39,14 @@ export default function ProductDetail({ product, onAddToCart, onToast }) {
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
   const [index, setIndex] = useState(0);
   const imgs = product?.gallery ?? [];
+
+  const { isSizeDisabled, isColorDisabled, currentAvailable } = useProductOptionStock({
+    product,
+    color,
+    setColor,
+    size,
+    setSize,
+  });
 
   useEffect(() => {
     const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)');
@@ -239,6 +248,7 @@ Object.fromEntries(
                 colors={product.colors}
                 value={color}
                 onChange={setColor}
+                isDisabled={isColorDisabled}
               />
               <p className="mt-2 text-xs text-gray-600">
                 {product.colors?.find((c) => c.code === color)?.name}
@@ -261,6 +271,7 @@ Object.fromEntries(
                 sizes={product.sizes}
                 value={size}
                 onChange={setSize}
+                isDisabled={isSizeDisabled}
               />
             </div>
 
