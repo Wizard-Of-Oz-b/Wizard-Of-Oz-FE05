@@ -9,7 +9,8 @@
 ```bash
 git clone -b develop --single-branch https://github.com/Wizard-Of-Oz-b/Wizard-Of-Oz-FE05.git
 cd Wizard-Of-Oz-FE05
-npm install && npm run dev
+npm install
+npm run dev
 ```
 
 - 기본 포트: **5173**  
@@ -29,6 +30,7 @@ npm -v
 ---
 
 ## 🏃 실행 & 스크립트
+
 ```bash
 # 의존성 설치
 npm install
@@ -37,18 +39,18 @@ npm install
 npm run dev
 ```
 
-- Vite 기본 설정 (`vite.config.js`)
-  ```js
-  import { defineConfig } from 'vite'
-  import react from '@vitejs/plugin-react'
-  import tailwindcss from '@tailwindcss/vite'
+Vite 기본 설정 (`vite.config.js`)
+```js
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 
   export default defineConfig({
     base: '/',
     plugins: [tailwindcss(), react()],
     server: { port: 5173 },
   })
-  ```
+```
 
 ---
 

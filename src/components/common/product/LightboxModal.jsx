@@ -3,12 +3,38 @@
 import React, { useEffect } from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
-export default function LightboxModal({ images = [], index = 0, onClose, onPrev, onNext }) {
+export default function LightboxModal({ 
+  images = [], 
+  index = 0, 
+  onClose,
+  onChange,
+  onSelect, 
+  onPrev, 
+  onNext 
+}) {
+  const len = images?.length;
+
+  if (!len) return null;
+  const clamp = (i) => (i + len) % len;
+
+  const changeTo = (i) => {
+    if (onChange) onChange(clamp(i));
+    else if (onSelect) onSelect(clamp(i));
+  };
+  const prev = () => {
+    if (onPrev) onPrev();
+    else changeTo(index - 1);
+  };
+  const next = () => {
+    if (onNext) onNext();
+    else changeTo(index + 1);
+  };
+
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === "Escape") onClose?.();
-      if (e.key === "ArrowLeft") onPrev?.();
-      if (e.key === "ArrowRight") onNext?.();
+      if (e.key === "ArrowLeft") prev?.();
+      if (e.key === "ArrowRight") next?.();
     };
     window.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
@@ -16,7 +42,7 @@ export default function LightboxModal({ images = [], index = 0, onClose, onPrev,
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
     };
-  }, [onClose, onPrev, onNext]);
+  }, [prev, next, onClose]);
 
   if (!images.length) return null;
   const src = images[index];
@@ -38,17 +64,17 @@ export default function LightboxModal({ images = [], index = 0, onClose, onPrev,
         </button>
       </div>
       {/* 좌/우 네비게이션 */}
-      {images.length > 1 && (
+      {len > 1 && (
         <>
           <button
-            onClick={(e) => { e.stopPropagation(); onPrev?.(); }}
+            onClick={(e) => { e.stopPropagation(); prev(); }}
             className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-white/90 hover:text-white"
             aria-label="prev"
           >
             <ChevronLeft size={40} />
           </button>
           <button
-            onClick={(e) => { e.stopPropagation(); onNext?.(); }}
+            onClick={(e) => { e.stopPropagation(); next(); }}
             className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-white/90 hover:text-white"
             aria-label="next"
           >
@@ -58,14 +84,17 @@ export default function LightboxModal({ images = [], index = 0, onClose, onPrev,
       )}
 
       {/* 하단 썸네일 네비 */}
-      {images.length > 1 && (
+      {len > 1 && (
         <div className="absolute bottom-4 left-0 right-0 z-10 flex justify-center gap-2 px-4">
           <div className="flex gap-2 overflow-x-auto max-w-[90vw]">
             {images.map((s, i) => (
               <button
                 key={i}
-                onClick={(e) => { e.stopPropagation(); if (i < index) onPrev?.(i); else if (i > index) onNext?.(i); }}
-                className={`h-16 w-12 md:w-16 rounded overflow-hidden border ${i === index ? "border-white" : "border-white/30"}`}
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  if (i !== index) changeTo(i);
+                }}
+                className={`h-24 w-12 md:w-16 rounded overflow-hidden border ${i === index ? "border-white" : "border-white/30"}`}
                 aria-label={`thumb-${i}`}
               >
                 <img src={s} alt="" className="h-full w-full object-cover" />
