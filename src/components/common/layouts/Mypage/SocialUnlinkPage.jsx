@@ -8,7 +8,7 @@ import {
 import { useAuth } from "../../../../context/AuthContext";
 import ConfirmModal from "../admin/common/ConfirmModal";
 import Toast from "../admin/common/Toast";
-import { unlinkSocial } from "../../../../lib/social";
+import { fetchMySocialAccounts, unlinkSocial } from "../../../../lib/social";
 
 const providerLabels = {
   google: "Google",
@@ -33,6 +33,8 @@ export default function SocialUnlinkPage() {
   const [agreeMsg, setAgreeMsg] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [resultMsg, setResultMsg] = useState("");
+  const [accounts, setAccounts] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const [toasts, setToasts] = useState([]);
   const pushToast = (message, { type = "info", description, duration = 2600 } = {}) => {
@@ -43,14 +45,32 @@ export default function SocialUnlinkPage() {
 
   // 유저 객체에서 소셜 제공자 목록을 뽑아올게여.
   const providers = useMemo(() => {
-    const list = Array.isArray(user?.social_providers)
-      ? user.social_providers
-      : (user?.auth_provider ? [user.auth_provider] : []);
-    return (list || []).filter(Boolean);
-  }, [user]);
+    const fromAPI = (accounts || []).map(a => String(a.provider).toLowerCase()).filter(Boolean);
+      if (fromAPI.length) return fromAPI;
+      const fallback = Array.isArray(user?.social_providers)
+        ? user.social_providers
+        : (user?.auth_provider ? [user.auth_provider] : []);
+      return (fallback || []).filter(Boolean).map(v => String(v).toLowerCase());
+  }, [accounts, user]);
 
   useEffect(() => {
-    if (providerFromPath) setSelectedProvider(providerFromPath);
+    let alive = true;
+    (async () => {
+      try {
+        setLoading(true);
+        const rows = await fetchMySocialAccounts();
+        if (alive) setAccounts(rows);
+      } catch (e) {
+        console.debug("social accounts fetch failed", e);
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+    return () => { alive = false; };
+  }, []);
+
+  useEffect(() => {
+    if (providerFromPath) setSelectedProvider(String(providerFromPath).toLowerCase());
     else if (!selectedProvider && providers.length === 1) setSelectedProvider(providers[0]);
   }, [providerFromPath, providers, selectedProvider]);
 
@@ -131,7 +151,10 @@ export default function SocialUnlinkPage() {
     </div>
   );
 
-  const ProviderChip = ({ p, checked }) => (
+  const ProviderChip = ({ p, checked }) => {
+    const acc = accounts.find(a => String(a.provider).toLowerCase() === p);
+    const sub = acc?.email || acc?.provider_uid ? (acc.email || `UID: ${acc.provider_uid}`) : "연결된 로그인";
+    return (
     <motion.label
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.98 }}
@@ -145,7 +168,7 @@ export default function SocialUnlinkPage() {
         </div>
         <div className="text-sm">
           <div className="font-semibold text-neutral-900">{labelOf(p)}</div>
-          <div className="text-[11px] text-neutral-500">연결된 로그인</div>
+          <div className="text-[11px] text-neutral-500 truncate max-w-[220px]">{sub}</div>
         </div>
       </div>
 
@@ -159,6 +182,7 @@ export default function SocialUnlinkPage() {
       />
     </motion.label>
   );
+}
 
   return (
     <div className="space-y-6">
@@ -196,7 +220,11 @@ export default function SocialUnlinkPage() {
                 <h3 className="text-lg font-semibold">연동된 소셜 선택</h3>
               </div>
 
-              {providers.length === 0 ? (
+              {(loading && providers.length === 0) ? (
+                <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200 text-sm text-neutral-700">
+                  불러오고 있어유
+                </div>
+              ) : providers.length === 0 ? (
                 <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200 text-sm text-neutral-700">
                   연동된 소셜 계정이 없습니다.
                 </div>
