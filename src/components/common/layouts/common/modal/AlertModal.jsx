@@ -54,7 +54,7 @@ export default function AlertModal({ type = "info", title, message, onClose }) {
         <h2 className={`text-xl font-bold mb-4 ${color}`}>
           {icon} {title || defaultTitle}
         </h2>
-        <p className="text-gray-700 mb-6">{message}</p>
+        <p className="text-gray-700 mb-6 whitespace-pre-line">{message}</p>
         <div className="flex justify-end">
           <button
             onClick={onClose}
