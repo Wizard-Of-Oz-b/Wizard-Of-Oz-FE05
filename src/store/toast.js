@@ -4,13 +4,12 @@ export const useToastStore = create((set, get) => ({
   toastList: [],
   addToastList: (message) => {
     // 중복 검사...
-    const isAlreadyShown = get().toastList?.find((el) => el.message === message);
-    if (isAlreadyShown) {
-      return;
-    }
+    // const isAlreadyShown = get().toastList?.find((el) => el.message === message);
+    // if (isAlreadyShown) {
+    //   return;
+    // }
     const id =  Math.random();
     const toast = { id, message };
-    console.log(toast, "토스트");
     set((state) => {
       // 현재 toastList가 배열인지 확인
       const currentToasts = Array.isArray(state?.toastList) ? state?.toastList : [];
