@@ -13,6 +13,8 @@ import CartEmpty from "../components/features/cart/CartEmpty";
 import CartError from "../components/features/cart/CartError";
 import { useGetMyOrders } from "../hooks/payments/useOrderPayment";
 import ConfirmModal from "../components/common/ConfirmModal";
+import { useAlertModal } from "../components/common/layouts/common/modal/useAlertModal";
+import { parseStockError } from "../utils/cart/parseStockError";
 
 export default function UserCart() {
   const {
@@ -34,6 +36,8 @@ export default function UserCart() {
   const mergeMutation = useMergeOrder();
   const clearCartMutation = useClearCart();
   const navigate = useNavigate();
+  const { showModal, ModalComponent } = useAlertModal();
+
   console.log(cart, "카트");
   const cartList = useMemo(() => {
     if (!cart?.items) {
@@ -55,7 +59,13 @@ export default function UserCart() {
         await purchaseMutation.mutateAsync();
         navigate(`/payment`);
       } catch (error) {
-        console.error("주문 처리 중 에러 발생:", error);
+        const parseError = parseStockError(error)
+        showModal({
+        type: 'warning',
+        title: '재고 부족',
+        message: `${parseError}`
+      })
+        console.error("주문 처리 중 에러 발생:", parseStockError(error).product);
       }
     }
     // 기존 결제에 상품 추가
@@ -65,7 +75,7 @@ export default function UserCart() {
 
         const orderList = userOrder.results.map((el) => el.order_id);
         const mergePayload = { order_ids: [...orderList, newOrder.order_id] };
-        console.log(mergePayload, 'payload')
+        console.log(mergePayload, "payload");
         await mergeMutation.mutateAsync(mergePayload);
 
         navigate(`/payment`);
@@ -229,6 +239,7 @@ export default function UserCart() {
           </button>
         )}
       </div>
+      {ModalComponent}
     </div>
   );
 }
