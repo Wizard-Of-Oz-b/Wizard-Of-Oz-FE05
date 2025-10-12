@@ -40,7 +40,7 @@ export default function ProductDetail({ product, onAddToCart, onToast }) {
   const [index, setIndex] = useState(0);
   const imgs = product?.gallery ?? [];
 
-  const { isSizeDisabled, isColorDisabled, currentAvailable } = useProductOptionStock({
+  const { isSizeDisabled, isColorDisabled, currentAvailable, currentQty } = useProductOptionStock({
     product,
     color,
     setColor,
@@ -178,6 +178,10 @@ Object.fromEntries(
   const price = useMemo(() => KRW(product.price), [product.price]);
 
   const handleAddToCart = async () => {
+    if (!currentAvailable) {
+      onToast?.('error', '선택한 옵션은 현재 품절이에요.');
+      return;
+    }
     if (!isLoggedIn) {
       requireLogin();
       return;
@@ -278,16 +282,24 @@ Object.fromEntries(
             {/* 수량 + 액션 */}
             <div className="mt-5 flex gap-3">
               <QtyInput value={qty} onChange={setQty} />
-
+              { !currentAvailable && (
+                <p className="sr-only">현재 선택한 옵션은 품절입니다.</p>
+              )}
               <button
                 onClick={handleAddToCart}
-                disabled={adding}
+                disabled={adding || !currentAvailable}
                 className={`flex-1 inline-flex items-center justify-center gap-2 rounded px-4 py-3 text-white ${
-                  adding ? 'bg-gray-500 cursor-not-allowed' : 'bg-black hover:bg-gray-900'
+                  adding || !currentAvailable
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-black hover:bg-gray-900'
                 }`}
               >
                 <ShoppingCart size={18} />
-                {adding ? '담는 중…' : '장바구니 담기'}
+                {adding
+                  ? '담는 중…'
+                  : !currentAvailable
+                    ? '옵션 품절'
+                    : '장바구니 담기'}
               </button>
 
               <div className="relative">
