@@ -5,14 +5,18 @@ import { useEffect } from "react";
 import api from "../../../lib/axios";
 import { useAuth } from "../../../context/AuthContext";
 import { useCartCount } from "../../../store/cartCount";
+import { useWishlistCount } from "../../../store/wishlistCount";
+import { fetchWishlistCount } from "../api/public/wishlist";
 
 export default function HomeLayout() {
     const { isLoggedIn, user } = useAuth();
     const setCartCount = useCartCount((s) => s.set);
+    const setWishlistCount = useWishlistCount((s) => s.set);
 
     useEffect(() => {
       if (!isLoggedIn) {
         setCartCount(0);
+        setWishlistCount(0);
         return;
       }
       let alive = true;
@@ -34,6 +38,24 @@ export default function HomeLayout() {
           alive = false;
         };
      }, [isLoggedIn, user?.id, setCartCount]);
+
+     useEffect(() => {
+        if (!isLoggedIn) {
+          setWishlistCount(0);
+          return;
+        }
+        let alive = true;
+        (async () => {
+          try {
+            const n = await fetchWishlistCount();
+            if (alive) setWishlistCount(n);
+          } catch(e) {
+            console.error("위시리스트 개수 불러오기 실패:", e);
+            if (alive) setWishlistCount(0);
+          }
+        })();
+        return () => { alive = false; };
+      }, [isLoggedIn, user?.id, setWishlistCount]);
 
   return (
     <div className="relative min-h-screen">

@@ -1,4 +1,5 @@
 import api from "../../../../lib/axios";
+import { useWishlistCount } from "../../../../store/wishlistCount";
 
 /** 위시리스트 조회 */
 export async function listWishlist({ ordering, search } = {}) {
@@ -118,4 +119,9 @@ export function formatOptionsForDisplay(optionsObj) {
   });
 
   return kvs.join(" / ");
+}
+
+export async function fetchWishlistCount() {
+  const rows = await listWishlist();
+  return Array.isArray(rows) ? rows.length : 0;
 }

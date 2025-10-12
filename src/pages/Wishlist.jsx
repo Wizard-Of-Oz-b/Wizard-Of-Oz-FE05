@@ -10,6 +10,7 @@ import { useToasts } from "../components/common/layouts/wishlist/hooks/useToasts
 import { useFlyToCart } from "../components/common/layouts/wishlist/hooks/useFlyToCart";
 import {
   adaptWishlistItem,
+  fetchWishlistCount,
   listWishlist,
   moveWishlistToCart,
   removeWishlist,
@@ -20,6 +21,7 @@ import CartLoadingSpin from "../components/features/cart/CartLoadingSpin";
 import WishlistCardSkeleton from "../components/common/layouts/wishlist/components/WishlistCardSkeleton";
 import { fetchProductStocks } from "../lib/stocks";
 import { useCartCount } from "../store/cartCount";
+import { useWishlistCount } from "../store/wishlistCount";
 
 export default function Wishlist() {
   const [items, setItems] = useState([]);
@@ -35,6 +37,7 @@ export default function Wishlist() {
   const flyToCart = useFlyToCart(cartDockRef);
   const { inc } = useCartCount();
   const { toasts, pushToast } = useToasts();
+  const setWishlistCount = useWishlistCount((s) => s.set);
 
   const allChecked = selected.size === items.length && items.length > 0;
   const indeterminate = selected.size > 0 && !allChecked;
@@ -60,6 +63,7 @@ export default function Wishlist() {
         const rows = await listWishlist();
         if (!mounted) return;
         setItems(rows.map(adaptWishlistItem));
+        setWishlistCount(Array.isArray(rows) ? rows.length : 0);
       } catch (e) {
         console.error(e);
         pushToast("위시리스트를 불러오지 못했어요.");
@@ -107,6 +111,7 @@ export default function Wishlist() {
       setLoading(true);
       await removeWishlist(id);
       pushToast("삭제했어요.");
+      setWishlistCount(await fetchWishlistCount());
     } catch (e) {
       console.error(e);
       setItems(backup);
@@ -125,6 +130,7 @@ export default function Wishlist() {
       setLoading(true);
       await Promise.all(ids.map((id) => removeWishlist(id)));
       pushToast("선택 항목을 삭제했어요.");
+      setWishlistCount(await fetchWishlistCount());
     } catch (e) {
       console.error(e);
       setItems(backup);
@@ -157,6 +163,7 @@ export default function Wishlist() {
       inc(1);
       pushToast("장바구니에 담겼어요.");
       removeOneLocal(id);
+      setWishlistCount(await fetchWishlistCount());
     } catch (e) {
       console.error(e);
       pushToast("장바구니 담기 중 오류가 발생했어요.");
@@ -217,6 +224,7 @@ export default function Wishlist() {
       );
       setItems((prev) => prev.filter((i) => !okIds.includes(i.id)));
       setSelected(new Set());
+      setWishlistCount(await fetchWishlistCount());
     } catch (e) {
       console.error(e);
       pushToast("일부 항목 담기에 실패했어요.");

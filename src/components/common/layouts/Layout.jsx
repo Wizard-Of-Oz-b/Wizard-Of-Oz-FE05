@@ -6,11 +6,14 @@ import { useAuth } from "../../../context/AuthContext";
 import ScrollToTop from "./ScrollToTop";
 import api from "../../../lib/axios";
 import { useCartCount } from "../../../store/cartCount";
+import { useWishlistCount } from "../../../store/wishlistCount";
+import { fetchWishlistCount } from "../api/public/wishlist";
 
 export default function Layout() {
   const { pathname } = useLocation();
   const { isLoggedIn, user } = useAuth();
   const setCartCount = useCartCount((s) => s.set);
+  const setWishlistCount = useWishlistCount((s) => s.set);
 
   const noHeaderPadPages = ["/mypage", "/info", "/login", "/signup", "/brand"];
   const noHeaderPad = noHeaderPadPages.some((p) => pathname.startsWith(p));
@@ -18,6 +21,7 @@ export default function Layout() {
   React.useEffect(() => {
     if (!isLoggedIn) {
       setCartCount(0);
+      setWishlistCount(0);
       return;
     }
     let alive = true;
@@ -37,6 +41,24 @@ export default function Layout() {
   })();
   return () => { alive = false; };
 }, [isLoggedIn, user?.id, setCartCount]);
+
+  React.useEffect(() => {
+    if (!isLoggedIn) {
+      setWishlistCount(0);
+      return;
+    }
+    let alive = true;
+    (async () => {
+      try {
+        const n = await fetchWishlistCount();
+        if (alive) setWishlistCount(n);
+      } catch (e) {
+        if (alive) setWishlistCount(0);
+        console.debug("wishlist bootstrap failed", e);
+      }
+    })();
+    return () => { alive = false; };
+  }, [isLoggedIn, user?.id, setWishlistCount]);
 
   return (
     <div className="flex flex-col min-h-screen">
