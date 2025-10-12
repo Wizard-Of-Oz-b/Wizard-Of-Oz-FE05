@@ -22,6 +22,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAlertModal } from '../layouts/common/modal/useAlertModal';  // 모달 컴포넌트 변경
 import SizeGuideModal from './SizeGuideModal';
 import { useProductOptionStock } from '../../../hooks/useProductOptionStock';
+import { useCartCount } from '../../../store/cartCount';
 
 export default function ProductDetail({ product, onAddToCart, onToast }) {
   const [color, setColor] = useState(product.colors?.[0]?.code);
@@ -39,6 +40,7 @@ export default function ProductDetail({ product, onAddToCart, onToast }) {
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
   const [index, setIndex] = useState(0);
   const imgs = product?.gallery ?? [];
+  const { inc } = useCartCount.getState();
 
   const { isSizeDisabled, isColorDisabled, currentAvailable, currentQty } = useProductOptionStock({
     product,
@@ -194,12 +196,14 @@ Object.fromEntries(
 
       if (typeof onAddToCart === 'function') {
         await onAddToCart({ product, option_key, qty });
+        inc(qty ?? 1);
       } else if (typeof addCartItem === 'function') {
         await addCartItem({
           product_id,
           option_key,
           quantity: qty ?? 1,
         });
+        inc(qty ?? 1);
         onToast?.('success', '장바구니에 담겼어요.');
       } else {
         throw new Error('addCartItem not available (import path?)');

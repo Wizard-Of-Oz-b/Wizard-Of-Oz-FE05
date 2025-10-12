@@ -19,6 +19,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import CartLoadingSpin from "../components/features/cart/CartLoadingSpin";
 import WishlistCardSkeleton from "../components/common/layouts/wishlist/components/WishlistCardSkeleton";
 import { fetchProductStocks } from "../lib/stocks";
+import { useCartCount } from "../store/cartCount";
 
 export default function Wishlist() {
   const [items, setItems] = useState([]);
@@ -32,7 +33,7 @@ export default function Wishlist() {
   const cartDockRef = useRef(null);
   const imgRefs = useRef({});
   const flyToCart = useFlyToCart(cartDockRef);
-
+  const { inc } = useCartCount();
   const { toasts, pushToast } = useToasts();
 
   const allChecked = selected.size === items.length && items.length > 0;
@@ -153,6 +154,7 @@ export default function Wishlist() {
       const img = imgRefs.current[id];
       if (img) flyToCart(img);
       setCartCount((c) => c + 1);
+      inc(1);
       pushToast("장바구니에 담겼어요.");
       removeOneLocal(id);
     } catch (e) {
@@ -207,6 +209,7 @@ export default function Wishlist() {
       );
 
       setCartCount((c) => c + okIds.length);
+      inc(okIds.length);
       pushToast(
         noStock.length
           ? `일부 품절로 ${okIds.length}개만 담겼어요.`

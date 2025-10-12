@@ -7,6 +7,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import userApi from "../../lib/api/userAxios";
+import { useCartCount } from "../../store/cartCount"; // 추가
 
 // const BASE_URL = "/api/v1";
 const BASE_URL = import.meta.env.VITE_API_BASE + "/v1";
@@ -58,6 +59,7 @@ async function deleteCartItem({ productId, optionKey }) {
 async function clearCartAPI() {
   // 이 요청은 별도의 body나 파라미터가 필요 없습니다.
   const response = await userApi.delete("/carts/clear/");
+  useCartCount.getState().set(0);
   return response.data;
 }
 
@@ -91,8 +93,12 @@ export function useDeleteCartItem() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: deleteCartItem,
-    onSuccess: () => {
-      //성공하면 데이터 다시 불러오기
+    // onSuccess: () => {
+    //   //성공하면 데이터 다시 불러오기
+    //   queryClient.invalidateQueries({ queryKey: ["userCart"] });
+    // },
+    onSuccess: (_data, variables) => {
+      useCartCount.getState().dec(variables?.quantity ?? 1)
       queryClient.invalidateQueries({ queryKey: ["userCart"] });
     },
     onError: (error) => {
