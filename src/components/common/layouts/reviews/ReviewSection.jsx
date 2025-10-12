@@ -30,11 +30,8 @@ export default function ReviewSection({
   const { showModal, ModalComponent } = useAlertModal();
   const effectiveIsAdmin = isAdmin || adminFromContext;
 
-  const {
-    data: elig,
-    isLoading: eligLoading,
-    isError: eligError,
-  } = useReviewEligibility(productId);
+  const { data: elig, isLoading: eligLoading } =
+    useReviewEligibility(productId, { enabled: isLoggedIn });
 
   const authedUserId = useMemo(
     () => currentUserId ?? user?.user_id ?? user?.id ?? null,

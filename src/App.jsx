@@ -54,6 +54,7 @@ import MembershipTiers from "./components/common/layouts/Mypage/MembershipTiers.
 import BrandPage from "./pages/BrandPage.jsx";
 import SocialUnlinkPage from "./components/common/layouts/Mypage/SocialUnlinkPage.jsx";
 import ToastList from "./components/common/ToastList.jsx";
+import HomeLayout from "./components/common/layouts/HomeLayout.jsx";
 
 const queryClient = new QueryClient();
 
@@ -63,9 +64,11 @@ export default function App() {
       <ErrorBoundary>
         <Suspense fallback={<div className="p-6 text-sm text-gray-500">로딩 중…</div>}>
           <Routes>
+            <Route path="/" element={<HomeLayout />}>
+              <Route index element={<Home />} />
+            </Route>
             {/* 사용자/공통 레이아웃 */}
-            <Route element={<Layout />}>
-              <Route path="/" element={<Home />} />
+            <Route element={<Layout />}>              
               <Route path="/products/:id" element={<ProductDetailPage />} />
               <Route path="/products/list" element={<CategoryProductList />} />
               <Route path="/cart" element={<UserCart />} />
