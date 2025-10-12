@@ -413,7 +413,7 @@ export default function UserPayment() {
   // 불러올 정보가 없다면 빈페이지 출력
   if (userOrder?.results.length === 0) {
     // 홈으로 이동
-    navigate('/')
+    // navigate('/')
     return <EmptyPayment />;
   }
 
