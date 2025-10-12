@@ -190,6 +190,11 @@ export default function UserPayment() {
         }));
       }
     }
+    // 기본 배송지가 없다면. 기본배송지 상태 false
+    else if(myAddress && myAddress.length === 0){
+      setIsDefaultAddress(false)
+    }
+    console.log(myAddress, '기본 주소')
   }, [myAddress]);
 
   // 배송지 변경사항 저장
@@ -457,6 +462,7 @@ export default function UserPayment() {
               className={`text-gray-500 text-center border rounded-sm border-gray-300 px-0.5 w-[90px]
               cursor-pointer select-none`}
               onClick={handleAddressListModalOpen}
+              disabled={myAddress.length === 0}
             >
               {/* 기본 배송지 */}
               배송지 선택
