@@ -5,10 +5,13 @@ import { useEffect } from "react";
 import api from "../../../lib/axios";
 import { useAuth } from "../../../context/AuthContext";
 import { useCartCount } from "../../../store/cartCount";
+import { useWishlistCount } from "../../../store/wishlistCount";
+import { fetchWishlistCount } from "../api/public/wishlist";
 
 export default function HomeLayout() {
     const { isLoggedIn, user } = useAuth();
     const setCartCount = useCartCount((s) => s.set);
+    const setWishlistCount = useWishlistCount((s) => s.set);
 
     useEffect(() => {
       if (!isLoggedIn) {

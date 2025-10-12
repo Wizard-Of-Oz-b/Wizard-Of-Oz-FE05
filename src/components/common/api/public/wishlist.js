@@ -119,3 +119,8 @@ export function formatOptionsForDisplay(optionsObj) {
 
   return kvs.join(" / ");
 }
+
+export async function fetchWishlistCount() {
+  const rows = await listWishlist();
+  return Array.isArray(rows) ? rows.length : 0;
+}
