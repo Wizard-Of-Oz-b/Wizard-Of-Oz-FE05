@@ -15,6 +15,7 @@ import { useGetMyOrders } from "../hooks/payments/useOrderPayment";
 import ConfirmModal from "../components/common/ConfirmModal";
 import { useAlertModal } from "../components/common/layouts/common/modal/useAlertModal";
 import { parseStockError } from "../utils/cart/parseStockError";
+import formatOptionKey from "../utils/optionKey";
 
 export default function UserCart() {
   const {
@@ -59,13 +60,28 @@ export default function UserCart() {
         await purchaseMutation.mutateAsync();
         navigate(`/payment`);
       } catch (error) {
-        const parseError = parseStockError(error)
-        showModal({
-        type: 'warning',
-        title: '재고 부족',
-        message: `${parseError}`
-      })
-        console.error("주문 처리 중 에러 발생:", parseStockError(error).product);
+        const parseError = parseStockError(error);
+        console.log(parseError);
+        if (parseError?.product) {
+          const productName = cartList?.find(
+            (el) =>
+              el.product === parseError.product &&
+              el.option_key === parseError.option
+          );
+          const option = formatOptionKey(parseError.option);
+
+          showModal({
+            type: "warning",
+            title: "재고 부족",
+            message: `${productName.product_name} ${option} 
+            상품이 재고가 부족합니다.
+           현재 보유: ${parseError.have}개 주문 시도: ${parseError.need}개`,
+          });
+        }
+        console.error(
+          "주문 처리 중 에러 발생:",
+          parseStockError(error).product
+        );
       }
     }
     // 기존 결제에 상품 추가
