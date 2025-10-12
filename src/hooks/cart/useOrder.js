@@ -101,9 +101,9 @@ export const useCreatePurchase = () => {
         errorData?.detail || // { "detail": "자격 증명이..." }
         errorData?.stock || // { "detail": "재고 부족..." }
         "알 수 없는 오류가 발생했습니다."; // 그 외의 경우
-
-      console.error("주문 실패:", errorData);
-      alert(errorMessage); // 사용자에게 에러 메시지 나중에 모달창을 교체
+        console.error("주문 실패:", errorData);
+        throw errorMessage
+      // alert(errorMessage); // 사용자에게 에러 메시지 나중에 모달창을 교체
 
       // // 인증 에러(401)인 경우, 로그인 페이지로 보내는 등의 추가 처리도 가능
       // if (error.response?.status === 401) {
