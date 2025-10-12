@@ -14,7 +14,7 @@ export default function Home() {
   const steps = [
     {
       kind: "image",
-      src: { desktop: "/images/32.jpg", mobile: "/images/32.jpg" },
+      src: { desktop: "https://vteallasuiryfibljlww.supabase.co/storage/v1/object/public/s/32.jpg", mobile: "https://vteallasuiryfibljlww.supabase.co/storage/v1/object/public/s/32.jpg" },
       title: "Everyday Essentials for Everyone",
       subtitle: "남성과 여성을 위한 실용적이고 스타일리시한 선택",
       ctaText: "Shop Now",
@@ -30,7 +30,7 @@ export default function Home() {
     },
     {
       kind: "image",
-      src: { desktop: "/images/4.jpg", mobile: "/images/4.jpg" },
+      src: { desktop: "https://vteallasuiryfibljlww.supabase.co/storage/v1/object/public/s/4.jpg", mobile: "https://vteallasuiryfibljlww.supabase.co/storage/v1/object/public/s/4.jpg" },
       title: "Everyday Essentials for Men",
       subtitle: "스타일과 실용성의 완벽한 조화",
       ctaText: "Shop MEN",
@@ -38,7 +38,7 @@ export default function Home() {
     },
     {
       kind: "image",
-      src: { desktop: "/images/5.jpg", mobile: "/images/5.jpg" },
+      src: { desktop: "https://vteallasuiryfibljlww.supabase.co/storage/v1/object/public/s/5.jpg", mobile: "https://vteallasuiryfibljlww.supabase.co/storage/v1/object/public/s/5.jpg" },
       title: "Timeless Wardrobe Classics",
       subtitle: "오래도록 사랑받는 클래식 아이템",
       ctaText: "Shop WOMEN",
