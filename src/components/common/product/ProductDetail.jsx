@@ -11,6 +11,7 @@ import ReviewSection from '../layouts/reviews/ReviewSection';
 import ProductDescription from './ProductDescription';
 import {
   addWishlist,
+  fetchWishlistCount,
   listWishlist,
   removeWishlist,
 } from '../api/public/wishlist';
@@ -23,6 +24,7 @@ import { useAlertModal } from '../layouts/common/modal/useAlertModal';  // ëª¨ë‹
 import SizeGuideModal from './SizeGuideModal';
 import { useProductOptionStock } from '../../../hooks/useProductOptionStock';
 import { useCartCount } from '../../../store/cartCount';
+import { useWishlistCount } from '../../../store/wishlistCount';
 
 export default function ProductDetail({ product, onAddToCart, onToast }) {
   const [color, setColor] = useState(product.colors?.[0]?.code);
@@ -41,6 +43,7 @@ export default function ProductDetail({ product, onAddToCart, onToast }) {
   const [index, setIndex] = useState(0);
   const imgs = product?.gallery ?? [];
   const { inc } = useCartCount.getState();
+  const setWishlistCount = useWishlistCount((s) => s.set);
 
   const { isSizeDisabled, isColorDisabled, currentAvailable, currentQty } = useProductOptionStock({
     product,
@@ -156,6 +159,7 @@ Object.fromEntries(
         setWishId(found?.wishlist_id ?? null);
 
         if (allowBurst) setBurstKey((k) => k + 1);
+        setWishlistCount(await fetchWishlistCount());
       } else {
         if (wishId) {
           await removeWishlist(wishId);
@@ -169,6 +173,7 @@ Object.fromEntries(
             await removeWishlist(found.wishlist_id);
           }
         }
+        setWishlistCount(await fetchWishlistCount());
       }
     } catch (e) {
       setWish(prevWish);

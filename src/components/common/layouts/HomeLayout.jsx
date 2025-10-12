@@ -16,6 +16,7 @@ export default function HomeLayout() {
     useEffect(() => {
       if (!isLoggedIn) {
         setCartCount(0);
+        setWishlistCount(0);
         return;
       }
       let alive = true;
@@ -37,6 +38,24 @@ export default function HomeLayout() {
           alive = false;
         };
      }, [isLoggedIn, user?.id, setCartCount]);
+
+     useEffect(() => {
+        if (!isLoggedIn) {
+          setWishlistCount(0);
+          return;
+        }
+        let alive = true;
+        (async () => {
+          try {
+            const n = await fetchWishlistCount();
+            if (alive) setWishlistCount(n);
+          } catch(e) {
+            console.error("위시리스트 개수 불러오기 실패:", e);
+            if (alive) setWishlistCount(0);
+          }
+        })();
+        return () => { alive = false; };
+      }, [isLoggedIn, user?.id, setWishlistCount]);
 
   return (
     <div className="relative min-h-screen">
