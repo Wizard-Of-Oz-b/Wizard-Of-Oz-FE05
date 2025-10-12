@@ -18,6 +18,7 @@ import { useAuth } from "../context/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import CartLoadingSpin from "../components/features/cart/CartLoadingSpin";
 import WishlistCardSkeleton from "../components/common/layouts/wishlist/components/WishlistCardSkeleton";
+import { fetchProductStocks } from "../lib/stocks";
 
 export default function Wishlist() {
   const [items, setItems] = useState([]);
@@ -135,6 +136,19 @@ export default function Wishlist() {
   const addOneToCart = async (id) => {
     try {
       setLoading(true);
+      const item = items.find((i) => i.id === id);
+      const stockRes = await fetchProductStocks(item.productId);
+      const stockMap = stockRes.reduce((acc, s) => {
+        acc[s.option_key] = s.stock_quantity;
+        return acc;
+      }, {});
+      if (!stockMap[item.optionKey] || stockMap[item.optionKey] <= 0) {
+        setLoading(false);
+        requestAnimationFrame(() => {
+          pushToast(`"${item.title}" 옵션의 재고가 없어 담을 수 없습니다.\u200B`);
+        });
+        return;
+      }
       await moveWishlistToCart(id, { quantity: 1, remove_from_wishlist: true });
       const img = imgRefs.current[id];
       if (img) flyToCart(img);
@@ -154,19 +168,51 @@ export default function Wishlist() {
     const ids = [...selected];
     try {
       setLoading(true);
-      const first = ids[0];
+      const stockCache = new Map();
+      const ensureStocks = async (productId) => {
+        if (!stockCache.has(productId)) {
+          const rows = await fetchProductStocks(productId);
+          stockCache.set(productId, Array.isArray(rows) ? rows : []);
+        }
+        return stockCache.get(productId);
+      };
+      // 재고 있는것만 걸러냄
+      const checks = [];
+      for (const id of ids) {
+        const item = items.find((i) => i.id === id);
+        const rows = await ensureStocks(item.productId);
+        const hit = rows.find((r) => r.option_key === item.optionKey);
+        const ok = (hit?.stock_quantity ?? 0) > 0;
+        checks.push({ id, ok, itemTitle: item.title });
+      }
+      const okIds = checks.filter(c => c.ok).map(c => c.id);
+      const noStock = checks.filter(c => !c.ok).map(c => c.itemTitle);
+
+      if (okIds.length === 0) {
+        setLoading(false);
+        requestAnimationFrame(() => {
+          pushToast("선택한 항목 중 담을 수 있는 재고가 없어요.\u200B");
+        });
+        return;
+      }
+
+      const first = okIds[0];
       const firstImg = imgRefs.current[first];
       if (firstImg) flyToCart(firstImg);
 
       await Promise.all(
-        ids.map((id) =>
+        okIds.map((id) =>
           moveWishlistToCart(id, { quantity: 1, remove_from_wishlist: true })
         )
       );
 
-      setCartCount((c) => c + ids.length);
-      pushToast(`선택한 ${ids.length}개 담겼어요.`);
-      setItems((prev) => prev.filter((i) => !selected.has(i.id)));
+      setCartCount((c) => c + okIds.length);
+      pushToast(
+        noStock.length
+          ? `일부 품절로 ${okIds.length}개만 담겼어요.`
+          : `선택한 ${okIds.length}개 담겼어요.`
+      );
+      setItems((prev) => prev.filter((i) => !okIds.includes(i.id)));
       setSelected(new Set());
     } catch (e) {
       console.error(e);
@@ -240,7 +286,7 @@ export default function Wishlist() {
       {/* 토스트 */}
       <Toasts toasts={toasts} />
       {showOverlayLoading && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/10 backdrop-blur-[1px]">
+        <div className="fixed inset-0 z-[8000] flex items-center justify-center bg-black/10 backdrop-blur-[1px]">
           <CartLoadingSpin />
         </div>
       )}
