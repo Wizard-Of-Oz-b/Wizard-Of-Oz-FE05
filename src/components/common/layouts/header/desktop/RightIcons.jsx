@@ -5,7 +5,6 @@ import {
   User,
   ShoppingCart,
   Heart,
-  ChevronRight,
   LogOut,
   User2,
   Shield,
@@ -14,36 +13,16 @@ import { useNavigate } from "react-router-dom";
 import { logoutLocal } from "../../../../../lib/axios";
 import { useAuth } from "../../../../../context/AuthContext";
 import { useCartCount } from "../../../../../store/cartCount";
-
-function MenuItem({ icon: Icon, label, onClick, firstRef, danger = false }) {
-  const base =
-    "w-full px-4 py-3 text-left text-sm flex items-center justify-between rounded-lg focus:outline-none transition";
-  const normal =
-    "hover:bg-gray-50 focus:bg-gray-50 text-black";
-  const dangerCls =
-    "text-red-600 hover:bg-red-50 focus:bg-red-50";
-  return (
-    <button
-      ref={firstRef}
-      className={`${base} ${danger ? dangerCls : normal}`}
-      onClick={onClick}
-      role="menuitem"
-    >
-      <span className="flex items-center gap-2">
-        <Icon className={`w-4 h-4 ${danger ? "text-red-600" : "text-black"}`} />
-        {label}
-      </span>
-      {!danger && <ChevronRight className="w-4 h-4 text-gray-400" />}
-    </button>
-  );
-}
+import { useWishlistCount } from "../../../../../store/wishlistCount";
+import IconWithBadge from "./IconWithBadge";
+import MenuItem from "./MenuItem";
 
 export default function RightIcons({ isLight, onOpenSearch }) {
   const navigate = useNavigate();
   const { isLoggedIn, user, setUser, isAdmin } = useAuth();
   const base = isLight ? "hover:opacity-80 text-black" : "hover:opacity-80 text-white";
   const cartCount = useCartCount((s) => s.count);
-
+  const wishlistCount = useWishlistCount((s) => s.count);
   const [openMenu, setOpenMenu] = useState(false);
   const menuRef = useRef(null);
   const firstItemRef = useRef(null);
@@ -96,20 +75,14 @@ export default function RightIcons({ isLight, onOpenSearch }) {
       animate={{ opacity: 1, y: 0, transition: { duration: 0.2, delay: 0.06 } }}
     >
       {/* 검색 */}
-      <button aria-label="Search" 
-              className={`base cursor-pointer`} 
-              onClick={onOpenSearch}>
+      <IconWithBadge onClick={onOpenSearch} className={base}>
         <Search className="w-7 h-7" />
-      </button>
+      </IconWithBadge>
 
       {/* 위시리스트 */}
-      <button
-        aria-label="Wishlist"
-        className={`base cursor-pointer`}
-        onClick={() => navigate("/wishlist")}
-      >
+      <IconWithBadge onClick={() => navigate("/wishlist")} className={base} count={wishlistCount}>
         <Heart className="w-7 h-7" />
-      </button>
+      </IconWithBadge>
 
       {/* 유저 */}
       <div className="relative" ref={menuRef}>
@@ -216,20 +189,9 @@ export default function RightIcons({ isLight, onOpenSearch }) {
       </div>
 
       {/* 장바구니 */}
-      <button
-        aria-label="Cart"
-        className={`${base} relative`}
-        onClick={() => navigate("/cart")}
-      >
-        <ShoppingCart className="w-7 h-7 cursor-pointer hover:scale-110 hover:opacity-80 transition" />
-        {cartCount > 0 && (
-          <span
-            className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 text-white text-[10px] font-bold grid place-items-center shadow"
-          >
-            {cartCount > 99 ? "99+" : cartCount}
-          </span>
-        )}
-      </button>
+      <IconWithBadge onClick={() => navigate("/cart")} className={base} count={cartCount}>
+        <ShoppingCart className="w-7 h-7 hover:scale-110 transition" />
+      </IconWithBadge>
     </motion.div>
   );
 }
