@@ -3,6 +3,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import Cookies from "js-cookie";
 import api, { logoutLocal } from "../lib/axios";
 import { useAuth } from "../context/AuthContext";
+import { fetchAddressCount, firstSocialVisitKey } from "../utils/onboarding";
 
 const ACCESS_KEY = "accessToken";
 
@@ -65,6 +66,20 @@ export default function OAuthCallback() {
         const displayName =
           [me.nickname, me.name, me.username, me.email && me.email.split("@")[0]].find(ok) || "사용자";
         setUser({ ...me, displayName });
+
+        if (provider) {
+          const key = firstSocialVisitKey(me.id);
+          const already = localStorage.getItem(key) === "1";
+          if (!already) {
+            const addrCount = await fetchAddressCount();
+            if (addrCount === 0) {
+              localStorage.setItem(key, "1");
+              // 소셜 첫로그인일때만 보내기 위해서 임시사용, 추후 개선예정입니다 - 복
+              navigate("/mypage/shipping", { replace: true, state: { from: "oauth" } });
+              return;
+            }
+          }
+        }
 
         navigate("/", { replace: true });
       } catch (e) {
