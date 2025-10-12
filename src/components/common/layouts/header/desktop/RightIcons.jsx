@@ -13,6 +13,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { logoutLocal } from "../../../../../lib/axios";
 import { useAuth } from "../../../../../context/AuthContext";
+import { useCartCount } from "../../../../../store/cartCount";
 
 function MenuItem({ icon: Icon, label, onClick, firstRef, danger = false }) {
   const base =
@@ -41,6 +42,7 @@ export default function RightIcons({ isLight, onOpenSearch }) {
   const navigate = useNavigate();
   const { isLoggedIn, user, setUser, isAdmin } = useAuth();
   const base = isLight ? "hover:opacity-80 text-black" : "hover:opacity-80 text-white";
+  const cartCount = useCartCount((s) => s.count);
 
   const [openMenu, setOpenMenu] = useState(false);
   const menuRef = useRef(null);
@@ -216,10 +218,17 @@ export default function RightIcons({ isLight, onOpenSearch }) {
       {/* 장바구니 */}
       <button
         aria-label="Cart"
-        className={base}
+        className={`${base} relative`}
         onClick={() => navigate("/cart")}
       >
         <ShoppingCart className="w-7 h-7 cursor-pointer hover:scale-110 hover:opacity-80 transition" />
+        {cartCount > 0 && (
+          <span
+            className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 text-white text-[10px] font-bold grid place-items-center shadow"
+          >
+            {cartCount > 99 ? "99+" : cartCount}
+          </span>
+        )}
       </button>
     </motion.div>
   );
