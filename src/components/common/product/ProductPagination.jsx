@@ -4,11 +4,31 @@ export default function ProductPagination({
   currentPage,
   totalPage,
   onPageChange,
+  maxPage = 5,
 }) {
-  const pageNumbers = useMemo(
-    () => Array.from({ length: totalPage }, (_, i) => i + 1),
-    [totalPage]
-  );
+  const pageNumbers = useMemo(() => {
+    // 최대 페이지(5) 보다 작으면 전부 출력
+    const halfPage = Math.floor(maxPage/2) // 
+
+    if (totalPage <= maxPage) {
+      return Array.from({ length: totalPage }, (_, i) => i + 1);
+    }
+    
+    let startPage = currentPage - halfPage;
+    let endPage = currentPage + halfPage;
+
+    // 1보다 작은 5페이지 최대에서느 currentpage가 2일때까지 적용
+    if (startPage <1){
+      startPage = 1;
+      endPage = maxPage;
+    }
+    // totalpage가 커질 경우
+    if (endPage > totalPage){
+      endPage = totalPage
+      startPage = totalPage - maxPage + 1
+    }
+    return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+  } ,[totalPage, currentPage, maxPage]);
 
   return (
     <div className="flex justify-center space-x-2">
