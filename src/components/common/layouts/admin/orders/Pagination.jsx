@@ -1,9 +1,11 @@
 import { ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight } from "lucide-react";
-import IconButton from "../common/IconButton";
+import { IconButton } from "../products";
+// import IconButton from "../common/IconButton";
 
 export default function Pagination({ page, pageCount, onFirst, onPrev, onNext, onLast }) {
   return (
     <div className="mt-6 flex justify-center gap-2 items-center">
+
       <IconButton
         title="첫 페이지"
         onClick={onFirst}
