@@ -5,6 +5,10 @@ const ALLOWED_STATUSES = ["paid", "delivered", "completed"];
 
 async function checkEligibility(productId) {
   if (!productId) return { eligible: false, reason: "no_product" };
+  const hasToken =
+    !!localStorage.getItem("access_token") ||
+    !!sessionStorage.getItem("access_token");
+  if (!hasToken) return { eligible: false, reason: "guest" };
 
   // 1) 내 구매 목록을 조회합니다.
   const { data } = await api.get("/v1/orders/purchases/me/", {
@@ -44,11 +48,12 @@ async function checkEligibility(productId) {
   return { eligible: false, reason: "no_purchase" };
 }
 
-export function useReviewEligibility(productId) {
+export function useReviewEligibility(productId, options = {}) {
+  const { enabled = true } = options;
   return useQuery({
     queryKey: ["review-eligibility", productId],
     queryFn: () => checkEligibility(String(productId)),
-    enabled: !!productId,
+    enabled: !!productId && enabled,
     staleTime: 5 * 60 * 1000,
   });
 }
