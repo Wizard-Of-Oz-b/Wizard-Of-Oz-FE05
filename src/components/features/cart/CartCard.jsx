@@ -112,7 +112,7 @@ export default function CartCard({ data, view = "pc" }) {
           <div className="flex items-start justify-between">
             <div className="flex items-center min-w-0">
               {isLoading ? (
-                <div className="w-16 h-16 bg-gray-300 rounded-md mr-3 flex-shrink-0"></div>
+                <div className="w-16 h-16 bg-gray-300 animate-pulse rounded-md mr-3 flex-shrink-0"></div>
               ) : (
                 <img
                   src={imageUrl}

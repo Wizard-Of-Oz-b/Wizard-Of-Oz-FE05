@@ -13,6 +13,9 @@ import CartEmpty from "../components/features/cart/CartEmpty";
 import CartError from "../components/features/cart/CartError";
 import { useGetMyOrders } from "../hooks/payments/useOrderPayment";
 import ConfirmModal from "../components/common/ConfirmModal";
+import { useAlertModal } from "../components/common/layouts/common/modal/useAlertModal";
+import { parseStockError } from "../utils/cart/parseStockError";
+import formatOptionKey from "../utils/optionKey";
 
 export default function UserCart() {
   const {
@@ -34,6 +37,8 @@ export default function UserCart() {
   const mergeMutation = useMergeOrder();
   const clearCartMutation = useClearCart();
   const navigate = useNavigate();
+  const { showModal, ModalComponent } = useAlertModal();
+
   console.log(cart, "카트");
   const cartList = useMemo(() => {
     if (!cart?.items) {
@@ -55,7 +60,28 @@ export default function UserCart() {
         await purchaseMutation.mutateAsync();
         navigate(`/payment`);
       } catch (error) {
-        console.error("주문 처리 중 에러 발생:", error);
+        const parseError = parseStockError(error);
+        console.log(parseError);
+        if (parseError?.product) {
+          const productName = cartList?.find(
+            (el) =>
+              el.product === parseError.product &&
+              el.option_key === parseError.option
+          );
+          const option = formatOptionKey(parseError.option);
+
+          showModal({
+            type: "warning",
+            title: "재고 부족",
+            message: `${productName.product_name} ${option} 
+            상품이 재고가 부족합니다.
+           현재 보유: ${parseError.have}개 주문 시도: ${parseError.need}개`,
+          });
+        }
+        console.error(
+          "주문 처리 중 에러 발생:",
+          parseStockError(error).product
+        );
       }
     }
     // 기존 결제에 상품 추가
@@ -65,7 +91,7 @@ export default function UserCart() {
 
         const orderList = userOrder.results.map((el) => el.order_id);
         const mergePayload = { order_ids: [...orderList, newOrder.order_id] };
-        console.log(mergePayload, 'payload')
+        console.log(mergePayload, "payload");
         await mergeMutation.mutateAsync(mergePayload);
 
         navigate(`/payment`);
@@ -229,6 +255,7 @@ export default function UserCart() {
           </button>
         )}
       </div>
+      {ModalComponent}
     </div>
   );
 }

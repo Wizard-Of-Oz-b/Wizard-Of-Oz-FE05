@@ -20,6 +20,7 @@ import UserAddressModal from "../../components/features/payment/UserAddressModal
 import TermsModal from "../../components/features/payment/TermsModal";
 import ConfirmModal from "../../components/common/ConfirmModal";
 import { useNavigate } from "react-router-dom";
+import { useToastStore } from "../../store/toast";
 
 const SECTION_STYLE =
   "w-full border border-gray-200 rounded-2xl px-4 py-5 shadow-sm mb-2";
@@ -95,6 +96,8 @@ export default function UserPayment() {
   const [isTermsOpen, setTermsOpen] = useState(false);
   const [termsAgree, setTermsAgree] = useState(false);
 
+
+   const { addToastList } = useToastStore();
   // 입력 필드 위치 참조
   const inputRef = {
     recipient: {
@@ -377,6 +380,7 @@ export default function UserPayment() {
         // 주소 추가 경고창 보내고, 바로 중단할것
         setIsPaymentModalOpen(true);
       } else if (payment === "account") {
+        addToastList('준비 중인 기능입니다.')
         console.log("무통장 입금"); // 현재 구현이 안되어 있어서 임시로 체크
       }
     } catch (error) {
@@ -413,7 +417,7 @@ export default function UserPayment() {
   // 불러올 정보가 없다면 빈페이지 출력
   if (userOrder?.results.length === 0) {
     // 홈으로 이동
-    navigate('/')
+    // navigate('/')
     return <EmptyPayment />;
   }
 
