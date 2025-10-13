@@ -3,7 +3,7 @@ import { useAlertModal } from "../components/common/layouts/common/modal/useAler
 import { useNavigate } from "react-router-dom";
 import { loginAndStore, registerUser } from "../lib/axios";
 import { Sparkles, CheckCircle2, User, AtSign, Lock, Phone, MapPin, Eye, EyeOff } from "lucide-react";
-import { addMyAddress, setMyDefaultAddress } from "../components/common/api/Mypage/address.user";
+import { addMyAddress, getMyAddress, setMyDefaultAddress } from "../components/common/api/Mypage/address.user";
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -107,7 +107,7 @@ setNicknameMessage(isDuplicate ? "❌ 이미 사용 중인 닉네임입니다." 
         password: formData.password,
       });
 
-      const addressRes = await addMyAddress({
+      const created = await addMyAddress({
         recipient: formData.name || formData.nickname || "회원",
         phone: formData.phone.replace(/[^\d]/g, ""),
         postcode: formData.postcode || "",
@@ -115,7 +115,17 @@ setNicknameMessage(isDuplicate ? "❌ 이미 사용 중인 닉네임입니다." 
         address2: formData.detailAddress,
       });
 
-      await setMyDefaultAddress(addressRes.address_id);
+      let id = created?.address_id;
+         if (!id) {
+     const list = await getMyAddresses();
+     const match = list.find(a =>
+       (a.postcode || "") === (formData.postcode || "") &&
+       (a.address1 || "") === (formData.address || "") &&
+       (a.address2 || "") === (formData.detailAddress || "")
+     );
+     id = match?.address_id || list[list.length - 1]?.address_id;
+   }
+   if (id) await setMyDefaultAddress(id);
 
     showModal({ type: "success", message: "회원가입이 성공했습니다! 자동으로 로그인되었습니다." });
 
@@ -129,6 +139,7 @@ setNicknameMessage(isDuplicate ? "❌ 이미 사용 중인 닉네임입니다." 
         telecom: "",
         address: "",
         detailAddress: "",
+        postcode: "",
         terms: false,
         defaultAddress: false,
       });
@@ -150,7 +161,7 @@ setNicknameMessage(isDuplicate ? "❌ 이미 사용 중인 닉네임입니다." 
   const handleAddressSearch = () => {
     new window.daum.Postcode({
       oncomplete: (data) => {
-        setFormData((prev) => ({ ...prev, address: data.address }));
+        setFormData((prev) => ({ ...prev, address: data.address, postcode: data.zonecode, }));
       },
     }).open();
   };
