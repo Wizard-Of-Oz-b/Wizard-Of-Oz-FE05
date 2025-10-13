@@ -3,6 +3,7 @@ import { useAlertModal } from "../components/common/layouts/common/modal/useAler
 import { useNavigate } from "react-router-dom";
 import { loginAndStore, registerUser } from "../lib/axios";
 import { Sparkles, CheckCircle2, User, AtSign, Lock, Phone, MapPin, Eye, EyeOff } from "lucide-react";
+import { addMyAddress, setMyDefaultAddress } from "../components/common/api/Mypage/address.user";
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -105,6 +106,16 @@ setNicknameMessage(isDuplicate ? "❌ 이미 사용 중인 닉네임입니다." 
         email: formData.email,
         password: formData.password,
       });
+
+      const addressRes = await addMyAddress({
+        recipient: formData.name || formData.nickname || "회원",
+        phone: formData.phone.replace(/[^\d]/g, ""),
+        postcode: formData.postcode || "",
+        address1: formData.address,
+        address2: formData.detailAddress,
+      });
+
+      await setMyDefaultAddress(addressRes.address_id);
 
     showModal({ type: "success", message: "회원가입이 성공했습니다! 자동으로 로그인되었습니다." });
 
