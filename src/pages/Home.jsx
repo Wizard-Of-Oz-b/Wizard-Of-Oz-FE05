@@ -63,7 +63,7 @@ export default function Home() {
         mobile: "images/32.jpg",
       },
       title: "Timeless Essentials for Women",
-      subtitle: "시간이 지나도 변치 않는 스타일",
+      subtitle: "시간이 지나도 변치 않는 스타일 수정이라네",
       ctaText: "Shop WOMEN",
       ctaHref:
         "/products/list?page=1&sort=created_at&primary=WOMEN&item=아우터&category_id=890fe0f0-7e72-4e9d-b3c2-5bb1e0461e9a",
